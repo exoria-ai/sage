@@ -201,19 +201,40 @@ async function getParcelExtent(apn: string): Promise<{
 }
 
 /**
- * Fetch parcel overlay from MapServer/export
- * Returns a transparent PNG with parcel lines
+ * Fetch parcel boundary overlay from MapServer/export
+ * Returns a transparent PNG with all parcel lines in view (green, like Solano's viewer)
  */
-async function fetchParcelOverlay(
+async function fetchParcelBoundaries(
   bbox: { xmin: number; ymin: number; xmax: number; ymax: number },
   width: number,
-  height: number,
-  highlightApns?: string[]
+  height: number
 ): Promise<Buffer | null> {
   try {
     // Convert bbox to Web Mercator for MapServer
     const min = toWebMercator(bbox.xmin, bbox.ymin);
     const max = toWebMercator(bbox.xmax, bbox.ymax);
+
+    // Use dynamicLayers to style parcels with green outlines (matching Solano's viewer)
+    const dynamicLayers = [{
+      id: 102,
+      source: { type: 'mapLayer', mapLayerId: 2 },
+      drawingInfo: {
+        renderer: {
+          type: 'simple',
+          symbol: {
+            type: 'esriSFS',
+            style: 'esriSFSNull',  // No fill
+            outline: {
+              type: 'esriSLS',
+              style: 'esriSLSSolid',
+              color: [34, 197, 94, 255],  // Green (#22C55E)
+              width: 1.5
+            }
+          }
+        },
+        showLabels: false
+      }
+    }];
 
     const params = new URLSearchParams({
       bbox: `${min.x},${min.y},${max.x},${max.y}`,
@@ -221,57 +242,95 @@ async function fetchParcelOverlay(
       size: `${width},${height}`,
       format: 'png32',
       transparent: 'true',
-      layers: 'show:2',  // Parcels layer
+      dynamicLayers: JSON.stringify(dynamicLayers),
+      layers: 'dynamic',
       f: 'image',
     });
-
-    // If we have specific APNs to highlight, use dynamicLayers
-    if (highlightApns && highlightApns.length > 0) {
-      const whereClause = highlightApns.map(apn => {
-        const parsed = parseAPN(apn);
-        return parsed ? `parcelid='${parsed.raw}'` : null;
-      }).filter(Boolean).join(' OR ');
-
-      if (whereClause) {
-        const dynamicLayers = [{
-          id: 102,  // Custom ID for our dynamic layer
-          source: { type: 'mapLayer', mapLayerId: 2 },
-          definitionExpression: whereClause,
-          drawingInfo: {
-            renderer: {
-              type: 'simple',
-              symbol: {
-                type: 'esriSFS',
-                style: 'esriSFSSolid',
-                color: [59, 130, 246, 51],  // Blue with 20% opacity
-                outline: {
-                  type: 'esriSLS',
-                  style: 'esriSLSSolid',
-                  color: [59, 130, 246, 255],  // Solid blue
-                  width: 3
-                }
-              }
-            },
-            showLabels: false
-          }
-        }];
-        params.set('dynamicLayers', JSON.stringify(dynamicLayers));
-        params.set('layers', 'dynamic');
-      }
-    }
 
     const url = `${AUMENTUM_MAPSERVER}/export?${params.toString()}`;
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.error(`MapServer export failed: ${response.status}`);
+      console.error(`MapServer parcel boundaries failed: ${response.status}`);
       return null;
     }
 
     const arrayBuffer = await response.arrayBuffer();
     return Buffer.from(arrayBuffer);
   } catch (error) {
-    console.error('Failed to fetch parcel overlay:', error);
+    console.error('Failed to fetch parcel boundaries:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch highlighted parcel overlay from MapServer/export
+ * Returns a transparent PNG with specific parcels highlighted in blue
+ */
+async function fetchHighlightedParcels(
+  bbox: { xmin: number; ymin: number; xmax: number; ymax: number },
+  width: number,
+  height: number,
+  apns: string[]
+): Promise<Buffer | null> {
+  try {
+    const whereClause = apns.map(apn => {
+      const parsed = parseAPN(apn);
+      return parsed ? `parcelid='${parsed.raw}'` : null;
+    }).filter(Boolean).join(' OR ');
+
+    if (!whereClause) return null;
+
+    // Convert bbox to Web Mercator for MapServer
+    const min = toWebMercator(bbox.xmin, bbox.ymin);
+    const max = toWebMercator(bbox.xmax, bbox.ymax);
+
+    const dynamicLayers = [{
+      id: 103,
+      source: { type: 'mapLayer', mapLayerId: 2 },
+      definitionExpression: whereClause,
+      drawingInfo: {
+        renderer: {
+          type: 'simple',
+          symbol: {
+            type: 'esriSFS',
+            style: 'esriSFSSolid',
+            color: [59, 130, 246, 77],  // Blue with 30% opacity
+            outline: {
+              type: 'esriSLS',
+              style: 'esriSLSSolid',
+              color: [59, 130, 246, 255],  // Solid blue
+              width: 3
+            }
+          }
+        },
+        showLabels: false
+      }
+    }];
+
+    const params = new URLSearchParams({
+      bbox: `${min.x},${min.y},${max.x},${max.y}`,
+      bboxSR: '3857',
+      size: `${width},${height}`,
+      format: 'png32',
+      transparent: 'true',
+      dynamicLayers: JSON.stringify(dynamicLayers),
+      layers: 'dynamic',
+      f: 'image',
+    });
+
+    const url = `${AUMENTUM_MAPSERVER}/export?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`MapServer highlight failed: ${response.status}`);
+      return null;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (error) {
+    console.error('Failed to fetch highlighted parcels:', error);
     return null;
   }
 }
@@ -506,15 +565,23 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     // Calculate bbox for the extracted region
     const mapBbox = calculateBboxFromCenter(lat, lon, actualWidth, actualHeight, zoom);
 
-    // Fetch parcel overlay from MapServer if we have APNs to show
-    if (showParcel && parcelApns.length > 0) {
-      const parcelOverlay = await fetchParcelOverlay(mapBbox, actualWidth, actualHeight, parcelApns);
-      if (parcelOverlay) {
-        overlays.push({ input: parcelOverlay, top: 0, left: 0 });
+    // Always show parcel boundaries (green lines like Solano's viewer)
+    if (showParcel) {
+      const parcelBoundaries = await fetchParcelBoundaries(mapBbox, actualWidth, actualHeight);
+      if (parcelBoundaries) {
+        overlays.push({ input: parcelBoundaries, top: 0, left: 0 });
       }
     }
 
-    // Add center marker if no parcels shown
+    // Highlight specific parcels in blue if APNs provided
+    if (parcelApns.length > 0) {
+      const highlightOverlay = await fetchHighlightedParcels(mapBbox, actualWidth, actualHeight, parcelApns);
+      if (highlightOverlay) {
+        overlays.push({ input: highlightOverlay, top: 0, left: 0 });
+      }
+    }
+
+    // Add center marker if no specific parcels highlighted
     if (parcelApns.length === 0) {
       const markerSvg = generateMarkerSvg(actualWidth, actualHeight);
       overlays.push({ input: Buffer.from(markerSvg), top: 0, left: 0 });
