@@ -316,6 +316,32 @@ After search_parcels, pass the APNs to render_map to visualize results:
 
         // If successful, return the image
         if (result.success && result.imageBase64 && result.mimeType) {
+          // Build URL for direct image access
+          const baseUrl = process.env.VERCEL_URL
+            ? `https://${process.env.VERCEL_URL}`
+            : 'https://sage.solano.ai';
+
+          const params = new URLSearchParams();
+          if (apn) params.set('apn', apn);
+          if (apns?.length) params.set('apns', apns.join(','));
+          if (center) {
+            params.set('lat', center.latitude.toString());
+            params.set('lng', center.longitude.toString());
+          }
+          if (bbox) {
+            params.set('xmin', bbox.xmin.toString());
+            params.set('ymin', bbox.ymin.toString());
+            params.set('xmax', bbox.xmax.toString());
+            params.set('ymax', bbox.ymax.toString());
+          }
+          if (width) params.set('width', width.toString());
+          if (height) params.set('height', height.toString());
+          if (zoom) params.set('zoom', zoom.toString());
+          if (format) params.set('format', format);
+          if (basemap) params.set('basemap', basemap);
+
+          const imageUrl = `${baseUrl}/api/map?${params.toString()}`;
+
           return {
             content: [
               {
@@ -331,6 +357,7 @@ After search_parcels, pass the APNs to render_map to visualize results:
                   width: result.width,
                   height: result.height,
                   zoom: result.zoom,
+                  imageUrl,
                 }, null, 2),
               },
             ],
