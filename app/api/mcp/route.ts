@@ -351,17 +351,14 @@ After search_parcels, pass the APNs to render_map to visualize results:
                 type: 'image',
                 data: result.imageBase64,
                 mimeType: result.mimeType,
+                annotations: {
+                  audience: ['user'],
+                  priority: 1.0,
+                },
               },
               {
                 type: 'text',
-                text: JSON.stringify({
-                  success: true,
-                  center: result.center,
-                  width: result.width,
-                  height: result.height,
-                  zoom: result.zoom,
-                  imageUrl,
-                }, null, 2),
+                text: `Map generated successfully.\n\n**View map:** ${imageUrl}\n\nCenter: ${result.center?.latitude}, ${result.center?.longitude}\nDimensions: ${result.width}x${result.height}\nZoom: ${result.zoom}`,
               },
             ],
           };
