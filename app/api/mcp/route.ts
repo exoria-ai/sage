@@ -13,6 +13,8 @@ import { getZoning } from '@/lib/tools/zoning';
 import { getFloodZone } from '@/lib/tools/flood';
 import { getFireHazardZone } from '@/lib/tools/fire';
 import { getSupervisorDistrict } from '@/lib/tools/supervisor';
+import { getSolanoContext } from '@/lib/tools/context';
+import { renderMap } from '@/lib/tools/render-map';
 
 const handler = createMcpHandler(
   (server) => {
@@ -198,6 +200,121 @@ For issues in incorporated cities, contact city council instead.`,
       },
       async ({ apn, latitude, longitude }) => {
         const result = await getSupervisorDistrict({ apn, latitude, longitude });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get Solano Context Tool
+    server.tool(
+      'get_solano_context',
+      `Retrieve detailed reference material about Solano County GIS topics.
+
+USE THIS TOOL when you need to:
+- Interpret zoning codes or flood zones
+- Explain Proposition 13 / assessed values
+- Understand ADU rules and requirements
+- Know which department to contact
+- Get proper disclaimer language
+
+AVAILABLE TOPICS:
+- jurisdiction: City vs county routing, incorporated cities
+- zoning: Zoning code meanings and allowed uses
+- prop13: Assessed value vs market value, Proposition 13/8
+- adu: ADU/JADU requirements, state and local rules
+- flood: FEMA flood zone explanations, insurance
+- fire: Fire hazard severity zones, defensible space
+- contacts: Department phone numbers and emails
+- districts: Special districts (fire, water, sewer)
+- disclaimers: Standard disclaimer language
+
+Returns full reference document for the requested topic.`,
+      {
+        topic: z.string().describe('Topic to retrieve (e.g., "zoning", "flood", "adu", "contacts")'),
+      },
+      async ({ topic }) => {
+        const result = await getSolanoContext({ topic });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Render Map Tool
+    server.tool(
+      'render_map',
+      `Generate a map image centered on a location or parcel.
+
+INPUT (provide ONE of these):
+- apn: Assessor's Parcel Number - map will be centered on the parcel
+- center: { latitude, longitude } - map will be centered on the point
+- bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
+
+OPTIONS:
+- width: Image width in pixels (default: 800)
+- height: Image height in pixels (default: 600)
+- format: 'png' or 'jpg' (default: 'png')
+- returnBase64: If true, returns base64-encoded image data (default: false)
+
+OUTPUT:
+- imageUrl: URL to the rendered map image (if returnBase64 is false)
+- imageBase64: Base64-encoded image data (if returnBase64 is true)
+- extent: The geographic extent of the rendered map
+- width/height: Actual dimensions
+
+NOTE: The map shows the Solano County parcel basemap with parcels, roads, and labels.`,
+      {
+        apn: z.string().optional().describe("Assessor's Parcel Number to center map on"),
+        center: z.object({
+          latitude: z.number(),
+          longitude: z.number(),
+        }).optional().describe('Center point coordinates'),
+        bbox: z.object({
+          xmin: z.number(),
+          ymin: z.number(),
+          xmax: z.number(),
+          ymax: z.number(),
+        }).optional().describe('Bounding box in WGS84'),
+        width: z.number().optional().describe('Image width in pixels (default: 800)'),
+        height: z.number().optional().describe('Image height in pixels (default: 600)'),
+        format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
+        returnBase64: z.boolean().optional().describe('Return base64 image data instead of URL'),
+      },
+      async ({ apn, center, bbox, width, height, format, returnBase64 }) => {
+        const result = await renderMap({
+          apn,
+          center,
+          bbox,
+          width,
+          height,
+          format,
+          returnBase64,
+        });
+
+        // If we have base64 image data, return it as an image content type
+        if (result.success && result.imageBase64 && result.mimeType) {
+          return {
+            content: [
+              {
+                type: 'image',
+                data: result.imageBase64,
+                mimeType: result.mimeType,
+              },
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  success: true,
+                  width: result.width,
+                  height: result.height,
+                  extent: result.extent,
+                }, null, 2),
+              },
+            ],
+          };
+        }
+
+        // Otherwise return JSON (URL or error)
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };
