@@ -273,7 +273,11 @@ OPTIONS:
   - 'streets': Generic CARTO street map. Use only when street names/navigation context is more important than property details.
 
 OUTPUT:
-Returns a PNG/JPG image and an imageUrl for direct access, plus metadata.
+Returns both an embedded image AND a permanent imageUrl.
+
+**CRITICAL**: You MUST include the imageUrl in your response to the user. The image may not render
+in all clients, so the URL is essential for users to view the map. Format it as a clickable link:
+"View map: [URL]" or similar.
 
 MULTI-PARCEL USE CASE:
 After search_parcels, pass the APNs to render_map to visualize results:
@@ -358,7 +362,14 @@ After search_parcels, pass the APNs to render_map to visualize results:
               },
               {
                 type: 'text',
-                text: `Map generated successfully.\n\n**View map:** ${imageUrl}\n\nCenter: ${result.center?.latitude}, ${result.center?.longitude}\nDimensions: ${result.width}x${result.height}\nZoom: ${result.zoom}`,
+                text: `Map generated successfully.
+
+📍 **IMPORTANT - Share this link with the user:**
+${imageUrl}
+
+Center: ${result.center?.latitude}, ${result.center?.longitude}
+Dimensions: ${result.width}x${result.height}
+Zoom: ${result.zoom}`,
               },
             ],
           };
