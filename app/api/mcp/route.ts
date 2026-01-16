@@ -244,26 +244,33 @@ Returns full reference document for the requested topic.`,
     // Render Map Tool
     server.tool(
       'render_map',
-      `Generate a map image centered on a location or parcel.
+      `Generate a static map image centered on a location or parcel.
+
+Uses CARTO Voyager basemap tiles with parcel geometry overlay.
 
 INPUT (provide ONE of these):
-- apn: Assessor's Parcel Number - map will be centered on the parcel
-- center: { latitude, longitude } - map will be centered on the point
+- apn: Assessor's Parcel Number - map centered on parcel with boundary highlighted
+- center: { latitude, longitude } - map centered on point with marker
 - bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
 
 OPTIONS:
-- width: Image width in pixels (default: 800)
-- height: Image height in pixels (default: 600)
+- width: Image width in pixels (default: 600)
+- height: Image height in pixels (default: 400)
+- zoom: Map zoom level 1-19 (default: 17, street level)
 - format: 'png' or 'jpg' (default: 'png')
-- returnBase64: If true, returns base64-encoded image data (default: false)
 
 OUTPUT:
-- imageUrl: URL to the rendered map image (if returnBase64 is false)
-- imageBase64: Base64-encoded image data (if returnBase64 is true)
-- extent: The geographic extent of the rendered map
-- width/height: Actual dimensions
+Returns a PNG/JPG image directly, plus metadata:
+- center: { latitude, longitude } of the map center
+- width/height: Actual image dimensions
+- zoom: Zoom level used
 
-NOTE: The map shows the Solano County parcel basemap with parcels, roads, and labels.`,
+The image includes:
+- CARTO Voyager basemap (streets, labels, buildings)
+- Parcel boundary highlighted in blue (if APN provided)
+- Red marker at center (if coordinates provided)
+- North arrow
+- SAGE watermark`,
       {
         apn: z.string().optional().describe("Assessor's Parcel Number to center map on"),
         center: z.object({
@@ -276,23 +283,23 @@ NOTE: The map shows the Solano County parcel basemap with parcels, roads, and la
           xmax: z.number(),
           ymax: z.number(),
         }).optional().describe('Bounding box in WGS84'),
-        width: z.number().optional().describe('Image width in pixels (default: 800)'),
-        height: z.number().optional().describe('Image height in pixels (default: 600)'),
+        width: z.number().optional().describe('Image width in pixels (default: 600)'),
+        height: z.number().optional().describe('Image height in pixels (default: 400)'),
+        zoom: z.number().optional().describe('Map zoom level 1-19 (default: 17)'),
         format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
-        returnBase64: z.boolean().optional().describe('Return base64 image data instead of URL'),
       },
-      async ({ apn, center, bbox, width, height, format, returnBase64 }) => {
+      async ({ apn, center, bbox, width, height, zoom, format }) => {
         const result = await renderMap({
           apn,
           center,
           bbox,
           width,
           height,
+          zoom,
           format,
-          returnBase64,
         });
 
-        // If we have base64 image data, return it as an image content type
+        // If successful, return the image
         if (result.success && result.imageBase64 && result.mimeType) {
           return {
             content: [
@@ -305,16 +312,17 @@ NOTE: The map shows the Solano County parcel basemap with parcels, roads, and la
                 type: 'text',
                 text: JSON.stringify({
                   success: true,
+                  center: result.center,
                   width: result.width,
                   height: result.height,
-                  extent: result.extent,
+                  zoom: result.zoom,
                 }, null, 2),
               },
             ],
           };
         }
 
-        // Otherwise return JSON (URL or error)
+        // Error case
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };
