@@ -250,13 +250,17 @@ Returns full reference document for the requested topic.`,
       'render_map',
       `Generate a static map image centered on a location or parcel.
 
-Uses CARTO Voyager or Solano County aerial imagery for basemap.
-Parcel overlays rendered via Solano County MapServer (server-side styling).
+IMPORTANT: You must provide coordinates via the 'center' parameter. If you only have an address,
+first call geocode_address to get coordinates, then pass those coordinates to render_map.
+
+WORKFLOW:
+1. geocode_address({ address: "675 Texas St, Fairfield, CA" }) → returns latitude, longitude
+2. render_map({ center: { latitude: 38.248, longitude: -122.041 }, zoom: 18 })
 
 INPUT (provide ONE of these):
+- center: { latitude, longitude } - RECOMMENDED. Map centered on point with marker.
 - apn: Assessor's Parcel Number - map centered on parcel with boundary highlighted
 - apns: Array of APNs - display multiple parcels (e.g., search results)
-- center: { latitude, longitude } - map centered on point with marker
 - bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
 
 OPTIONS:
@@ -267,17 +271,7 @@ OPTIONS:
 - basemap: 'streets' (CARTO Voyager) or 'aerial' (Solano 2025 imagery)
 
 OUTPUT:
-Returns a PNG/JPG image directly, plus metadata:
-- center: { latitude, longitude } of the map center
-- width/height: Actual image dimensions
-- zoom: Zoom level used
-
-The image includes:
-- Basemap (streets or aerial)
-- Parcel boundaries highlighted in blue (if APN(s) provided)
-- Red marker at center (if coordinates provided without APN)
-- North arrow
-- SAGE watermark
+Returns a PNG/JPG image and an imageUrl for direct access, plus metadata.
 
 MULTI-PARCEL USE CASE:
 After search_parcels, pass the APNs to render_map to visualize results:
