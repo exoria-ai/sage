@@ -268,7 +268,9 @@ OPTIONS:
 - height: Image height in pixels (default: 400)
 - zoom: Map zoom level 1-19 (default: 17, street level)
 - format: 'png' or 'jpg' (default: 'png')
-- basemap: 'streets' (CARTO Voyager) or 'aerial' (Solano 2025 imagery)
+- basemap: 'aerial' or 'streets'
+  - 'aerial' (RECOMMENDED): High-resolution 2025 Solano County aerial photography. Best for viewing property boundaries, structures, and land features.
+  - 'streets': Generic CARTO street map. Use only when street names/navigation context is more important than property details.
 
 OUTPUT:
 Returns a PNG/JPG image and an imageUrl for direct access, plus metadata.
@@ -294,7 +296,7 @@ After search_parcels, pass the APNs to render_map to visualize results:
         height: z.number().optional().describe('Image height in pixels (default: 400)'),
         zoom: z.number().optional().describe('Map zoom level 1-19 (default: 17)'),
         format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
-        basemap: z.enum(['streets', 'aerial']).optional().describe('Basemap type (default: streets)'),
+        basemap: z.enum(['aerial', 'streets']).optional().describe('Basemap type: aerial (default, Solano imagery) or streets'),
       },
       async ({ apn, apns, center, bbox, width, height, zoom, format, basemap }) => {
         const result = await renderMap({

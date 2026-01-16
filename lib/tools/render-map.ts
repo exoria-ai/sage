@@ -359,7 +359,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     zoom: requestedZoom,
     showParcel = true,
     format = 'png',
-    basemap = 'streets',
+    basemap = 'aerial',
     highlightApn,
   } = args;
 
