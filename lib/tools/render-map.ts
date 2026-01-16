@@ -375,32 +375,58 @@ function generateWatermarkSvg(width: number, height: number): string {
 }
 
 /**
- * Calculate bbox from center and dimensions at a given zoom
+ * Convert pixel coordinates back to lon/lat (inverse of lonLatToPixel)
  */
-function calculateBboxFromCenter(
-  lat: number,
-  lon: number,
-  width: number,
-  height: number,
-  zoom: number
+function pixelToLonLat(
+  px: number,
+  py: number,
+  zoom: number,
+  originTileX: number,
+  originTileY: number
+): { lon: number; lat: number } {
+  // Convert pixel to tile-space coordinate
+  const tileX = originTileX + px / TILE_SIZE;
+  const tileY = originTileY + py / TILE_SIZE;
+
+  // Convert tile coordinates to lon/lat
+  const n = Math.pow(2, zoom);
+  const lon = (tileX / n) * 360 - 180;
+  const latRad = Math.atan(Math.sinh(Math.PI * (1 - (2 * tileY) / n)));
+  const lat = latRad * 180 / Math.PI;
+
+  return { lon, lat };
+}
+
+/**
+ * Calculate the exact bbox for an extracted region based on tile math
+ * This ensures the bbox matches exactly what was extracted from tiles
+ */
+function calculateExtractedBbox(
+  extractLeft: number,
+  extractTop: number,
+  extractWidth: number,
+  extractHeight: number,
+  zoom: number,
+  startTileX: number,
+  startTileY: number,
+  tileSize: number
 ): { xmin: number; ymin: number; xmax: number; ymax: number } {
-  // At zoom level z, the world is 2^z tiles, each 256px
-  // Degrees per pixel = 360 / (256 * 2^z)
-  const degreesPerPixel = 360 / (256 * Math.pow(2, zoom));
+  // Scale pixel coordinates to 256px tile space (our coordinate functions use 256)
+  const scaleFactor = 256 / tileSize;
+  const left256 = extractLeft * scaleFactor;
+  const top256 = extractTop * scaleFactor;
+  const right256 = (extractLeft + extractWidth) * scaleFactor;
+  const bottom256 = (extractTop + extractHeight) * scaleFactor;
 
-  // Latitude is more complex due to Mercator projection
-  const latRadians = lat * Math.PI / 180;
-  const metersPerPixelY = 156543.03392 * Math.cos(latRadians) / Math.pow(2, zoom);
-  const degreesPerPixelY = metersPerPixelY / 111319.9;  // ~111km per degree
-
-  const halfWidthDeg = (width / 2) * degreesPerPixel;
-  const halfHeightDeg = (height / 2) * degreesPerPixelY;
+  // Convert corners to lon/lat
+  const topLeft = pixelToLonLat(left256, top256, zoom, startTileX, startTileY);
+  const bottomRight = pixelToLonLat(right256, bottom256, zoom, startTileX, startTileY);
 
   return {
-    xmin: lon - halfWidthDeg,
-    ymin: lat - halfHeightDeg,
-    xmax: lon + halfWidthDeg,
-    ymax: lat + halfHeightDeg,
+    xmin: topLeft.lon,
+    ymin: bottomRight.lat,  // bottom is higher Y pixel = lower latitude
+    xmax: bottomRight.lon,
+    ymax: topLeft.lat,      // top is lower Y pixel = higher latitude
   };
 }
 
@@ -562,8 +588,18 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     // Build overlay array
     const overlays: { input: Buffer; top: number; left: number }[] = [];
 
-    // Calculate bbox for the extracted region
-    const mapBbox = calculateBboxFromCenter(lat, lon, actualWidth, actualHeight, zoom);
+    // Calculate exact bbox for the extracted region using tile math
+    // This ensures MapServer overlay aligns perfectly with the basemap
+    const mapBbox = calculateExtractedBbox(
+      extractLeft,
+      extractTop,
+      extractWidth,
+      extractHeight,
+      zoom,
+      startTileX,
+      startTileY,
+      tileSize
+    );
 
     // Always show parcel boundaries (green lines like Solano's viewer)
     if (showParcel) {
