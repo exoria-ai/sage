@@ -417,9 +417,10 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     const centerTileX = lon2tile(lon, zoom);
     const centerTileY = lat2tile(lat, zoom);
 
-    // Using @2x tiles (512px), so we need fewer tiles
-    const tilesNeededX = Math.ceil(width / 512) + 1;
-    const tilesNeededY = Math.ceil(height / 512) + 1;
+    // CARTO uses @2x tiles (512px), aerial uses standard 256px tiles
+    const tileSize = basemap === 'aerial' ? 256 : 512;
+    const tilesNeededX = Math.ceil(width / tileSize) + 1;
+    const tilesNeededY = Math.ceil(height / tileSize) + 1;
 
     const startTileX = centerTileX - Math.floor(tilesNeededX / 2);
     const startTileY = centerTileY - Math.floor(tilesNeededY / 2);
@@ -439,7 +440,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
             .catch(() => {
               // Return a gray placeholder for failed tiles
               return sharp({
-                create: { width: 512, height: 512, channels: 4, background: { r: 200, g: 200, b: 200, alpha: 1 } }
+                create: { width: tileSize, height: tileSize, channels: 4, background: { r: 200, g: 200, b: 200, alpha: 1 } }
               }).png().toBuffer().then(buffer => ({ x, y, buffer }));
             })
         );
@@ -448,15 +449,15 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
 
     const tiles = await Promise.all(tilePromises);
 
-    // Calculate total canvas size for all tiles (using @2x tiles = 512px each)
-    const canvasWidth = (endTileX - startTileX + 1) * 512;
-    const canvasHeight = (endTileY - startTileY + 1) * 512;
+    // Calculate total canvas size for all tiles
+    const canvasWidth = (endTileX - startTileX + 1) * tileSize;
+    const canvasHeight = (endTileY - startTileY + 1) * tileSize;
 
     // Composite all tiles onto a canvas
     const compositeInputs = tiles.map((tile) => ({
       input: tile.buffer,
-      left: (tile.x - startTileX) * 512,
-      top: (tile.y - startTileY) * 512,
+      left: (tile.x - startTileX) * tileSize,
+      top: (tile.y - startTileY) * tileSize,
     }));
 
     // Create base image from tiles
@@ -472,10 +473,12 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       .png()
       .toBuffer();
 
-    // Calculate the pixel position of the center point (in 256-based space, then scale to 512)
+    // Calculate the pixel position of the center point
+    // lonLatToPixel uses 256px base, scale appropriately for tile size
     const [centerPx256, centerPy256] = lonLatToPixel(lon, lat, zoom, startTileX, startTileY);
-    const centerPx = centerPx256 * 2; // Scale to 512px tile space
-    const centerPy = centerPy256 * 2;
+    const scaleFactor = tileSize / 256;
+    const centerPx = centerPx256 * scaleFactor;
+    const centerPy = centerPy256 * scaleFactor;
 
     // Extract the region centered on the target location
     const extractLeft = Math.max(0, Math.round(centerPx - width / 2));
