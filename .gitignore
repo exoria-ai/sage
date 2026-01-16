@@ -7,6 +7,10 @@ dist/
 build/
 *.js.map
 
+# Next.js
+.next/
+out/
+
 # Environment variables
 .env
 .env.local
