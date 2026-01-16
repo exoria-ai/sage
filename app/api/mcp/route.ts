@@ -6,6 +6,7 @@
  */
 
 import { z } from 'zod';
+import { put } from '@vercel/blob';
 import { createMcpHandler } from 'mcp-handler';
 import { geocodeAddress } from '@/lib/tools/geocode';
 import { getParcelDetails } from '@/lib/tools/parcel';
@@ -314,33 +315,39 @@ After search_parcels, pass the APNs to render_map to visualize results:
           basemap,
         });
 
-        // If successful, return the image
+        // If successful, upload to Vercel Blob and return URL
         if (result.success && result.imageBase64 && result.mimeType) {
-          // Build URL for direct image access
-          const baseUrl = process.env.VERCEL_URL
-            ? `https://${process.env.VERCEL_URL}`
-            : 'https://sage.solano.ai';
+          // Generate a unique filename
+          const ext = format || 'png';
+          const timestamp = Date.now();
+          const identifier = apn || apns?.[0] || `${center?.latitude}_${center?.longitude}` || 'map';
+          const filename = `maps/${identifier.replace(/[^a-zA-Z0-9-_]/g, '-')}_${timestamp}.${ext}`;
 
-          const params = new URLSearchParams();
-          if (apn) params.set('apn', apn);
-          if (apns?.length) params.set('apns', apns.join(','));
-          if (center) {
-            params.set('lat', center.latitude.toString());
-            params.set('lng', center.longitude.toString());
-          }
-          if (bbox) {
-            params.set('xmin', bbox.xmin.toString());
-            params.set('ymin', bbox.ymin.toString());
-            params.set('xmax', bbox.xmax.toString());
-            params.set('ymax', bbox.ymax.toString());
-          }
-          if (width) params.set('width', width.toString());
-          if (height) params.set('height', height.toString());
-          if (zoom) params.set('zoom', zoom.toString());
-          if (format) params.set('format', format);
-          if (basemap) params.set('basemap', basemap);
+          // Convert base64 to buffer and upload
+          const imageBuffer = Buffer.from(result.imageBase64, 'base64');
 
-          const imageUrl = `${baseUrl}/api/map?${params.toString()}`;
+          let imageUrl: string;
+          try {
+            const blob = await put(filename, imageBuffer, {
+              access: 'public',
+              contentType: result.mimeType,
+            });
+            imageUrl = blob.url;
+          } catch (uploadError) {
+            // If blob upload fails, fall back to the dynamic API route
+            console.error('Blob upload failed:', uploadError);
+            const baseUrl = process.env.VERCEL_URL
+              ? `https://${process.env.VERCEL_URL}`
+              : 'https://sage.solano.ai';
+            const params = new URLSearchParams();
+            if (apn) params.set('apn', apn);
+            if (center) {
+              params.set('lat', center.latitude.toString());
+              params.set('lng', center.longitude.toString());
+            }
+            if (zoom) params.set('zoom', zoom.toString());
+            imageUrl = `${baseUrl}/api/map?${params.toString()}`;
+          }
 
           return {
             content: [

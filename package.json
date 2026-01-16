@@ -26,6 +26,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
     "@turf/turf": "^7.1.0",
+    "@vercel/blob": "^2.0.0",
     "axios": "^1.7.0",
     "mcp-handler": "^1.0.7",
     "next": "^15.1.0",
