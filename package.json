@@ -24,7 +24,7 @@
   "author": "Exoria AI",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "@turf/turf": "^7.1.0",
     "axios": "^1.7.0",
     "mcp-handler": "^1.0.7",
