@@ -5,6 +5,12 @@
  */
 
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { geocodeAddress } from './geocode.js';
+import { getParcelDetails } from './parcel.js';
+import { getZoning } from './zoning.js';
+import { getFloodZone } from './flood.js';
+import { getFireHazardZone } from './fire.js';
+import { getSupervisorDistrict } from './supervisor.js';
 
 // Tool definitions with rich descriptions for Claude
 export const tools: Tool[] = [
@@ -222,26 +228,89 @@ export async function handleToolCall(
   name: string,
   args: Record<string, unknown> | undefined
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
-  // TODO: Implement actual tool handlers
-  // For now, return a placeholder response indicating the tool is not yet implemented
+  try {
+    let result: unknown;
 
-  return {
-    content: [
-      {
-        type: 'text',
-        text: JSON.stringify(
-          {
-            success: false,
-            error_type: 'NOT_IMPLEMENTED',
-            message: `Tool '${name}' is defined but not yet implemented`,
-            args_received: args,
-            suggestion:
-              'This tool will query Solano County GIS services once implemented',
-          },
-          null,
-          2
-        ),
-      },
-    ],
-  };
+    switch (name) {
+      case 'geocode_address':
+        result = await geocodeAddress(args as { address: string });
+        break;
+
+      case 'get_parcel_details':
+        result = await getParcelDetails(args as {
+          apn?: string;
+          latitude?: number;
+          longitude?: number;
+        });
+        break;
+
+      case 'get_zoning':
+        result = await getZoning(args as {
+          apn?: string;
+          latitude?: number;
+          longitude?: number;
+        });
+        break;
+
+      case 'get_flood_zone':
+        result = await getFloodZone(args as {
+          apn?: string;
+          latitude?: number;
+          longitude?: number;
+        });
+        break;
+
+      case 'get_fire_hazard_zone':
+        result = await getFireHazardZone(args as {
+          apn?: string;
+          latitude?: number;
+          longitude?: number;
+        });
+        break;
+
+      case 'get_supervisor_district':
+        result = await getSupervisorDistrict(args as {
+          apn?: string;
+          latitude?: number;
+          longitude?: number;
+        });
+        break;
+
+      default:
+        result = {
+          success: false,
+          error_type: 'UNKNOWN_TOOL',
+          message: `Unknown tool: ${name}`,
+          suggestion: 'Available tools: geocode_address, get_parcel_details, get_zoning, get_flood_zone, get_fire_hazard_zone, get_supervisor_district',
+        };
+    }
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify(
+            {
+              success: false,
+              error_type: 'INTERNAL_ERROR',
+              message: `Tool execution failed: ${errorMessage}`,
+              suggestion: 'This may be a temporary issue. Please try again.',
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
 }

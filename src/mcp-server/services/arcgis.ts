@@ -21,13 +21,13 @@ export const ENDPOINTS = {
   CALFIRE_FHSZ: 'https://services.gis.ca.gov/arcgis/rest/services/Environment/Fire_Severity_Zones/MapServer',
 } as const;
 
-// Layer IDs for Solano County services
+// Layer IDs for Solano County services (from SOLANO_GIS_LAYERS.md)
 export const LAYERS = {
   ADDRESS_POINTS: 'Address_Points/FeatureServer/0',
   PARCELS: 'Parcels_Public_Aumentum/FeatureServer/0',
-  ZONING_COUNTY: 'Zoning/FeatureServer/0',
-  CITY_BOUNDARIES: 'City_Boundaries/FeatureServer/0',
-  BOS_DISTRICTS: 'BOS_Districts/FeatureServer/0',
+  ZONING_COUNTY: 'SolanoCountyZoning_092322/FeatureServer/4',
+  CITY_BOUNDARIES: 'CityBoundary/FeatureServer/2',
+  BOS_DISTRICTS: 'BOS_District_Boundaries_2021/FeatureServer/0',
 } as const;
 
 interface QueryParams {
@@ -35,6 +35,7 @@ interface QueryParams {
   geometry?: string;
   geometryType?: 'esriGeometryPoint' | 'esriGeometryPolygon' | 'esriGeometryEnvelope';
   spatialRel?: 'esriSpatialRelIntersects' | 'esriSpatialRelContains' | 'esriSpatialRelWithin';
+  inSR?: string;
   outFields?: string;
   returnGeometry?: boolean;
   f?: 'json' | 'geojson';
@@ -62,10 +63,8 @@ interface ArcGISQueryResponse {
 
 export class ArcGISClient {
   private client: AxiosInstance;
-  private baseUrl: string;
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
     this.client = axios.create({
       baseURL: baseUrl,
       timeout: 30000,
@@ -79,20 +78,27 @@ export class ArcGISClient {
    * Query a feature layer
    */
   async query(layerPath: string, params: QueryParams): Promise<ArcGISQueryResponse> {
-    const queryParams = {
-      where: params.where ?? '1=1',
-      geometry: params.geometry,
-      geometryType: params.geometryType,
-      spatialRel: params.spatialRel ?? 'esriSpatialRelIntersects',
-      outFields: params.outFields ?? '*',
-      returnGeometry: params.returnGeometry ?? true,
-      f: params.f ?? 'json',
-      outSR: params.outSR ?? '4326', // WGS84
-    };
+    // Build query string manually to handle JSON geometry properly
+    const queryParts: string[] = [];
 
+    queryParts.push(`where=${encodeURIComponent(params.where ?? '1=1')}`);
+
+    if (params.geometry) {
+      queryParts.push(`geometry=${encodeURIComponent(params.geometry)}`);
+    }
+    if (params.geometryType) {
+      queryParts.push(`geometryType=${params.geometryType}`);
+    }
+    queryParts.push(`spatialRel=${params.spatialRel ?? 'esriSpatialRelIntersects'}`);
+    queryParts.push(`inSR=${params.inSR ?? '4326'}`);
+    queryParts.push(`outFields=${encodeURIComponent(params.outFields ?? '*')}`);
+    queryParts.push(`returnGeometry=${params.returnGeometry ?? true}`);
+    queryParts.push(`f=${params.f ?? 'json'}`);
+    queryParts.push(`outSR=${params.outSR ?? '4326'}`);
+
+    const queryString = queryParts.join('&');
     const response = await this.client.get<ArcGISQueryResponse>(
-      `${layerPath}/query`,
-      { params: queryParams }
+      `${layerPath}/query?${queryString}`
     );
 
     if (response.data.error) {
