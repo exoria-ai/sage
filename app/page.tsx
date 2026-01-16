@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <main style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
+    <main style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif', maxWidth: '800px' }}>
       <h1>SAGE - Solano Agent for Geographic Enquiry</h1>
       <p>AI-powered GIS assistant for Solano County, California.</p>
 
@@ -17,15 +17,20 @@ export default function Home() {
         <li><strong>get_flood_zone</strong> - Query FEMA flood zone designation</li>
         <li><strong>get_fire_hazard_zone</strong> - Query CAL FIRE Fire Hazard Severity Zone</li>
         <li><strong>get_supervisor_district</strong> - Get Board of Supervisors district info</li>
+        <li><strong>get_special_districts</strong> - Query special districts (water, fire, schools, etc.)</li>
+        <li><strong>search_parcels</strong> - Search parcels by criteria with aggregations</li>
+        <li><strong>find_nearby</strong> - Find nearby places and services</li>
+        <li><strong>get_knowledge</strong> - Get contextual knowledge about GIS topics</li>
+        <li><strong>render_map</strong> - Generate static map images with parcel overlays</li>
       </ul>
 
       <h2>Usage</h2>
       <p>Add this server to your MCP client configuration:</p>
-      <pre style={{ background: '#f4f4f4', padding: '1rem', borderRadius: '4px' }}>
+      <pre style={{ background: '#f4f4f4', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
 {`{
   "mcpServers": {
     "sage-gis": {
-      "url": "https://your-deployment.vercel.app/api/mcp"
+      "url": "https://sage-gis.vercel.app/api/mcp"
     }
   }
 }`}
