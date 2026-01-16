@@ -15,6 +15,9 @@ import { getFireHazardZone } from '@/lib/tools/fire';
 import { getSupervisorDistrict } from '@/lib/tools/supervisor';
 import { getSolanoContext } from '@/lib/tools/context';
 import { renderMap } from '@/lib/tools/render-map';
+import { searchParcels } from '@/lib/tools/search-parcels';
+import { getSpecialDistricts } from '@/lib/tools/special-districts';
+import { getNearby } from '@/lib/tools/nearby';
 
 const handler = createMcpHandler(
   (server) => {
@@ -246,10 +249,12 @@ Returns full reference document for the requested topic.`,
       'render_map',
       `Generate a static map image centered on a location or parcel.
 
-Uses CARTO Voyager basemap tiles with parcel geometry overlay.
+Uses CARTO Voyager or Solano County aerial imagery for basemap.
+Parcel overlays rendered via Solano County MapServer (server-side styling).
 
 INPUT (provide ONE of these):
 - apn: Assessor's Parcel Number - map centered on parcel with boundary highlighted
+- apns: Array of APNs - display multiple parcels (e.g., search results)
 - center: { latitude, longitude } - map centered on point with marker
 - bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
 
@@ -258,6 +263,7 @@ OPTIONS:
 - height: Image height in pixels (default: 400)
 - zoom: Map zoom level 1-19 (default: 17, street level)
 - format: 'png' or 'jpg' (default: 'png')
+- basemap: 'streets' (CARTO Voyager) or 'aerial' (Solano 2025 imagery)
 
 OUTPUT:
 Returns a PNG/JPG image directly, plus metadata:
@@ -266,13 +272,19 @@ Returns a PNG/JPG image directly, plus metadata:
 - zoom: Zoom level used
 
 The image includes:
-- CARTO Voyager basemap (streets, labels, buildings)
-- Parcel boundary highlighted in blue (if APN provided)
-- Red marker at center (if coordinates provided)
+- Basemap (streets or aerial)
+- Parcel boundaries highlighted in blue (if APN(s) provided)
+- Red marker at center (if coordinates provided without APN)
 - North arrow
-- SAGE watermark`,
+- SAGE watermark
+
+MULTI-PARCEL USE CASE:
+After search_parcels, pass the APNs to render_map to visualize results:
+  1. search_parcels({ criteria: { zoning: "A-40", min_acres: 10 } })
+  2. render_map({ apns: [apn1, apn2, ...], zoom: 14 })`,
       {
         apn: z.string().optional().describe("Assessor's Parcel Number to center map on"),
+        apns: z.array(z.string()).optional().describe('Array of APNs to display (for search results)'),
         center: z.object({
           latitude: z.number(),
           longitude: z.number(),
@@ -287,16 +299,19 @@ The image includes:
         height: z.number().optional().describe('Image height in pixels (default: 400)'),
         zoom: z.number().optional().describe('Map zoom level 1-19 (default: 17)'),
         format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
+        basemap: z.enum(['streets', 'aerial']).optional().describe('Basemap type (default: streets)'),
       },
-      async ({ apn, center, bbox, width, height, zoom, format }) => {
+      async ({ apn, apns, center, bbox, width, height, zoom, format, basemap }) => {
         const result = await renderMap({
           apn,
+          apns,
           center,
           bbox,
           width,
           height,
           zoom,
           format,
+          basemap,
         });
 
         // If successful, return the image
@@ -323,6 +338,132 @@ The image includes:
         }
 
         // Error case
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Search Parcels Tool
+    server.tool(
+      'search_parcels',
+      `Search for parcels matching criteria with aggregations.
+
+Enables queries like "all agricultural parcels in District 3" or "vacant lots over 5 acres".
+
+SEARCH CRITERIA (provide one or more):
+- zoning: Zone code (e.g., "A-40", "R-1", "C-2")
+- use_description: Property use (e.g., "SINGLE FAMILY RESIDENCE", "AGRICULTURAL")
+- min_acres / max_acres: Acreage range
+- min_value / max_value: Assessed value range
+- year_built_after / year_built_before: Building age
+- has_pool / has_solar: Boolean amenities
+- city: Tax area city (e.g., "FAIRFIELD", "VALLEJO")
+- williamson_act: Agricultural preserve status
+
+OUTPUT:
+- total_count: Number of matching parcels
+- aggregations: Total acres, avg acres, total value, counts by use type
+- sample_parcels: Up to 5 example parcels with key details
+
+NOTE: For supervisor district filtering, first query the district boundaries
+and then filter by city or use spatial queries.`,
+      {
+        criteria: z.object({
+          zoning: z.string().optional().describe('Zone code to match (e.g., "A-40", "R-1")'),
+          use_code: z.string().optional().describe('Property use code'),
+          use_description: z.string().optional().describe('Property use description to match'),
+          min_acres: z.number().optional().describe('Minimum acreage'),
+          max_acres: z.number().optional().describe('Maximum acreage'),
+          min_value: z.number().optional().describe('Minimum total assessed value'),
+          max_value: z.number().optional().describe('Maximum total assessed value'),
+          year_built_after: z.number().optional().describe('Built after this year'),
+          year_built_before: z.number().optional().describe('Built before this year'),
+          has_pool: z.boolean().optional().describe('Has pool'),
+          has_solar: z.boolean().optional().describe('Has solar'),
+          city: z.string().optional().describe('Tax area city name'),
+          williamson_act: z.boolean().optional().describe('Under Williamson Act contract'),
+        }).describe('Search criteria'),
+        include_samples: z.boolean().optional().describe('Include sample parcels (default: true)'),
+        sample_limit: z.number().optional().describe('Number of sample parcels (default: 5)'),
+      },
+      async ({ criteria, include_samples, sample_limit }) => {
+        const result = await searchParcels({ criteria, include_samples, sample_limit });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get Special Districts Tool
+    server.tool(
+      'get_special_districts',
+      `Get all special districts covering a location.
+
+Returns comprehensive district information for a property including:
+- Fire district / fire response area
+- Water district
+- School district
+- Garbage/waste service area
+- Cemetery district
+- Reclamation/flood protection district
+- Groundwater Sustainability Agency (GSA)
+- Board of Supervisors district
+
+INPUT: Either APN or coordinates
+
+OUTPUT: Object with district details for each applicable district type.
+
+USE CASE: "Who provides services to this property?" or
+"What districts does this parcel fall within?"`,
+      {
+        apn: z.string().optional().describe("Assessor's Parcel Number"),
+        latitude: z.number().optional().describe('Latitude in WGS84'),
+        longitude: z.number().optional().describe('Longitude in WGS84'),
+      },
+      async ({ apn, latitude, longitude }) => {
+        const result = await getSpecialDistricts({ apn, latitude, longitude });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get Nearby Tool
+    server.tool(
+      'get_nearby',
+      `Find nearby points of interest.
+
+AVAILABLE LAYER TYPES:
+- school: Schools (elementary, middle, high)
+- park: Parks and recreation areas
+- fire_station: Fire stations
+- hospital: Hospitals and medical centers
+- library: Public libraries
+- police: Police stations
+- transit: Public transit stops
+- community_center: Community centers
+
+INPUT:
+- layer_type: Type of POI to search for
+- Location: Either APN or coordinates
+- radius_feet: Search radius (default: 5280 = 1 mile)
+- limit: Max results to return (default: 10)
+
+OUTPUT: List of nearby features with name, type, and distance.
+
+USE CASE: "What schools are within 1 mile?" or
+"Find the nearest fire station to this address"`,
+      {
+        layer_type: z.string().describe('Type of POI: school, park, fire_station, hospital, library, police, transit, community_center'),
+        apn: z.string().optional().describe("Assessor's Parcel Number"),
+        latitude: z.number().optional().describe('Latitude in WGS84'),
+        longitude: z.number().optional().describe('Longitude in WGS84'),
+        radius_feet: z.number().optional().describe('Search radius in feet (default: 5280 = 1 mile)'),
+        limit: z.number().optional().describe('Maximum results to return (default: 10)'),
+      },
+      async ({ layer_type, apn, latitude, longitude, radius_feet, limit }) => {
+        const result = await getNearby({ layer_type, apn, latitude, longitude, radius_feet, limit });
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };

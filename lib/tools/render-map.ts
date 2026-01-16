@@ -1,25 +1,33 @@
 /**
  * Render Map Tool
  *
- * Generates static map images using CARTO tiles and Sharp compositing.
- * Based on the CivSnap/Worcester approach.
+ * Generates static map images using:
+ * - CARTO Voyager tiles OR Solano aerial tiles for basemap
+ * - Solano County AumentumPublic MapServer/export for parcel overlays
+ * - Sharp for compositing
  */
 
 import sharp from 'sharp';
-import { LAYERS } from '@/lib/services/arcgis';
 import { parseAPN } from '@/lib/utils/apn';
 
 const TILE_SIZE = 256;
 
+// Solano County MapServer endpoints
+const AUMENTUM_MAPSERVER = 'https://solanocountygis.com/server/rest/services/Aumentum/AumentumPublic/MapServer';
+const AERIAL_TILES = 'https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2025_WGS84/MapServer/tile';
+
 interface MapOptions {
   center?: { latitude: number; longitude: number };
   apn?: string;
+  apns?: string[];  // Multiple APNs for search result visualization
   bbox?: { xmin: number; ymin: number; xmax: number; ymax: number };
   width?: number;
   height?: number;
   zoom?: number;
   showParcel?: boolean;
   format?: 'png' | 'jpg';
+  basemap?: 'streets' | 'aerial';
+  highlightApn?: string;  // Specific APN to highlight differently
 }
 
 interface RenderMapResult {
@@ -39,6 +47,16 @@ interface RenderMapResult {
 const DEFAULT_WIDTH = 600;
 const DEFAULT_HEIGHT = 400;
 const DEFAULT_ZOOM = 17;
+
+/**
+ * Convert WGS84 to Web Mercator
+ */
+function toWebMercator(lon: number, lat: number): { x: number; y: number } {
+  const x = lon * 20037508.34 / 180;
+  let y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+  y = y * 20037508.34 / 180;
+  return { x, y };
+}
 
 /**
  * Convert longitude to tile X coordinate
@@ -83,7 +101,7 @@ function lonLatToPixel(
 /**
  * Fetch a single map tile from CARTO's Voyager basemap
  */
-async function fetchTile(x: number, y: number, z: number): Promise<Buffer> {
+async function fetchCartoTile(x: number, y: number, z: number): Promise<Buffer> {
   const url = `https://basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}@2x.png`;
 
   const response = await fetch(url, {
@@ -93,7 +111,7 @@ async function fetchTile(x: number, y: number, z: number): Promise<Buffer> {
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch tile: ${response.status}`);
+    throw new Error(`Failed to fetch CARTO tile: ${response.status}`);
   }
 
   const arrayBuffer = await response.arrayBuffer();
@@ -101,40 +119,161 @@ async function fetchTile(x: number, y: number, z: number): Promise<Buffer> {
 }
 
 /**
- * Generate SVG path from polygon coordinates
+ * Fetch aerial tile from Solano County
  */
-function coordsToSvgPath(
-  coords: number[][],
-  zoom: number,
-  originTileX: number,
-  originTileY: number
-): string {
-  const points = coords.map((coord) => {
-    const [px, py] = lonLatToPixel(coord[0]!, coord[1]!, zoom, originTileX, originTileY);
-    return `${px},${py}`;
+async function fetchAerialTile(x: number, y: number, z: number): Promise<Buffer> {
+  // Solano aerial tiles use TMS format: /tile/{z}/{y}/{x}
+  const url = `${AERIAL_TILES}/${z}/${y}/${x}`;
+
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'SAGE-GIS/1.0 (Solano County GIS Assistant)',
+    },
   });
-  return `M ${points.join(' L ')} Z`;
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch aerial tile: ${response.status}`);
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 }
 
 /**
- * Generate SVG for parcel geometry overlay
+ * Get parcel extent from APN (fast, no geometry)
  */
-function generateParcelSvg(
+async function getParcelExtent(apn: string): Promise<{
+  xmin: number;
+  ymin: number;
+  xmax: number;
+  ymax: number;
+  centerLat: number;
+  centerLon: number;
+} | null> {
+  const parsed = parseAPN(apn);
+  if (!parsed) return null;
+
+  try {
+    const url = `${AUMENTUM_MAPSERVER}/2/query`;
+    const params = new URLSearchParams({
+      where: `parcelid='${parsed.raw}'`,
+      returnExtentOnly: 'true',
+      outSR: '4326',
+      f: 'json',
+    });
+
+    const response = await fetch(`${url}?${params.toString()}`);
+    const data = await response.json();
+
+    if (!data.extent) {
+      // Try with formatted APN
+      const params2 = new URLSearchParams({
+        where: `parcelid='${parsed.formatted}'`,
+        returnExtentOnly: 'true',
+        outSR: '4326',
+        f: 'json',
+      });
+      const response2 = await fetch(`${url}?${params2.toString()}`);
+      const data2 = await response2.json();
+      if (!data2.extent) return null;
+
+      return {
+        xmin: data2.extent.xmin,
+        ymin: data2.extent.ymin,
+        xmax: data2.extent.xmax,
+        ymax: data2.extent.ymax,
+        centerLat: (data2.extent.ymin + data2.extent.ymax) / 2,
+        centerLon: (data2.extent.xmin + data2.extent.xmax) / 2,
+      };
+    }
+
+    return {
+      xmin: data.extent.xmin,
+      ymin: data.extent.ymin,
+      xmax: data.extent.xmax,
+      ymax: data.extent.ymax,
+      centerLat: (data.extent.ymin + data.extent.ymax) / 2,
+      centerLon: (data.extent.xmin + data.extent.xmax) / 2,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch parcel overlay from MapServer/export
+ * Returns a transparent PNG with parcel lines
+ */
+async function fetchParcelOverlay(
+  bbox: { xmin: number; ymin: number; xmax: number; ymax: number },
   width: number,
   height: number,
-  zoom: number,
-  originTileX: number,
-  originTileY: number,
-  parcelRings: number[][][]
-): string {
-  let paths = '';
+  highlightApns?: string[]
+): Promise<Buffer | null> {
+  try {
+    // Convert bbox to Web Mercator for MapServer
+    const min = toWebMercator(bbox.xmin, bbox.ymin);
+    const max = toWebMercator(bbox.xmax, bbox.ymax);
 
-  for (const ring of parcelRings) {
-    const pathD = coordsToSvgPath(ring, zoom, originTileX, originTileY);
-    paths += `<path d="${pathD}" fill="#3B82F6" fill-opacity="0.2" stroke="#3B82F6" stroke-width="3"/>`;
+    const params = new URLSearchParams({
+      bbox: `${min.x},${min.y},${max.x},${max.y}`,
+      bboxSR: '3857',
+      size: `${width},${height}`,
+      format: 'png32',
+      transparent: 'true',
+      layers: 'show:2',  // Parcels layer
+      f: 'image',
+    });
+
+    // If we have specific APNs to highlight, use dynamicLayers
+    if (highlightApns && highlightApns.length > 0) {
+      const whereClause = highlightApns.map(apn => {
+        const parsed = parseAPN(apn);
+        return parsed ? `parcelid='${parsed.raw}'` : null;
+      }).filter(Boolean).join(' OR ');
+
+      if (whereClause) {
+        const dynamicLayers = [{
+          id: 102,  // Custom ID for our dynamic layer
+          source: { type: 'mapLayer', mapLayerId: 2 },
+          definitionExpression: whereClause,
+          drawingInfo: {
+            renderer: {
+              type: 'simple',
+              symbol: {
+                type: 'esriSFS',
+                style: 'esriSFSSolid',
+                color: [59, 130, 246, 51],  // Blue with 20% opacity
+                outline: {
+                  type: 'esriSLS',
+                  style: 'esriSLSSolid',
+                  color: [59, 130, 246, 255],  // Solid blue
+                  width: 3
+                }
+              }
+            },
+            showLabels: false
+          }
+        }];
+        params.set('dynamicLayers', JSON.stringify(dynamicLayers));
+        params.set('layers', 'dynamic');
+      }
+    }
+
+    const url = `${AUMENTUM_MAPSERVER}/export?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`MapServer export failed: ${response.status}`);
+      return null;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (error) {
+    console.error('Failed to fetch parcel overlay:', error);
+    return null;
   }
-
-  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
 }
 
 /**
@@ -177,56 +316,33 @@ function generateWatermarkSvg(width: number, height: number): string {
 }
 
 /**
- * Get parcel geometry from APN
+ * Calculate bbox from center and dimensions at a given zoom
  */
-async function getParcelGeometry(apn: string): Promise<{
-  center: { latitude: number; longitude: number };
-  rings: number[][][];
-} | null> {
-  const parsed = parseAPN(apn);
-  if (!parsed) return null;
+function calculateBboxFromCenter(
+  lat: number,
+  lon: number,
+  width: number,
+  height: number,
+  zoom: number
+): { xmin: number; ymin: number; xmax: number; ymax: number } {
+  // At zoom level z, the world is 2^z tiles, each 256px
+  // Degrees per pixel = 360 / (256 * 2^z)
+  const degreesPerPixel = 360 / (256 * Math.pow(2, zoom));
 
-  try {
-    const url = `https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/${LAYERS.PARCELS}/query`;
-    const params = new URLSearchParams({
-      where: `APN = '${parsed.raw}' OR APN = '${parsed.formatted}'`,
-      outFields: 'APN',
-      returnGeometry: 'true',
-      outSR: '4326',
-      f: 'json',
-    });
+  // Latitude is more complex due to Mercator projection
+  const latRadians = lat * Math.PI / 180;
+  const metersPerPixelY = 156543.03392 * Math.cos(latRadians) / Math.pow(2, zoom);
+  const degreesPerPixelY = metersPerPixelY / 111319.9;  // ~111km per degree
 
-    const response = await fetch(`${url}?${params.toString()}`);
-    const data = await response.json();
+  const halfWidthDeg = (width / 2) * degreesPerPixel;
+  const halfHeightDeg = (height / 2) * degreesPerPixelY;
 
-    if (!data.features || data.features.length === 0) {
-      return null;
-    }
-
-    const feature = data.features[0];
-    const geometry = feature.geometry;
-
-    if (!geometry || !geometry.rings) {
-      return null;
-    }
-
-    // Calculate centroid
-    let sumX = 0, sumY = 0, count = 0;
-    for (const ring of geometry.rings) {
-      for (const coord of ring) {
-        sumX += coord[0];
-        sumY += coord[1];
-        count++;
-      }
-    }
-
-    return {
-      center: { latitude: sumY / count, longitude: sumX / count },
-      rings: geometry.rings,
-    };
-  } catch {
-    return null;
-  }
+  return {
+    xmin: lon - halfWidthDeg,
+    ymin: lat - halfHeightDeg,
+    xmax: lon + halfWidthDeg,
+    ymax: lat + halfHeightDeg,
+  };
 }
 
 /**
@@ -236,23 +352,34 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
   const {
     center,
     apn,
+    apns,
     bbox,
     width = DEFAULT_WIDTH,
     height = DEFAULT_HEIGHT,
     zoom: requestedZoom,
     showParcel = true,
     format = 'png',
+    basemap = 'streets',
+    highlightApn,
   } = args;
 
-  // Determine center and parcel geometry
+  // Determine center and parcel info
   let lat: number;
   let lon: number;
   let zoom = requestedZoom || DEFAULT_ZOOM;
-  let parcelRings: number[][][] | null = null;
+  let parcelApns: string[] = [];
 
+  // Collect APNs to display
+  if (apn) parcelApns.push(apn);
+  if (apns) parcelApns.push(...apns);
+  if (highlightApn && !parcelApns.includes(highlightApn)) {
+    parcelApns.push(highlightApn);
+  }
+
+  // Determine map center
   if (apn) {
-    const parcelData = await getParcelGeometry(apn);
-    if (!parcelData) {
+    const parcelExtent = await getParcelExtent(apn);
+    if (!parcelExtent) {
       return {
         success: false,
         error_type: 'APN_NOT_FOUND',
@@ -260,17 +387,15 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
         suggestion: 'Verify the APN format or provide coordinates instead',
       };
     }
-    lat = parcelData.center.latitude;
-    lon = parcelData.center.longitude;
-    if (showParcel) {
-      parcelRings = parcelData.rings;
-    }
+    lat = parcelExtent.centerLat;
+    lon = parcelExtent.centerLon;
   } else if (center) {
     lat = center.latitude;
     lon = center.longitude;
   } else if (bbox) {
     lat = (bbox.ymin + bbox.ymax) / 2;
     lon = (bbox.xmin + bbox.xmax) / 2;
+    // Auto-calculate zoom from bbox
     const lonSpan = bbox.xmax - bbox.xmin;
     const latSpan = bbox.ymax - bbox.ymin;
     const maxSpan = Math.max(lonSpan, latSpan);
@@ -301,12 +426,22 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     const endTileX = startTileX + tilesNeededX;
     const endTileY = startTileY + tilesNeededY;
 
+    // Choose tile fetcher based on basemap
+    const fetchTile = basemap === 'aerial' ? fetchAerialTile : fetchCartoTile;
+
     // Fetch all tiles in parallel
     const tilePromises: Promise<{ x: number; y: number; buffer: Buffer }>[] = [];
     for (let y = startTileY; y <= endTileY; y++) {
       for (let x = startTileX; x <= endTileX; x++) {
         tilePromises.push(
-          fetchTile(x, y, zoom).then((buffer) => ({ x, y, buffer }))
+          fetchTile(x, y, zoom)
+            .then((buffer) => ({ x, y, buffer }))
+            .catch(() => {
+              // Return a gray placeholder for failed tiles
+              return sharp({
+                create: { width: 512, height: 512, channels: 4, background: { r: 200, g: 200, b: 200, alpha: 1 } }
+              }).png().toBuffer().then(buffer => ({ x, y, buffer }));
+            })
         );
       }
     }
@@ -358,10 +493,6 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       .png()
       .toBuffer();
 
-    // Recalculate origin for the extracted region
-    const extractedOriginX = startTileX + extractLeft / 512;
-    const extractedOriginY = startTileY + extractTop / 512;
-
     // Use actual extracted dimensions for overlays
     const actualWidth = extractWidth;
     const actualHeight = extractHeight;
@@ -369,19 +500,19 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     // Build overlay array
     const overlays: { input: Buffer; top: number; left: number }[] = [];
 
-    // Add parcel geometry overlay if available
-    if (parcelRings) {
-      const parcelSvg = generateParcelSvg(
-        actualWidth,
-        actualHeight,
-        zoom,
-        extractedOriginX,
-        extractedOriginY,
-        parcelRings
-      );
-      overlays.push({ input: Buffer.from(parcelSvg), top: 0, left: 0 });
-    } else {
-      // Add center marker if no parcel
+    // Calculate bbox for the extracted region
+    const mapBbox = calculateBboxFromCenter(lat, lon, actualWidth, actualHeight, zoom);
+
+    // Fetch parcel overlay from MapServer if we have APNs to show
+    if (showParcel && parcelApns.length > 0) {
+      const parcelOverlay = await fetchParcelOverlay(mapBbox, actualWidth, actualHeight, parcelApns);
+      if (parcelOverlay) {
+        overlays.push({ input: parcelOverlay, top: 0, left: 0 });
+      }
+    }
+
+    // Add center marker if no parcels shown
+    if (parcelApns.length === 0) {
       const markerSvg = generateMarkerSvg(actualWidth, actualHeight);
       overlays.push({ input: Buffer.from(markerSvg), top: 0, left: 0 });
     }

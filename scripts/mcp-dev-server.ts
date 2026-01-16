@@ -28,6 +28,9 @@ import { getFireHazardZone } from '../lib/tools/fire.js';
 import { getSupervisorDistrict } from '../lib/tools/supervisor.js';
 import { getSolanoContext } from '../lib/tools/context.js';
 import { renderMap } from '../lib/tools/render-map.js';
+import { searchParcels } from '../lib/tools/search-parcels.js';
+import { getSpecialDistricts } from '../lib/tools/special-districts.js';
+import { getNearby } from '../lib/tools/nearby.js';
 
 const server = new Server(
   {
@@ -181,10 +184,12 @@ AVAILABLE TOPICS:
     name: 'render_map',
     description: `Generate a static map image centered on a location or parcel.
 
-Uses CARTO Voyager basemap tiles with parcel geometry overlay.
+Uses CARTO Voyager or Solano aerial imagery for basemap.
+Parcel overlays rendered via Solano County MapServer.
 
 INPUT (provide ONE):
 - apn: Parcel number - map centered on parcel with boundary highlighted
+- apns: Array of APNs - display multiple parcels (search results)
 - center: { latitude, longitude } - map centered on point with marker
 - bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
 
@@ -192,11 +197,13 @@ OPTIONS:
 - width: Image width in pixels (default: 600)
 - height: Image height in pixels (default: 400)
 - zoom: Map zoom level 1-19 (default: 17)
-- format: 'png' or 'jpg' (default: 'png')`,
+- format: 'png' or 'jpg' (default: 'png')
+- basemap: 'streets' or 'aerial' (default: 'streets')`,
     inputSchema: {
       type: 'object',
       properties: {
         apn: { type: 'string', description: 'APN to center map on' },
+        apns: { type: 'array', items: { type: 'string' }, description: 'Array of APNs to display' },
         center: {
           type: 'object',
           properties: {
@@ -217,7 +224,81 @@ OPTIONS:
         height: { type: 'number' },
         zoom: { type: 'number' },
         format: { type: 'string', enum: ['png', 'jpg'] },
+        basemap: { type: 'string', enum: ['streets', 'aerial'] },
       },
+    },
+  },
+  {
+    name: 'search_parcels',
+    description: `Search for parcels matching criteria with aggregations.
+
+Enables queries like "all agricultural parcels" or "vacant lots over 5 acres".
+
+CRITERIA: zoning, use_description, min_acres, max_acres, min_value, max_value,
+year_built_after, year_built_before, has_pool, has_solar, city, williamson_act
+
+OUTPUT: total_count, aggregations, sample_parcels`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        criteria: {
+          type: 'object',
+          properties: {
+            zoning: { type: 'string' },
+            use_code: { type: 'string' },
+            use_description: { type: 'string' },
+            min_acres: { type: 'number' },
+            max_acres: { type: 'number' },
+            min_value: { type: 'number' },
+            max_value: { type: 'number' },
+            year_built_after: { type: 'number' },
+            year_built_before: { type: 'number' },
+            has_pool: { type: 'boolean' },
+            has_solar: { type: 'boolean' },
+            city: { type: 'string' },
+            williamson_act: { type: 'boolean' },
+          },
+        },
+        include_samples: { type: 'boolean' },
+        sample_limit: { type: 'number' },
+      },
+      required: ['criteria'],
+    },
+  },
+  {
+    name: 'get_special_districts',
+    description: `Get all special districts covering a location.
+
+Returns fire, water, school, garbage, cemetery, reclamation, GSA districts.
+
+INPUT: Either APN or coordinates`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        apn: { type: 'string', description: 'APN to query' },
+        latitude: { type: 'number', description: 'Latitude in WGS84' },
+        longitude: { type: 'number', description: 'Longitude in WGS84' },
+      },
+    },
+  },
+  {
+    name: 'get_nearby',
+    description: `Find nearby points of interest.
+
+LAYER TYPES: school, park, fire_station, hospital, library, police, transit, community_center
+
+INPUT: layer_type, location (APN or coordinates), radius_feet, limit`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        layer_type: { type: 'string', description: 'Type of POI' },
+        apn: { type: 'string', description: 'APN' },
+        latitude: { type: 'number', description: 'Latitude' },
+        longitude: { type: 'number', description: 'Longitude' },
+        radius_feet: { type: 'number', description: 'Search radius (default: 5280)' },
+        limit: { type: 'number', description: 'Max results (default: 10)' },
+      },
+      required: ['layer_type'],
     },
   },
 ];
@@ -282,6 +363,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = mapResult;
         break;
       }
+      case 'search_parcels':
+        result = await searchParcels(args as Parameters<typeof searchParcels>[0]);
+        break;
+      case 'get_special_districts':
+        result = await getSpecialDistricts(args as { apn?: string; latitude?: number; longitude?: number });
+        break;
+      case 'get_nearby':
+        result = await getNearby(args as Parameters<typeof getNearby>[0]);
+        break;
       default:
         return {
           content: [{ type: 'text', text: `Unknown tool: ${name}` }],
