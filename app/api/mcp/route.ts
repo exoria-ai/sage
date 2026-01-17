@@ -255,56 +255,41 @@ Returns full reference document for the requested topic.`,
     // Render Map Tool
     server.tool(
       'render_map',
-      `Generate a static map image centered on a location or parcel.
+      `Generate a static map image for the user to view.
 
-IMPORTANT: You must provide coordinates via the 'center' parameter. If you only have an address,
-first call geocode_address to get coordinates, then pass those coordinates to render_map.
+**PURPOSE**: This tool creates a visual map that the user can see. The entire point is to
+produce an image URL that you MUST share with the user.
 
-WORKFLOW:
-1. geocode_address({ address: "675 Texas St, Fairfield, CA" }) → returns latitude, longitude
-2. render_map({ center: { latitude: 38.248, longitude: -122.041 }, zoom: 18 })
+**CRITICAL - ALWAYS INCLUDE THE URL**:
+The tool returns an imageUrl field. You MUST include this URL in your response to the user.
+The embedded image may not display in all clients, so the URL is essential.
+Format: "Here's the map: [imageUrl]" or include it with your description.
 
-INPUT (provide ONE of these):
-- center: { latitude, longitude } - RECOMMENDED. Map centered on point with marker.
-- apn: Assessor's Parcel Number - map centered on parcel with boundary highlighted
-- apns: Array of APNs - display multiple parcels (e.g., search results)
+WORKFLOW (address → map):
+1. geocode_address({ address: "675 Texas St, Fairfield, CA" }) → get APN
+2. render_map({ apn: "003-025-1020" }) → use APN directly (preferred)
+   OR render_map({ center: { latitude, longitude }, zoom: 18 })
+
+INPUT (provide ONE):
+- apn: Assessor's Parcel Number - PREFERRED. Centers on parcel, highlights boundary.
+- center: { latitude, longitude } - Map centered on point with marker.
+- buffer: Buffer visualization - for radius/notification maps (see below)
+- apns: Array of APNs - display multiple parcels
 - bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
-- buffer: Buffer visualization (see BUFFER MODE below)
 
 OPTIONS:
-- width: Image width in pixels (default: 600)
-- height: Image height in pixels (default: 400)
-- zoom: Map zoom level 1-19 (default: 17, street level). Auto-calculated for buffer mode.
-- format: 'png' or 'jpg' (default: 'png')
-- basemap: 'aerial' or 'streets'
-  - 'aerial' (RECOMMENDED): High-resolution 2025 Solano County aerial photography.
-  - 'streets': Generic CARTO street map.
+- width/height: Image dimensions (default: 1200x800)
+- zoom: Map zoom 1-19 (default: 17). Auto-calculated for buffer mode.
+- basemap: 'aerial' (default, recommended) or 'streets'
 
-BUFFER MODE - For buffer/radius visualization:
-Use the 'buffer' parameter to visualize a radius around a parcel or point.
-  buffer: {
-    apn: "123-456-789",    // Source parcel (highlighted in orange)
-    radius_feet: 300,      // Buffer radius (displayed as dashed circle)
-    show_ring: true,       // Show buffer circle (default: true)
-    highlight_parcels: true // Highlight parcels intersecting buffer in blue (default: true)
-  }
+BUFFER MODE - For radius visualization:
+  render_map({ buffer: { apn: "003-025-1020", radius_feet: 300 } })
 
-**EFFICIENT BUFFER VISUALIZATION**:
-  → Just call render_map with buffer parameter - NO need to call get_parcels_in_buffer first!
-  → render_map handles the spatial query internally and is much more efficient.
-  → Example: render_map({ buffer: { apn: "123-456-789", radius_feet: 2000 } })
-  → Only use get_parcels_in_buffer if you need the actual parcel data (owner names, addresses).
+  → Do NOT call get_parcels_in_buffer first - this tool handles spatial queries internally.
+  → Source parcel highlighted in orange, buffer shown as dashed circle.
+  → Only use get_parcels_in_buffer if you need owner names/addresses for notification lists.
 
-OUTPUT:
-Returns both an embedded image AND a permanent imageUrl.
-
-**CRITICAL**: You MUST include the imageUrl in your response to the user. The image may not render
-in all clients, so the URL is essential for users to view the map.
-
-MULTI-PARCEL USE CASE:
-After search_parcels, pass the APNs to render_map to visualize results:
-  1. search_parcels({ criteria: { zoning: "A-40", min_acres: 10 } })
-  2. render_map({ apns: [apn1, apn2, ...], zoom: 14 })`,
+REMEMBER: Always include the imageUrl in your response!`,
       {
         apn: z.string().optional().describe("Assessor's Parcel Number to center map on"),
         apns: z.array(z.string()).optional().describe('Array of APNs to display (for search results or buffer parcels)'),

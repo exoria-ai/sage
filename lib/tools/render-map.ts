@@ -165,8 +165,9 @@ async function getParcelExtent(apn: string): Promise<{
 
   try {
     const url = `${AUMENTUM_MAPSERVER}/2/query`;
+    // parcelid field has no dashes - use numeric format
     const params = new URLSearchParams({
-      where: `parcelid='${parsed.raw}'`,
+      where: `parcelid='${parsed.numeric}'`,
       returnExtentOnly: 'true',
       outSR: '4326',
       f: 'json',
@@ -176,7 +177,7 @@ async function getParcelExtent(apn: string): Promise<{
     const data = await response.json();
 
     if (!data.extent) {
-      // Try with formatted APN
+      // Fallback: try with formatted APN (some layers may use dashes)
       const params2 = new URLSearchParams({
         where: `parcelid='${parsed.formatted}'`,
         returnExtentOnly: 'true',
@@ -453,7 +454,8 @@ async function fetchSourceParcelOverlay(
     const parsed = parseAPN(apn);
     if (!parsed) return null;
 
-    const whereClause = `parcelid='${parsed.raw}'`;
+    // parcelid field has no dashes - use numeric format
+    const whereClause = `parcelid='${parsed.numeric}'`;
 
     // Convert bbox to Web Mercator for MapServer
     const min = toWebMercator(bbox.xmin, bbox.ymin);
