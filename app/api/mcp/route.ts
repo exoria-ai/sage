@@ -276,6 +276,14 @@ INPUT (provide ONE):
 - buffer: Buffer visualization - for radius/notification maps (see below)
 - apns: Array of APNs - display multiple parcels
 - bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
+- extent: 'county' - Zoom to show the entire county with boundaries
+
+COUNTY MAP MODE - For county-wide visualization:
+  render_map({ extent: 'county', boundaries: { showCounty: true, showCities: true } })
+
+  → Shows entire Solano County at appropriate zoom
+  → Can overlay county boundary (blue dashed line) and city boundaries (colored, labeled)
+  → Parcel boundaries hidden at county zoom (too cluttered)
 
 OPTIONS:
 - width/height: Image dimensions (default: 1200x800)
@@ -311,19 +319,28 @@ REMEMBER: Always include the imageUrl in your response!`,
           show_ring: z.boolean().optional().describe('Show buffer circle (default: true)'),
           highlight_parcels: z.boolean().optional().describe('Highlight parcels in buffer (default: true)'),
         }).optional().describe('Buffer visualization options'),
+        boundaries: z.object({
+          showCounty: z.boolean().optional().describe('Show county boundary outline (blue dashed line)'),
+          showCities: z.boolean().optional().describe('Show city boundary outlines with labels'),
+          countyFill: z.boolean().optional().describe('Fill county with semi-transparent color'),
+          cityFill: z.boolean().optional().describe('Fill cities with semi-transparent color'),
+        }).optional().describe('County/city boundary visualization options'),
+        extent: z.enum(['county']).optional().describe("Zoom to show full extent: 'county' for county-wide view"),
         width: z.number().optional().describe('Image width in pixels (default: 600)'),
         height: z.number().optional().describe('Image height in pixels (default: 400)'),
         zoom: z.number().optional().describe('Map zoom level 1-19 (auto-calculated for buffer mode)'),
         format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
         basemap: z.enum(['aerial', 'streets']).optional().describe('Basemap type: aerial (default) or streets'),
       },
-      async ({ apn, apns, center, bbox, buffer, width, height, zoom, format, basemap }) => {
+      async ({ apn, apns, center, bbox, buffer, boundaries, extent, width, height, zoom, format, basemap }) => {
         const result = await renderMap({
           apn,
           apns,
           center,
           bbox,
           buffer,
+          boundaries,
+          extent,
           width,
           height,
           zoom,

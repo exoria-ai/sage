@@ -16,6 +16,19 @@ const TILE_SIZE = 256;
 const AUMENTUM_MAPSERVER = 'https://solanocountygis.com/server/rest/services/Aumentum/AumentumPublic/MapServer';
 const AERIAL_TILES = 'https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2025_WGS84/MapServer/tile';
 
+// Boundary layer endpoints (FeatureServer for query, but we'll use export for rendering)
+const AGOL_BASE = 'https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services';
+const COUNTY_BOUNDARY_URL = `${AGOL_BASE}/County_Boundary/FeatureServer/1`;
+const CITY_BOUNDARY_URL = `${AGOL_BASE}/CityBoundary/FeatureServer/2`;
+
+// Solano County extent in WGS84 (from County_Boundary layer)
+const SOLANO_COUNTY_EXTENT = {
+  xmin: -122.409,
+  ymin: 38.031,
+  xmax: -121.592,
+  ymax: 38.538,
+};
+
 interface BufferOptions {
   apn?: string;           // Source parcel for buffer
   latitude?: number;      // Or source point lat
@@ -23,6 +36,13 @@ interface BufferOptions {
   radius_feet: number;    // Buffer radius
   show_ring?: boolean;    // Draw the buffer circle (default: true)
   highlight_parcels?: boolean; // Highlight parcels in buffer (default: true)
+}
+
+interface BoundaryOptions {
+  showCounty?: boolean;      // Show county boundary outline
+  showCities?: boolean;      // Show city boundary outlines
+  countyFill?: boolean;      // Fill county with semi-transparent color
+  cityFill?: boolean;        // Fill cities with semi-transparent color
 }
 
 interface MapOptions {
@@ -38,6 +58,8 @@ interface MapOptions {
   basemap?: 'streets' | 'aerial';
   highlightApn?: string;  // Specific APN to highlight differently
   buffer?: BufferOptions; // Buffer visualization options
+  boundaries?: BoundaryOptions;  // County/city boundary visualization
+  extent?: 'county';  // Zoom to show full county extent
 }
 
 interface RenderMapResult {
@@ -357,6 +379,245 @@ async function fetchHighlightedParcels(
     console.error('Failed to fetch highlighted parcels:', error);
     return null;
   }
+}
+
+/**
+ * Fetch county boundary overlay from ArcGIS FeatureServer
+ * Uses generateRenderer to draw a styled boundary
+ */
+async function fetchCountyBoundaryOverlay(
+  bbox: { xmin: number; ymin: number; xmax: number; ymax: number },
+  width: number,
+  height: number,
+  showFill: boolean = false
+): Promise<Buffer | null> {
+  try {
+    // Convert bbox to Web Mercator
+    const min = toWebMercator(bbox.xmin, bbox.ymin);
+    const max = toWebMercator(bbox.xmax, bbox.ymax);
+
+    // Query for the county boundary geometry and render it
+    // Use the FeatureServer's generateRenderer capability
+    const queryParams = new URLSearchParams({
+      where: '1=1',
+      outFields: 'name',
+      geometry: `${min.x},${min.y},${max.x},${max.y}`,
+      geometryType: 'esriGeometryEnvelope',
+      inSR: '3857',
+      outSR: '3857',
+      returnGeometry: 'true',
+      f: 'json',
+    });
+
+    const queryUrl = `${COUNTY_BOUNDARY_URL}/query?${queryParams.toString()}`;
+    const queryResponse = await fetch(queryUrl);
+    const queryData = await queryResponse.json();
+
+    if (!queryData.features || queryData.features.length === 0) {
+      return null;
+    }
+
+    // Draw the boundary using SVG
+    // Convert the geometry rings to SVG path
+    const feature = queryData.features[0];
+    const rings = feature.geometry.rings;
+
+    // Calculate the scale and offset to fit the bbox into the image dimensions
+    const bboxWidth = max.x - min.x;
+    const bboxHeight = max.y - min.y;
+    const scaleX = width / bboxWidth;
+    const scaleY = height / bboxHeight;
+
+    // Convert coordinates to SVG path
+    let pathData = '';
+    for (const ring of rings) {
+      for (let i = 0; i < ring.length; i++) {
+        const [x, y] = ring[i];
+        // Transform from Web Mercator to pixel coordinates
+        const px = (x - min.x) * scaleX;
+        const py = height - (y - min.y) * scaleY; // Flip Y axis
+        if (i === 0) {
+          pathData += `M ${px} ${py} `;
+        } else {
+          pathData += `L ${px} ${py} `;
+        }
+      }
+      pathData += 'Z ';
+    }
+
+    // Create SVG with the county boundary
+    const fillColor = showFill ? 'rgba(100, 116, 139, 0.1)' : 'none';
+    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <path d="${pathData}"
+        fill="${fillColor}"
+        stroke="#1e40af"
+        stroke-width="3"
+        stroke-dasharray="12,6"
+        stroke-linecap="round"
+      />
+    </svg>`;
+
+    // Convert SVG to PNG buffer using sharp
+    const buffer = await sharp(Buffer.from(svg)).png().toBuffer();
+    return buffer;
+  } catch (error) {
+    console.error('Failed to fetch county boundary:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch city boundaries overlay from ArcGIS FeatureServer
+ * Draws all 7 city boundaries with labels
+ */
+async function fetchCityBoundariesOverlay(
+  bbox: { xmin: number; ymin: number; xmax: number; ymax: number },
+  width: number,
+  height: number,
+  showFill: boolean = false
+): Promise<Buffer | null> {
+  try {
+    // Convert bbox to Web Mercator
+    const min = toWebMercator(bbox.xmin, bbox.ymin);
+    const max = toWebMercator(bbox.xmax, bbox.ymax);
+
+    // Query for all city boundaries
+    const queryParams = new URLSearchParams({
+      where: '1=1',
+      outFields: 'name',
+      geometry: `${min.x},${min.y},${max.x},${max.y}`,
+      geometryType: 'esriGeometryEnvelope',
+      inSR: '3857',
+      outSR: '3857',
+      returnGeometry: 'true',
+      f: 'json',
+    });
+
+    const queryUrl = `${CITY_BOUNDARY_URL}/query?${queryParams.toString()}`;
+    const queryResponse = await fetch(queryUrl);
+    const queryData = await queryResponse.json();
+
+    if (!queryData.features || queryData.features.length === 0) {
+      return null;
+    }
+
+    // Calculate the scale and offset
+    const bboxWidth = max.x - min.x;
+    const bboxHeight = max.y - min.y;
+    const scaleX = width / bboxWidth;
+    const scaleY = height / bboxHeight;
+
+    // City colors for variety
+    const cityColors = [
+      '#dc2626', // red
+      '#ea580c', // orange
+      '#ca8a04', // yellow
+      '#16a34a', // green
+      '#0891b2', // cyan
+      '#7c3aed', // purple
+      '#db2777', // pink
+    ];
+
+    let pathElements = '';
+    let labelElements = '';
+
+    queryData.features.forEach((feature: { geometry: { rings: Array<Array<[number, number]>> }; attributes: { name: string } }, index: number) => {
+      const rings = feature.geometry.rings;
+      const cityName = feature.attributes.name || 'Unknown';
+      const color = cityColors[index % cityColors.length];
+
+      // Calculate centroid for label placement
+      let centroidX = 0;
+      let centroidY = 0;
+      let pointCount = 0;
+
+      // Convert coordinates to SVG path
+      let pathData = '';
+      for (const ring of rings) {
+        for (let i = 0; i < ring.length; i++) {
+          const coord = ring[i];
+          if (!coord) continue;
+          const [x, y] = coord;
+          const px = (x - min.x) * scaleX;
+          const py = height - (y - min.y) * scaleY;
+
+          centroidX += px;
+          centroidY += py;
+          pointCount++;
+
+          if (i === 0) {
+            pathData += `M ${px} ${py} `;
+          } else {
+            pathData += `L ${px} ${py} `;
+          }
+        }
+        pathData += 'Z ';
+      }
+
+      // Average for centroid
+      centroidX /= pointCount;
+      centroidY /= pointCount;
+
+      const fillColor = showFill ? `${color}1a` : 'none'; // 10% opacity if fill
+      pathElements += `<path d="${pathData}"
+        fill="${fillColor}"
+        stroke="${color}"
+        stroke-width="2"
+        stroke-opacity="0.8"
+      />`;
+
+      // Add city label at centroid
+      labelElements += `
+        <text x="${centroidX}" y="${centroidY}"
+          text-anchor="middle"
+          font-family="Arial, sans-serif"
+          font-size="14"
+          font-weight="bold"
+          fill="${color}"
+          stroke="white"
+          stroke-width="3"
+          paint-order="stroke"
+        >${cityName.toUpperCase()}</text>`;
+    });
+
+    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      ${pathElements}
+      ${labelElements}
+    </svg>`;
+
+    const buffer = await sharp(Buffer.from(svg)).png().toBuffer();
+    return buffer;
+  } catch (error) {
+    console.error('Failed to fetch city boundaries:', error);
+    return null;
+  }
+}
+
+/**
+ * Calculate zoom level to fit a bounding box within given dimensions
+ */
+function calculateZoomForBbox(
+  bbox: { xmin: number; ymin: number; xmax: number; ymax: number },
+  width: number,
+  height: number,
+  padding: number = 0.1  // 10% padding
+): number {
+  const lonSpan = (bbox.xmax - bbox.xmin) * (1 + padding * 2);
+  const latSpan = (bbox.ymax - bbox.ymin) * (1 + padding * 2);
+
+  // Calculate zoom for longitude (X)
+  const zoomX = Math.log2((360 * width) / (lonSpan * 256));
+
+  // Calculate zoom for latitude (Y) - more complex due to Mercator projection
+  const latCenter = (bbox.ymin + bbox.ymax) / 2;
+  const latRad = (latCenter * Math.PI) / 180;
+  const zoomY = Math.log2((256 * height * Math.cos(latRad)) / (latSpan * 256 / 360 * Math.PI));
+
+  // Use the more restrictive zoom (smaller number = more zoomed out)
+  const zoom = Math.min(zoomX, zoomY);
+
+  // Clamp to reasonable range
+  return Math.max(8, Math.min(19, Math.floor(zoom)));
 }
 
 /**
@@ -774,6 +1035,8 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     basemap = 'streets',  // Default to streets basemap (cleaner, more context)
     highlightApn,
     buffer,
+    boundaries,
+    extent,
   } = args;
 
   // Determine center and parcel info
@@ -781,6 +1044,15 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
   let lon: number | undefined;
   let zoom = requestedZoom || DEFAULT_ZOOM;
   let parcelApns: string[] = [];
+
+  // Handle extent option - zoom to full county
+  if (extent === 'county') {
+    lat = (SOLANO_COUNTY_EXTENT.ymin + SOLANO_COUNTY_EXTENT.ymax) / 2;
+    lon = (SOLANO_COUNTY_EXTENT.xmin + SOLANO_COUNTY_EXTENT.xmax) / 2;
+    if (!requestedZoom) {
+      zoom = calculateZoomForBbox(SOLANO_COUNTY_EXTENT, width, height, 0.05);
+    }
+  }
 
   // Buffer visualization state
   let bufferSourceApn: string | undefined;
@@ -841,8 +1113,8 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     parcelApns.push(highlightApn);
   }
 
-  // Determine map center (if not already set by buffer)
-  if (!buffer) {
+  // Determine map center (if not already set by buffer or extent)
+  if (!buffer && !extent) {
     if (apn) {
       const parcelExtent = await getParcelExtent(apn);
       if (!parcelExtent) {
@@ -995,11 +1267,41 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     // Always show parcel boundaries (green lines like Solano's viewer)
     // Show APN labels when zoom >= 17 (readable at neighborhood scale)
     // Labels get too cluttered at lower zooms and unreadable at higher zooms would be fine
-    if (showParcel) {
+    // Skip parcel boundaries at county-wide zoom levels (too cluttered)
+    if (showParcel && zoom >= 14) {
       const shouldShowLabels = zoom >= 17;
       const parcelBoundaries = await fetchParcelBoundaries(mapBbox, actualWidth, actualHeight, shouldShowLabels);
       if (parcelBoundaries) {
         overlays.push({ input: parcelBoundaries, top: 0, left: 0 });
+      }
+    }
+
+    // County and city boundary overlays
+    if (boundaries) {
+      // County boundary first (underneath cities)
+      if (boundaries.showCounty) {
+        const countyOverlay = await fetchCountyBoundaryOverlay(
+          mapBbox,
+          actualWidth,
+          actualHeight,
+          boundaries.countyFill
+        );
+        if (countyOverlay) {
+          overlays.push({ input: countyOverlay, top: 0, left: 0 });
+        }
+      }
+
+      // City boundaries on top
+      if (boundaries.showCities) {
+        const cityOverlay = await fetchCityBoundariesOverlay(
+          mapBbox,
+          actualWidth,
+          actualHeight,
+          boundaries.cityFill
+        );
+        if (cityOverlay) {
+          overlays.push({ input: cityOverlay, top: 0, left: 0 });
+        }
       }
     }
 
