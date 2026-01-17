@@ -54,8 +54,8 @@ interface RenderMapResult {
 }
 
 // Default settings
-const DEFAULT_WIDTH = 600;
-const DEFAULT_HEIGHT = 400;
+const DEFAULT_WIDTH = 1200;
+const DEFAULT_HEIGHT = 800;
 const DEFAULT_ZOOM = 17;
 
 /**
