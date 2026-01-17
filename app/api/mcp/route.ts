@@ -19,6 +19,12 @@ import { renderMap } from '@/lib/tools/render-map';
 import { searchParcels } from '@/lib/tools/search-parcels';
 import { getSpecialDistricts } from '@/lib/tools/special-districts';
 import { getNearby } from '@/lib/tools/nearby';
+import {
+  getCountyCodeSections,
+  listCountyCodeChapters,
+  listCountyCodeSections,
+  searchCountyCode,
+} from '@/lib/tools/county-code';
 
 const handler = createMcpHandler(
   (server) => {
@@ -502,6 +508,115 @@ USE CASE: "What schools are within 1 mile?" or
       },
       async ({ layer_type, apn, latitude, longitude, radius_feet, limit }) => {
         const result = await getNearby({ layer_type, apn, latitude, longitude, radius_feet, limit });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get County Code Sections Tool
+    server.tool(
+      'get_county_code_sections',
+      `Retrieve the full text of specific sections from the Solano County Code.
+
+WHEN TO USE THIS TOOL:
+- User asks about subdivision requirements, procedures, or definitions
+- User needs exact legal language from the county code
+- User asks "what does the code say about..." something specific
+- You need to cite specific regulations in your response
+- User asks about lot line adjustments, parcel maps, tentative maps, etc.
+
+STRATEGY - Batch multiple sections in one call:
+If a user asks about "subdivision exemptions", retrieve sections 26-15, 26-15.1, and 26-15.2 together.
+If discussing a definition, also pull related procedural sections.
+
+CURRENTLY AVAILABLE:
+- Chapter 26: Subdivisions (Articles I-II: General Provisions, Definitions)
+  - Sections 26-11 through 26-15.3: Authority, purpose, application, exemptions, fees
+  - Sections 26-21 through 26-21.32: All subdivision-related definitions
+
+SECTION ID FORMAT: "26-11", "26-21.3", "26-15.1" (chapter-section or chapter-section.subsection)
+
+OUTPUT: Full section text with title, chapter info, and ordinance references.
+
+TIP: If unsure which sections to retrieve, use search_county_code first to find relevant sections.`,
+      {
+        section_ids: z.array(z.string()).describe('Array of section IDs to retrieve (e.g., ["26-11", "26-21.3"])'),
+      },
+      async ({ section_ids }) => {
+        const result = await getCountyCodeSections({ section_ids });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // List County Code Chapters Tool
+    server.tool(
+      'list_county_code_chapters',
+      `List all available chapters in the Solano County Code database.
+
+WHEN TO USE:
+- To discover what county code content is available
+- When user asks broadly about "the county code" without specifics
+- To provide overview of code coverage
+
+Returns chapter numbers, titles, and counts of articles/sections.`,
+      {},
+      async () => {
+        const result = await listCountyCodeChapters();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // List County Code Sections Tool
+    server.tool(
+      'list_county_code_sections',
+      `List all sections within a specific chapter of the Solano County Code.
+
+WHEN TO USE:
+- User wants to browse what's in a chapter
+- You need to find the right section ID before retrieving full text
+- User asks "what sections cover [topic]" within a known chapter
+
+Returns section IDs and titles (not full text - use get_county_code_sections for that).`,
+      {
+        chapter: z.string().describe('Chapter number (e.g., "26" for Subdivisions)'),
+      },
+      async ({ chapter }) => {
+        const result = await listCountyCodeSections({ chapter });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Search County Code Tool
+    server.tool(
+      'search_county_code',
+      `Search the Solano County Code by keyword.
+
+WHEN TO USE:
+- User asks about a topic but you don't know which sections cover it
+- Need to find relevant sections before retrieving full text
+- User uses terminology that might appear in multiple sections
+
+STRATEGY:
+1. Search for key terms from the user's question
+2. Review the matching section titles and snippets
+3. Use get_county_code_sections to retrieve full text of relevant sections
+
+Returns matching sections with snippets showing context around matches.
+Title matches are ranked higher than text matches.`,
+      {
+        query: z.string().describe('Search term (e.g., "lot line adjustment", "parcel map", "exemption")'),
+        chapter: z.string().optional().describe('Limit search to specific chapter'),
+        max_results: z.number().optional().describe('Maximum results to return (default: 10)'),
+      },
+      async ({ query, chapter, max_results }) => {
+        const result = await searchCountyCode({ query, chapter, max_results });
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };

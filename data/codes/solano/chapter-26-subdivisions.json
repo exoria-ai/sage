@@ -1,0 +1,264 @@
+{
+  "chapter": "26",
+  "title": "Subdivisions",
+  "articles": [
+    {
+      "id": "I",
+      "title": "General Provisions",
+      "sections": [
+        {
+          "id": "26-11",
+          "title": "Authority and Title",
+          "text": "This Chapter is adopted pursuant to the authority vested in the County of Solano by Section 7 of Article 11 of the California Constitution and by the Subdivision Map Act. This Chapter may be cited as the \"Solano County Subdivision Ordinance\".",
+          "ordinances": ["874", "1575", "1608"]
+        },
+        {
+          "id": "26-12",
+          "title": "Purpose",
+          "text": "The purpose of this Chapter is to regulate and control subdivisions of land and, in connection therewith, to implement the County's General Plan and to implement and supplement the Subdivision Map Act.",
+          "ordinances": ["1575", "1608"]
+        },
+        {
+          "id": "26-13",
+          "title": "Application",
+          "text": "Except as otherwise provided in Section 26-15, this Chapter shall apply to all divisions, reversions to acreage, lot line adjustments, and mergers respecting real property located wholly or partially within the unincorporated areas of Solano County. This Chapter governs the filing, processing, approval, conditional approval, or disapproval of tentative, final and parcel maps, map waivers, lot line adjustments, certificates of compliance, conditional certificates of compliance, notices of violation, revisions to acreage, resubdivisions, mergers, and any modifications thereto. Except as specifically otherwise provided by this Chapter or the Subdivision Map Act, all subdivisions shall be subject to the same substantive and procedural requirements.",
+          "ordinances": ["1575", "1608"]
+        },
+        {
+          "id": "26-14",
+          "title": "Environmental Impact",
+          "text": "No discretionary actions pursuant to the provisions of this Chapter shall be approved until an environmental impact analysis is prepared, processed and considered in accordance with the provisions of the California Environmental Quality Act (Public Resources Code Section 21000 et seq.). The subdivider shall provide such data and information as may be required to complete such analysis, pay a deposit, and pay such fees as may be required to reimburse County costs for preparation and processing of environmental review documents as specified by the Board of Supervisors.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-15",
+          "title": "Exemptions",
+          "text": "Exemptions from the provisions of this Chapter are governed by Section 26-15.1 and 26.15.2.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-15.1",
+          "title": "List of Exemptions",
+          "text": "Except as otherwise provided in Section 26-15.2, this Chapter shall not apply to:\n\n(a)    The financing or leasing of apartments, offices, stores or similar spaces within apartment buildings, industrial buildings, commercial buildings, mobile home parks, or trailer parks;\n\n(b)    Mineral, oil, gas or agricultural leases;\n\n(c)    Land dedicated for cemetery purposes under the provisions of the Health and Safety Code;\n\n(d)    Boundary line or exchange agreements to which the State Lands Commission or a local agency holding a trust grant of tide and submerged lands is a party;\n\n(e)    Any separate assessment under Section 2188.7 of the Revenue and Taxation Code;\n\n(f)    The financing or leasing of existing separate commercial or industrial buildings on a single lot;\n\n(g)    The financing or leasing of any lot, or portion thereof, in conjunction with the construction of commercial or industrial buildings on a single lot;\n\n(h)    Subdivisions creating four or fewer lots for construction of removable commercial buildings having a floor area of less than 100 square feet;\n\n(i)    The construction, financing or leasing of dwelling units pursuant to Section 65852.1 of the Government Code, or of second units pursuant to Section 65852.2 of the Government Code;\n\n(j)    Subdivisions of a portion of the operating right-of-way of a railroad corporation defined as such by Section 230 of the Public Utilities Code which are created by short-term leases (terminable by either party on not more than 30 days' notice in writing);\n\n(k)    Land conveyed to or from a governmental agency, public entity or public utility;\n\n(l)    Land conveyed to a subsidiary of a public utility for conveyance to such public utility for rights-of-way;\n\n(m)    The leasing of, or the granting of an easement to, a lot, or any portion thereof, in conjunction with the financing, erection and sale or lease of a wind powered electrical generation device on the lot or portion thereof; and\n\n(n)    The leasing or licensing of a portion of a lot, or the granting of an easement, use permit, or similar right on a portion of a lot, to a telephone corporation as defined in Section 234 of the Public Utilities Code, exclusively for the placement and operation of cellular radio transmission facilities.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-15.2",
+          "title": "Limitations on Exemptions",
+          "text": "This Chapter shall apply to subdivisions affected in the manner described in subdivisions (j), (k) and (l) of Section 26-15.1 if the property involved is shown on the latest equalized County assessment roll unless the Director of Environmental Management has both:\n\n(a)    Received advanced written notice of the proposed subdivision; and\n\n(b)    Determined that there is no substantial evidence that public policy necessitates the filing of a final map, parcel map or map waiver for the subdivision.\n\nThe notice shall generally describe the proposed subdivision, shall identify the parties thereto, and shall contain such additional information as the Director of Environmental Management may require. The Director of Environmental Management's determination that there is or is not any such substantial evidence shall be made in writing within 30 calendar days after receipt of the notice. Public policy necessitates a final map, parcel map or map waiver whenever there is substantial evidence that the subdivision might create a lot that fails to satisfy any of the requirements of Article VII of this Chapter.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-15.3",
+          "title": "Fees",
+          "text": "Fees for the processing of tentative, final and parcel maps and for other procedures required or authorized by the Subdivision Map Act or this Chapter, shall be paid in the amounts, if any, prescribed by resolution of the Board of Supervisors. Except as otherwise specified, such fees shall not be refundable. Each application for any such map or other procedure shall be accompanied by payment of all outstanding fees and charges by and owed to the County under this Chapter by the applicant, or by persons, partnerships, corporations or other entities owned or controlled by the applicant, or owning or controlling the applicant. No filing fee shall be charged or collected for any application filed by any County officer, employee, board or commission on behalf of the County of Solano.",
+          "ordinances": ["1608"]
+        }
+      ]
+    },
+    {
+      "id": "II",
+      "title": "Definitions",
+      "sections": [
+        {
+          "id": "26-21",
+          "title": "Definitions",
+          "text": "Whenever any words or phrases used in this Chapter are not defined herein, but are defined in the Subdivision Map Act, such definitions shall be deemed incorporated herein and shall apply as though set forth in full in this Chapter.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.1",
+          "title": "Advisory Agency",
+          "text": "\"Advisory Agency\" means a designated official or an official body charged with the duty of making investigations and reports on the design and improvement of proposed divisions of real property, or imposing or suggesting requirements or conditions thereon, or having the authority to approve, conditionally approve or disapprove maps, certificates of compliance, conditional certificates of compliance, map waivers, lot line adjustments, or having the authority to conduct the hearings relating to notices of violation as specified in this Chapter and the Subdivision Map Act.\n\n(a)    For subdivisions that require the preparation of a tentative map and a final map pursuant to this Chapter and the Subdivision Map Act, the Planning Commission shall constitute the Advisory Agency. In such capacity, the Planning Commission shall make recommendations as to findings, requirements, conditions, approvals and disapprovals, but shall not be empowered to approve, conditionally approve or disapprove tentative maps. The Board of Supervisors shall make all findings required by this Chapter and the Subdivision Map Act, and shall approve, conditionally approve or disapprove tentative maps that require the preparation of a final map.\n\n(b)    For subdivisions that require the preparation of a tentative map and a parcel map, or the preparation of a map waiver, the Development Review Committee shall constitute the Advisory Agency. In such capacity, the Development Review Committee shall make recommendations as to findings, requirements, conditions, approvals and disapprovals but shall not be empowered to approve, conditionally approve or disapprove tentative maps. The Zoning Administrator shall make all findings required by this Chapter and the Subdivision Map Act and shall approve, conditionally approve or disapprove tentative maps which require the preparation of a parcel map and map waivers unless the Zoning Administrator defers to the Planning Commission, in which case the Planning Commission shall make all findings required by this Chapter and the Subdivision Map Act, and shall approve, conditionally approve or disapprove tentative maps which require the preparation of a parcel map and map waivers.\n\n(c)    For lot line adjustments the Zoning Administrator shall constitute the Advisory Agency. In such capacity, the Zoning Administrator shall make all findings required by this Chapter and the Subdivision Map Act, and shall approve, conditionally approve, or disapprove lot line adjustments.\n\n(d)    For certificates of compliance for legal building site determinations, the Director of Environmental Management shall constitute the Advisory Agency. In such capacity, the Director of Environmental Management shall make all findings required by this Chapter and the Subdivision Map Act, and shall approve the certificate of compliance or defer the request to the Planning Commission if a conditional certificate of compliance may be required.\n\n(e)    For hearings relating to notices of violation and conditional certificates of compliance, the Planning Commission shall constitute the Advisory Agency.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.2",
+          "title": "Appeal Board",
+          "text": "\"Appeal Board\" means a designated board or other official body charged with the duty of hearing and making determinations upon appeals with respect to subdivisions and findings related thereto, the imposition of requirements or conditions thereon, or the kinds, nature and extent of the design or improvements, or both, required by the Advisory Agency. The Planning Commission shall constitute the Appeal Board respecting all actions taken by the Director of Environmental Management as Advisory Agency or the Zoning Administrator as Advisory Agency from which actions a right to appeal is granted by this Chapter or the Subdivision Map Act. The Board of Supervisors shall constitute the Appeal Board respecting all actions taken by the Planning Commission as an Advisory Agency or as an Appeal Board from which actions a right to appeal is granted by this Chapter or the Subdivision Map Act.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.3",
+          "title": "Buildable Area",
+          "text": "\"Buildable Area\" means the area of a lot that is not within the building setback area or within a biologically, historically, or archaeologically sensitive area and includes areas that are reasonably free from soils and geologic hazards such as seismicity, liquefaction, settlement, land sliding, mud sliding, and flood hazards, and to which there is reasonable access.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.4",
+          "title": "Building and Safety Division",
+          "text": "\"Building and Safety Division\" means the Building and Safety Division of the Solano County Environmental Management Department.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.5",
+          "title": "CEQA",
+          "text": "\"CEQA\" means the California Environmental Quality Act, codified as Division 13 (commencing with Section 21000) of the Public Resources Code and such amendments and additions thereto as may be made from time to time by the California Legislature.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.6",
+          "title": "Contiguous",
+          "text": "Lots are \"contiguous\" when they touch each other at any point or when they are in close proximity to each other and are so situated as to be reasonably developable as a single unit. Lots may be contiguous even when separated by a strip of land over which some person or entity, other than the owner of the lots, has some property interest, including fee title or some lesser interest such as a leasehold or easement. Examples of such strips of land, which normally will not prevent lots from being contiguous, include roads and streets other than freeways, utility easements, railroad rights-of-way, canals and drainage channels.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.7",
+          "title": "County Engineer",
+          "text": "\"County Engineer\" means the Director of the Solano County Transportation Department or his/her designee.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.8",
+          "title": "County Surveyor",
+          "text": "\"County Surveyor\" means the Director of the Solano County Transportation Department or his/her designee.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.9",
+          "title": "Development Review Committee",
+          "text": "\"Development Review Committee\" means that body comprised of the Program Manager of the Planning Services Division, the Transportation Director, the Program Manager of Environmental Health Services Division, the Chief Building Inspector of the Building and Safety Division, and County Counsel or their designee and may include other affected departments, agencies and districts.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.10",
+          "title": "Director of Environmental Management",
+          "text": "\"Director of Environmental Management\" means the Director of the Solano County Environmental Management Department or his or her designee.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.11",
+          "title": "Environmental Health Services Division",
+          "text": "\"Environmental Health Services Division\" means the Environmental Health Services Division of the Solano County Environmental Management Department.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.12",
+          "title": "Environmental Subdivision",
+          "text": "\"Environmental Subdivision\" means any division of land for biotic and wildlife purposes which is an environmental subdivision as defined in Section 66418.2 of the Subdivision Map Act.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.13",
+          "title": "Filed",
+          "text": "For the limited purpose of commencing the time periods prescribed by Section 66452.1 of the Subdivision Map Act and Sections 26-95.2 and 26-95.3 of this Code for the reporting or acting upon tentative maps, a tentative map for which a complete application has been submitted shall be deemed to be \"filed\" with the clerk of the Advisory Agency on the filing date established as follows:\n\n(a)    In cases where the subdivision is exempt from the requirements of CEQA, the Director of Environmental Management shall prepare and sign a notice of exemption and the filing date of the tentative map shall be the date on which such notice is signed.\n\n(b)    In cases where a negative declaration or a mitigated negative declaration is required under CEQA, the Advisory Agency shall approve a negative declaration or a proposed mitigated negative declaration and the filing date for the tentative map shall be the date on which the appropriate Advisory Agency approves the document.\n\n(c)    In cases where an environmental impact report is required under CEQA, the filing date for the tentative map shall be the date on which the Advisory Agency having authority to approve, disapprove or conditionally approve the tentative map, certifies the environmental impact report.\n\nFor the purposes of Sections 66452.6, 66457 and 66463.5 of the Subdivision Map Act and Section 26-98.2 of this Code, a final map shall be deemed to be \"filed\" with the legislative body and a parcel map shall be deemed to be \"filed\" with the Advisory Agency on the date it is submitted to the County Surveyor in a form and condition which would permit the County Surveyor to sign the certificate specified in Section 26-102 of this Code. For the purpose of Sections 26-101 and 26-104 of this Code, a final map or parcel map is \"filed\" for record when the County Recorder accepts it for filing pursuant to Section 66466 of the Subdivision Map Act.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.14",
+          "title": "Flag Lot",
+          "text": "\"Flag Lot\" means a lot whose general configuration is in the shape of an \"L\" or \"T\", and which takes access from the road by means of a narrow strip which is part of the lot.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.15",
+          "title": "Hillside Area",
+          "text": "\"Hillside area\" means any area within a proposed subdivision that has a slope in excess of 20 percent.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.16",
+          "title": "Legislative Body",
+          "text": "\"Legislative body\" means the Board of Supervisors.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.17",
+          "title": "Local Building Ordinance",
+          "text": "\"Local Building Ordinance\" includes Chapter 6.3, Building Standards and Codes; Chapter 6.4, Sewage Standards; Chapter 9, Drainage and Flood Control; Chapter 12.2, Flood Damage Prevention; Chapter 13.10, Well Standards; Chapter 31, Grading and Erosion Control Ordinance, and this Chapter of the Solano County Code.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.18",
+          "title": "Lot",
+          "text": "\"Lot\" means an area of land having fixed boundaries depicted on or described by a tentative map, final map, parcel map or instrument of conveyance for the purpose of defining land to be held, actually or potentially, in fee title as a discrete unit; provided that roads, alleys and similar rights-of-way, whether held in fee or otherwise, are not lots. Condominium units that consist of airspace, as opposed to divisions of land, are not lots. Mere easements and licenses are not lots. Except where otherwise specified in this Chapter, references to lots are intended to include remainder parcels and parcels offered for dedication.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.19",
+          "title": "Lot Area, Gross",
+          "text": "For purposes of this ordinance, \"Gross lot area\" and \"gross area\" mean the total area under fee ownership, within the lot lines of the lot.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.20",
+          "title": "Lot Area, Net",
+          "text": "\"Net lot area\" and \"net area\" mean gross lot area less the area within any existing or proposed road.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.21",
+          "title": "Lot, Legal",
+          "text": "\"Legal lot\" means a lot that met all local subdivision ordinance and Subdivision Map Act requirements when it was created, still exists, and can be lawfully conveyed in fee as a discrete unit separate from any contiguous lot. \"Legal lot\" also means a lot for which a certificate of compliance or a conditional certificate of compliance has been issued under this Chapter and the Subdivision Map Act and the boundaries of which have not subsequently been altered by merger or further subdivision.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.22",
+          "title": "Lot Line Adjustment",
+          "text": "\"Lot line adjustment\" means any boundary line adjustment between two or more adjacent lots under the same or different ownership where land taken from one lot is added to an adjacent lot and where neither a greater nor a lesser number of lots than originally existed is created.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.23",
+          "title": "Parcel",
+          "text": "For the purposes of this Chapter, the word \"parcel\" shall have the same meaning as the word \"lot\" and the two words shall be synonymous.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.24",
+          "title": "Parent Parcel",
+          "text": "\"Parent parcel\" means all of the property from which a subdivision is, or was, created. For example, if a subdivision divides one original lot into two new lots, the original lot is the parent parcel for that subdivision, and if a subdivision merges and resubdivides two original lots into five new lots, the combined area of the two original lots is the parent parcel.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.25",
+          "title": "Permanent Domestic Water Supply",
+          "text": "\"Permanent domestic water supply\" means a supply or supplies of potable water to be provided by a system or systems approved by a public health agency of the State of California or the Environmental Health Services Division of the Solano County Environmental Management Department.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.26",
+          "title": "Planning Services Division",
+          "text": "\"Planning Services Division\" means the Planning Services Division of the Solano County Environmental Management Department.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.27",
+          "title": "Remainder Parcel",
+          "text": "\"Remainder Parcel\" means that portion of a parent parcel which is not created for purposes of sale, lease or financing, including any portion of a parent parcel that is either a \"designated remainder\" or an \"omitted parcel\" within the meaning of Section 66424.6 of the Subdivision Map Act, and also means any portion of a parent parcel that is designated as a \"Remainder Parcel\". Except as otherwise provided in this Chapter, a remainder parcel is a lot for all purposes of this Chapter. For any subdivision there shall be only one remainder parcel. The remainder parcel shall conform to the minimum size requirements applicable to the current zoning on the property.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.28",
+          "title": "Solano County Improvement Standards and Specifications",
+          "text": "(a)    \"Solano County Improvement Standards and Specifications\" means the latest revisions of the following documents adopted, from time to time, by the Board of Supervisors, and any other documents incorporated by reference therein:\n\n(1)    Solano County Road Improvement Standards and Land Development and Subdivision Requirements.\n\n(2)    County of Solano Hydrology and Drainage Design Procedure Manual.\n\n(3)    Solano County Erosion and Sediment Control Handbook.\n\n(4)    Solano County Water Agency Hydrology Manual.\n\n(b)    Pursuant to Section 66462, subdivision (b), of the Subdivision Map Act, the Solano County Improvement Standards and Specifications are adopted by reference and three copies shall be on file with the Clerk of the Board of Supervisors.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.29",
+          "title": "Subdivider",
+          "text": "\"Subdivider\" means any person, firm, corporation, partnership or association which is a subdivider as defined in Section 66423 of the Subdivision Map Act and, in addition, the following:\n\n(a)    With respect to a subdivision ordered by a probate court to effect a testamentary disposition, the estate of the testator;\n\n(b)    With respect to a subdivision ordered by a court in a partition action pursuant to Title 10.5 (commencing with Section 872.010) of Part 2 of the Code of Civil Procedure, any plaintiff in such action and any owner of the subject property who consents to the partition; or\n\n(c)    With respect to a subdivision ordered by a court in a partition proceeding pursuant to Chapter 7 (commencing with Section 11950) of Part 10, Division 7 of the Probate Code, any heir, devisee or other beneficiary as defined in Section 24 of the Probate Code, entitled to the distribution of undivided interests in the subject property who petitions for or consents to the partition.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.30",
+          "title": "Subdivision",
+          "text": "\"Subdivision\" means any division of land which is a subdivision as defined in Section 66424 of the Subdivision Map Act and, in addition, the following:\n\n(a)    The division, by any subdivider, of any unit or units of improved or unimproved land, or any portion, shown on the latest equalized County assessment roll as a unit or as contiguous units, for the purpose of any transfer, whether immediate or future, of the right to the exclusive possession of the surface of the land or portions, unless excepted by the Subdivision Map Act or this chapter.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.31",
+          "title": "Subdivision Map Act",
+          "text": "\"Subdivision Map Act\" means the provisions of Division 2 (commencing with Section 66410) of Title 7 of the California Government Code and such amendments and additions thereto as may be made from time to time by the California Legislature.",
+          "ordinances": ["1608"]
+        },
+        {
+          "id": "26-21.32",
+          "title": "Zoning Administrator",
+          "text": "\"Zoning Administrator\" means the designee of the Department of Environmental Management as defined under Section 28-61 of the Solano County Code.",
+          "ordinances": ["1575", "1608"]
+        }
+      ]
+    }
+  ]
+}
