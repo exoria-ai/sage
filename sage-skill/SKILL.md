@@ -36,12 +36,21 @@ The USPS assigns mailing addresses based on the nearest post office, not legal b
 
 When you need detailed information on these topics, read the corresponding reference file:
 
+### Geographic Context
+- **Spatial orientation / "Where is X?"** → `references/spatial-grounding.md`
+- **Detailed county history/demographics** → `references/solano-county-encyclopedia.md`
 - **Jurisdiction routing** → `references/jurisdiction.md`
+
+### Property & Zoning
 - **Zoning codes and meanings** → `references/zoning-codes.md`
 - **Prop 13 / assessed values** → `references/prop13.md`
 - **ADU (granny unit) rules** → `references/adu-rules.md`
+
+### Hazards & Environment
 - **Flood zones (FEMA)** → `references/flood-zones.md`
 - **Fire hazard zones (CAL FIRE)** → `references/fire-hazard.md`
+
+### Services & Contacts
 - **Special districts** → `references/special-districts.md`
 - **Department contacts** → `references/contacts.md`
 - **Standard disclaimers** → `references/disclaimers.md`
