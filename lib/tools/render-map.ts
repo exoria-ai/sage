@@ -521,21 +521,18 @@ function calculateZoomForBuffer(radiusFeet: number, width: number, height: numbe
   const availablePixels = Math.min(width, height) * marginFactor;
   const diameterFeet = radiusFeet * 2;
 
-  // At zoom 17, 1 pixel ≈ 2.4 feet at this latitude (roughly)
-  // feet per pixel = 364000 / (256 * 2^zoom) * cos(lat) -- approximate
-  // For Solano County (~38° lat), we can use a simplified formula
-
   // Target: diameterFeet should span availablePixels
   // feetPerPixel = diameterFeet / availablePixels
   const targetFeetPerPixel = diameterFeet / availablePixels;
 
-  // At zoom z, feetPerPixel ≈ 78271.52 / 2^z (at equator, adjust for latitude)
-  // At 38° latitude: feetPerPixel ≈ 78271.52 * cos(38°) / 2^z ≈ 61700 / 2^z
-  const latFactor = 61700; // feet per pixel at zoom 0, 38° latitude
+  // At zoom z, meters per pixel = 156543.03 * cos(lat) / 2^z
+  // At 38° latitude (cos(38°) ≈ 0.788): meters per pixel = 123,356 / 2^z
+  // In feet: 123,356 * 3.28084 = 404,612 feet per pixel at zoom 0
+  const latFactor = 404612; // feet per pixel at zoom 0, 38° latitude
 
   const zoom = Math.log2(latFactor / targetFeetPerPixel);
 
-  // Clamp to reasonable range
+  // Clamp to reasonable range (13 = county scale, 19 = building scale)
   return Math.max(13, Math.min(19, Math.round(zoom)));
 }
 
