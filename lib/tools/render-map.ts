@@ -396,14 +396,13 @@ async function fetchCountyBoundaryOverlay(
     const min = toWebMercator(bbox.xmin, bbox.ymin);
     const max = toWebMercator(bbox.xmax, bbox.ymax);
 
-    // Query for the county boundary geometry and render it
-    // Use the FeatureServer's generateRenderer capability
+    // Query for the county boundary geometry
+    // NOTE: Don't use a geometry filter here - we want the FULL county boundary,
+    // not just the portion within the current viewport. The SVG coordinate
+    // transformation will naturally clip the boundary to the visible area.
     const queryParams = new URLSearchParams({
       where: '1=1',
       outFields: 'name',
-      geometry: `${min.x},${min.y},${max.x},${max.y}`,
-      geometryType: 'esriGeometryEnvelope',
-      inSR: '3857',
       outSR: '3857',
       returnGeometry: 'true',
       f: 'json',
@@ -991,7 +990,9 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     lat = (SOLANO_COUNTY_EXTENT.ymin + SOLANO_COUNTY_EXTENT.ymax) / 2;
     lon = (SOLANO_COUNTY_EXTENT.xmin + SOLANO_COUNTY_EXTENT.xmax) / 2;
     if (!requestedZoom) {
-      zoom = calculateZoomForBbox(SOLANO_COUNTY_EXTENT, width, height, 0.05);
+      // Use 15% padding to ensure the full county boundary is visible
+      // (tile alignment can cause edges to be cut off with smaller padding)
+      zoom = calculateZoomForBbox(SOLANO_COUNTY_EXTENT, width, height, 0.15);
     }
   }
 
