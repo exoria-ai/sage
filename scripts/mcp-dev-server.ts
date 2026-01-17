@@ -1,9 +1,18 @@
 #!/usr/bin/env npx tsx
 /**
- * SAGE MCP Development Server (stdio)
+ * SAGE MCP Development Server (stdio) - LOCAL DEV ONLY
  *
  * A stdio-based MCP server for local development that supports
  * dynamic tool reloading via list_changed notifications.
+ *
+ * ⚠️  IMPORTANT: This is the LOCAL DEVELOPMENT server (scratchpad).
+ * Changes here do NOT automatically appear in production!
+ *
+ * When you add/modify tools here, you MUST also update:
+ *   → app/api/mcp/route.ts (the LIVE production server)
+ *
+ * A feature is NOT complete until it works on the live server.
+ * The user tests via the live server at sage.solano.ai, not this dev server.
  *
  * Usage:
  *   npx tsx scripts/mcp-dev-server.ts

@@ -1,8 +1,18 @@
 /**
- * SAGE MCP Route Handler
+ * SAGE MCP Route Handler (LIVE PRODUCTION)
  *
  * Provides Streamable HTTP transport for MCP tools.
  * Deploy to Vercel for remote MCP server access.
+ *
+ * ⚠️  IMPORTANT: This is the LIVE production server.
+ * Changes to mcp-dev-server.ts are NOT automatically synced here.
+ * When adding new tools to dev, you MUST also add them here for users to access them.
+ *
+ * Sync checklist:
+ * 1. Add tool import
+ * 2. Add server.tool() definition with full description
+ * 3. Deploy to Vercel
+ * 4. Verify tool appears in production
  */
 
 import { z } from 'zod';
@@ -26,6 +36,19 @@ import {
   searchCountyCode,
 } from '@/lib/tools/county-code';
 import { getParcelsInBuffer } from '@/lib/tools/parcels-in-buffer';
+import {
+  searchBudget,
+  getBudgetChunk,
+  listBudgetDepartments,
+  listBudgetSections,
+  getDepartmentBudget,
+  getBudgetOverview,
+} from '@/lib/tools/budget';
+import {
+  generateImage,
+  editImage,
+  getImageRateLimitStatus,
+} from '@/lib/tools/image-generation';
 
 const handler = createMcpHandler(
   (server) => {
@@ -732,6 +755,237 @@ LIMITS: Maximum 250 parcels returned. If truncated, total_parcels shows full cou
       },
       async ({ apn, latitude, longitude, radius_feet, include_source }) => {
         const result = await getParcelsInBuffer({ apn, latitude, longitude, radius_feet, include_source });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // ==========================================
+    // Budget Tools
+    // ==========================================
+
+    // Search Budget Tool
+    server.tool(
+      'search_budget',
+      `Search the FY2025-26 Recommended Budget document.
+
+Use this tool when users ask questions about:
+- County department budgets and funding
+- Staffing levels and positions
+- Budget priorities and challenges
+- Program accomplishments and workload
+- Revenue sources and expenditures
+
+INPUT:
+- query: Search terms (required)
+- top_k: Number of results (default: 5)
+- department: Filter by department name
+- section: Filter by section letter (A-N)
+- chunk_type: Filter by type (narrative, table, summary)
+
+OUTPUT: Matching budget document chunks with relevance scores.`,
+      {
+        query: z.string().describe('Search query'),
+        top_k: z.number().optional().describe('Max results (default: 5)'),
+        department: z.string().optional().describe('Filter by department'),
+        section: z.string().optional().describe('Filter by section (A-N)'),
+        chunk_type: z.string().optional().describe('Filter by type: narrative, table, summary'),
+      },
+      async ({ query, top_k, department, section, chunk_type }) => {
+        const result = await searchBudget({ query, top_k, department, section, chunk_type });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get Budget Chunk Tool
+    server.tool(
+      'get_budget_chunk',
+      `Retrieve the full text of a specific budget chunk by ID.
+
+Use after search_budget to get complete text of a result.`,
+      {
+        chunk_id: z.string().describe('Chunk ID from search results'),
+      },
+      async ({ chunk_id }) => {
+        const result = await getBudgetChunk({ chunk_id });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // List Budget Departments Tool
+    server.tool(
+      'list_budget_departments',
+      `List all departments in the budget document.
+
+Returns a list of all department names for filtering searches.`,
+      {},
+      async () => {
+        const result = await listBudgetDepartments();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // List Budget Sections Tool
+    server.tool(
+      'list_budget_sections',
+      `List all major sections in the budget document.
+
+Sections are lettered A-N and cover different functional areas:
+A. Budget Summary
+B. Permanent Position Summary
+C. County Statistical Profile
+...etc.`,
+      {},
+      async () => {
+        const result = await listBudgetSections();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get Department Budget Tool
+    server.tool(
+      'get_department_budget',
+      `Get all budget information for a specific department.
+
+Returns all chunks (narrative and tables) for a department.`,
+      {
+        department: z.string().describe('Department name (partial match)'),
+        include_narrative: z.boolean().optional().describe('Include narrative chunks (default: true)'),
+        include_tables: z.boolean().optional().describe('Include table chunks (default: true)'),
+      },
+      async ({ department, include_narrative, include_tables }) => {
+        const result = await getDepartmentBudget({ department, include_narrative, include_tables });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get Budget Overview Tool
+    server.tool(
+      'get_budget_overview',
+      `Get overview statistics about the budget document.
+
+Returns document metadata, section list, and chunk counts.`,
+      {},
+      async () => {
+        const result = await getBudgetOverview();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // ==========================================
+    // Image Generation Tools
+    // ==========================================
+
+    // Generate Infographic Tool
+    server.tool(
+      'generate_infographic',
+      `Generate infographics, diagrams, and visualizations using AI.
+
+**CRITICAL**: This tool returns image URLs. You MUST include these URLs in your response
+to the user so they can view the generated infographics. Format as clickable markdown links.
+
+Intended uses:
+- Create infographics explaining county data, zoning, or processes
+- Generate presentation slides for staff meetings
+- Create diagrams illustrating geographic concepts
+- Visualize organizational structures or workflows
+- Generate educational materials about county services
+
+Rate limited to ~66 images/day ($10 budget at $0.15/image).
+
+Aspect ratios:
+- 16:9: Presentations, slides (default)
+- 1:1: Square infographics
+- 4:3: Traditional presentations
+- 9:16: Mobile/portrait infographics
+- 21:9: Ultra-wide banners`,
+      {
+        prompt: z.string().describe('Detailed description of the image to generate. Be specific about style, content, layout, and any text to include.'),
+        aspect_ratio: z.enum(['21:9', '16:9', '3:2', '4:3', '5:4', '1:1', '4:5', '3:4', '2:3', '9:16']).optional().describe('Aspect ratio of the image. Default: 16:9 (good for presentations)'),
+        resolution: z.enum(['1K', '2K', '4K']).optional().describe('Image resolution. Default: 1K. Use 2K or 4K for higher quality.'),
+        output_format: z.enum(['jpeg', 'png', 'webp']).optional().describe('Output format. Default: png'),
+        num_images: z.number().min(1).max(4).optional().describe('Number of images to generate (1-4). Default: 1'),
+      },
+      async ({ prompt, aspect_ratio, resolution, output_format, num_images }) => {
+        const result = await generateImage({
+          prompt,
+          aspect_ratio,
+          resolution,
+          output_format,
+          num_images,
+        });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get Infographic Rate Limit Tool
+    server.tool(
+      'get_infographic_rate_limit',
+      `Check current infographic generation rate limit status.
+
+Returns how many infographics have been generated today, remaining quota, and budget usage.`,
+      {},
+      async () => {
+        const result = await getImageRateLimitStatus();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Edit Image Tool
+    server.tool(
+      'edit_image',
+      `Edit or combine images using AI.
+
+**CRITICAL**: This tool returns image URLs. You MUST include these URLs in your response
+to the user so they can view the edited images. Format as clickable markdown links.
+
+Capabilities:
+- Modify existing images based on text prompts
+- Combine multiple images into one
+- Add annotations, labels, or callouts
+- Change style, colors, or composition
+- Remove or add elements
+
+Input images:
+- Use URLs from previous generate_infographic calls
+- Use any publicly accessible image URL
+- Can provide multiple images to combine/reference
+
+Rate limited: shares daily quota with generate_infographic (~66 images/day total).`,
+      {
+        prompt: z.string().describe('Description of the edits to make. Be specific about what to change, add, or remove.'),
+        image_urls: z.array(z.string()).describe('URLs of source images to edit. Can be FAL URLs from previous generations or any public image URL.'),
+        aspect_ratio: z.enum(['auto', '21:9', '16:9', '3:2', '4:3', '5:4', '1:1', '4:5', '3:4', '2:3', '9:16']).optional().describe('Aspect ratio. Default: auto (preserves original)'),
+        resolution: z.enum(['1K', '2K', '4K']).optional().describe('Output resolution. Default: 1K'),
+        output_format: z.enum(['jpeg', 'png', 'webp']).optional().describe('Output format. Default: png'),
+        num_images: z.number().min(1).max(4).optional().describe('Number of variations to generate (1-4). Default: 1'),
+      },
+      async ({ prompt, image_urls, aspect_ratio, resolution, output_format, num_images }) => {
+        const result = await editImage({
+          prompt,
+          image_urls,
+          aspect_ratio,
+          resolution,
+          output_format,
+          num_images,
+        });
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };
