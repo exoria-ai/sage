@@ -46,6 +46,10 @@ import {
   getDepartmentBudget,
   getBudgetOverview,
 } from '../lib/tools/budget.js';
+import {
+  generateImage,
+  getImageRateLimitStatus,
+} from '../lib/tools/image-generation.js';
 
 const server = new Server(
   {
@@ -480,6 +484,71 @@ Returns document metadata, section list, and chunk counts.`,
       properties: {},
     },
   },
+  // Infographic generation tools
+  {
+    name: 'generate_infographic',
+    description: `Generate infographics, diagrams, and visualizations using AI.
+
+**CRITICAL**: This tool returns image URLs. You MUST include these URLs in your response
+to the user so they can view the generated infographics. Format as clickable markdown links.
+
+Intended uses:
+- Create infographics explaining county data, zoning, or processes
+- Generate presentation slides for staff meetings
+- Create diagrams illustrating geographic concepts
+- Visualize organizational structures or workflows
+- Generate educational materials about county services
+
+Rate limited to ~66 images/day ($10 budget at $0.15/image).
+
+Aspect ratios:
+- 16:9: Presentations, slides (default)
+- 1:1: Square infographics
+- 4:3: Traditional presentations
+- 9:16: Mobile/portrait infographics
+- 21:9: Ultra-wide banners`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        prompt: {
+          type: 'string',
+          description: 'Detailed description of the image to generate. Be specific about style, content, layout, and any text to include.',
+        },
+        aspect_ratio: {
+          type: 'string',
+          enum: ['21:9', '16:9', '3:2', '4:3', '5:4', '1:1', '4:5', '3:4', '2:3', '9:16'],
+          description: 'Aspect ratio of the image. Default: 16:9 (good for presentations)',
+        },
+        resolution: {
+          type: 'string',
+          enum: ['1K', '2K', '4K'],
+          description: 'Image resolution. Default: 1K. Use 2K or 4K for higher quality.',
+        },
+        output_format: {
+          type: 'string',
+          enum: ['jpeg', 'png', 'webp'],
+          description: 'Output format. Default: png',
+        },
+        num_images: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 4,
+          description: 'Number of images to generate (1-4). Default: 1',
+        },
+      },
+      required: ['prompt'],
+    },
+  },
+  {
+    name: 'get_infographic_rate_limit',
+    description: `Check current infographic generation rate limit status.
+
+Returns how many infographics have been generated today, remaining quota, and budget usage.`,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
 ];
 
 // Handle list tools request
@@ -583,6 +652,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'get_budget_overview':
         result = await getBudgetOverview();
+        break;
+      case 'generate_infographic':
+        result = await generateImage(args as unknown as Parameters<typeof generateImage>[0]);
+        break;
+      case 'get_infographic_rate_limit':
+        result = await getImageRateLimitStatus();
         break;
       default:
         return {

@@ -24,6 +24,7 @@
   "author": "Exoria AI",
   "license": "MIT",
   "dependencies": {
+    "@fal-ai/client": "^1.8.3",
     "@modelcontextprotocol/sdk": "^1.25.2",
     "@turf/turf": "^7.1.0",
     "@vercel/blob": "^2.0.0",
