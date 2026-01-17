@@ -705,12 +705,40 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'get_budget_overview':
         result = await getBudgetOverview();
         break;
-      case 'generate_infographic':
-        result = await generateImage(args as unknown as Parameters<typeof generateImage>[0]);
+      case 'generate_infographic': {
+        const imgResult = await generateImage(args as unknown as Parameters<typeof generateImage>[0]);
+        if (imgResult.success && imgResult.images && imgResult.images.length > 0) {
+          const content: Array<{ type: string; data?: string; mimeType?: string; text?: string }> = [];
+          for (const img of imgResult.images) {
+            content.push({ type: 'image', data: img.base64, mimeType: img.mimeType });
+          }
+          const urls = imgResult.images.map((img) => img.url).join('\n');
+          content.push({
+            type: 'text',
+            text: `Infographic generated successfully.\n\n**IMPORTANT - Share these URLs with the user:**\n${urls}`,
+          });
+          return { content };
+        }
+        result = imgResult;
         break;
-      case 'edit_image':
-        result = await editImage(args as unknown as Parameters<typeof editImage>[0]);
+      }
+      case 'edit_image': {
+        const editResult = await editImage(args as unknown as Parameters<typeof editImage>[0]);
+        if (editResult.success && editResult.images && editResult.images.length > 0) {
+          const content: Array<{ type: string; data?: string; mimeType?: string; text?: string }> = [];
+          for (const img of editResult.images) {
+            content.push({ type: 'image', data: img.base64, mimeType: img.mimeType });
+          }
+          const urls = editResult.images.map((img) => img.url).join('\n');
+          content.push({
+            type: 'text',
+            text: `Image edited successfully.\n\n**IMPORTANT - Share these URLs with the user:**\n${urls}`,
+          });
+          return { content };
+        }
+        result = editResult;
         break;
+      }
       default:
         return {
           content: [{ type: 'text', text: `Unknown tool: ${name}` }],

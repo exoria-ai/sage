@@ -924,6 +924,33 @@ Aspect ratios:
           output_format,
           num_images,
         });
+
+        // If successful, return image content blocks so agent can see them
+        if (result.success && result.images && result.images.length > 0) {
+          // Build content array with proper types
+          const imageBlocks = result.images.map((img) => ({
+            type: 'image' as const,
+            data: img.base64,
+            mimeType: img.mimeType,
+          }));
+
+          const urls = result.images.map((img) => img.url).join('\n');
+          const textBlock = {
+            type: 'text' as const,
+            text: `Infographic generated successfully.
+
+**IMPORTANT - Share these URLs with the user (they cannot see the images otherwise):**
+${urls}
+
+${result.description ? `Description: ${result.description}` : ''}`,
+          };
+
+          return {
+            content: [...imageBlocks, textBlock],
+          };
+        }
+
+        // Error case
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };
@@ -966,6 +993,33 @@ Input images:
           output_format,
           num_images,
         });
+
+        // If successful, return image content blocks so agent can see them
+        if (result.success && result.images && result.images.length > 0) {
+          // Build content array with proper types
+          const imageBlocks = result.images.map((img) => ({
+            type: 'image' as const,
+            data: img.base64,
+            mimeType: img.mimeType,
+          }));
+
+          const urls = result.images.map((img) => img.url).join('\n');
+          const textBlock = {
+            type: 'text' as const,
+            text: `Image edited successfully.
+
+**IMPORTANT - Share these URLs with the user (they cannot see the images otherwise):**
+${urls}
+
+${result.description ? `Description: ${result.description}` : ''}`,
+          };
+
+          return {
+            content: [...imageBlocks, textBlock],
+          };
+        }
+
+        // Error case
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };

@@ -2,6 +2,8 @@
  * Image generation tools using fal.ai Nano Banana Pro.
  *
  * Cost control is handled by fal.ai account top-up balance.
+ *
+ * Returns both image URLs (for user) and base64 data (for agent to view).
  */
 
 import { fal } from '@fal-ai/client';
@@ -19,22 +21,43 @@ interface GenerateImageParams {
   num_images?: number;
 }
 
+interface ImageData {
+  url: string;
+  base64: string;
+  mimeType: string;
+  file_name: string;
+}
+
 interface GenerateImageResult {
   success: boolean;
-  images?: Array<{
-    url: string;
-    file_name: string;
-    content_type: string;
-  }>;
+  images?: ImageData[];
   description?: string;
   error?: string;
 }
 
 /**
+ * Fetch image from URL and convert to base64.
+ */
+async function fetchImageAsBase64(url: string, contentType: string): Promise<{ base64: string; mimeType: string }> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.statusText}`);
+  }
+  const arrayBuffer = await response.arrayBuffer();
+  const base64 = Buffer.from(arrayBuffer).toString('base64');
+
+  // Determine mime type from content-type header or fallback
+  const mimeType = response.headers.get('content-type') || contentType || 'image/png';
+
+  return { base64, mimeType };
+}
+
+/**
  * Generate images using Nano Banana Pro.
  *
- * IMPORTANT: Returns image URLs that MUST be included in the response to the user.
- * The agent should always display these URLs as clickable links.
+ * Returns both:
+ * - Image URLs (for sharing with user - they can't see images otherwise)
+ * - Base64 image data (for agent to view what was generated)
  */
 export async function generateImage(params: GenerateImageParams): Promise<GenerateImageResult> {
   const {
@@ -71,16 +94,25 @@ export async function generateImage(params: GenerateImageParams): Promise<Genera
       },
     });
 
-    const images = (result.data as { images: Array<{ url: string; file_name: string; content_type: string }> }).images;
+    const rawImages = (result.data as { images: Array<{ url: string; file_name: string; content_type: string }> }).images;
     const description = (result.data as { description?: string }).description;
+
+    // Fetch each image and convert to base64
+    const images: ImageData[] = await Promise.all(
+      rawImages.map(async (img) => {
+        const { base64, mimeType } = await fetchImageAsBase64(img.url, img.content_type);
+        return {
+          url: img.url,
+          base64,
+          mimeType,
+          file_name: img.file_name,
+        };
+      })
+    );
 
     return {
       success: true,
-      images: images.map((img) => ({
-        url: img.url,
-        file_name: img.file_name,
-        content_type: img.content_type,
-      })),
+      images,
       description,
     };
   } catch (error) {
@@ -105,11 +137,7 @@ interface EditImageParams {
 
 interface EditImageResult {
   success: boolean;
-  images?: Array<{
-    url: string;
-    file_name: string;
-    content_type: string;
-  }>;
+  images?: ImageData[];
   description?: string;
   error?: string;
 }
@@ -120,8 +148,9 @@ interface EditImageResult {
  * Takes one or more source image URLs and a prompt describing the desired edits.
  * Can combine multiple images, add annotations, modify content, etc.
  *
- * IMPORTANT: Returns image URLs that MUST be included in the response to the user.
- * The agent should always display these URLs as clickable links.
+ * Returns both:
+ * - Image URLs (for sharing with user - they can't see images otherwise)
+ * - Base64 image data (for agent to view what was generated)
  */
 export async function editImage(params: EditImageParams): Promise<EditImageResult> {
   const {
@@ -168,16 +197,25 @@ export async function editImage(params: EditImageParams): Promise<EditImageResul
       },
     });
 
-    const images = (result.data as { images: Array<{ url: string; file_name: string; content_type: string }> }).images;
+    const rawImages = (result.data as { images: Array<{ url: string; file_name: string; content_type: string }> }).images;
     const description = (result.data as { description?: string }).description;
+
+    // Fetch each image and convert to base64
+    const images: ImageData[] = await Promise.all(
+      rawImages.map(async (img) => {
+        const { base64, mimeType } = await fetchImageAsBase64(img.url, img.content_type);
+        return {
+          url: img.url,
+          base64,
+          mimeType,
+          file_name: img.file_name,
+        };
+      })
+    );
 
     return {
       success: true,
-      images: images.map((img) => ({
-        url: img.url,
-        file_name: img.file_name,
-        content_type: img.content_type,
-      })),
+      images,
       description,
     };
   } catch (error) {
