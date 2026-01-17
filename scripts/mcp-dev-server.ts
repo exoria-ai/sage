@@ -31,6 +31,13 @@ import { renderMap } from '../lib/tools/render-map.js';
 import { searchParcels } from '../lib/tools/search-parcels.js';
 import { getSpecialDistricts } from '../lib/tools/special-districts.js';
 import { getNearby } from '../lib/tools/nearby.js';
+import {
+  getCountyCodeSections,
+  listCountyCodeChapters,
+  listCountyCodeSections,
+  searchCountyCode,
+} from '../lib/tools/county-code.js';
+import { getParcelsInBuffer } from '../lib/tools/parcels-in-buffer.js';
 
 const server = new Server(
   {
@@ -301,6 +308,76 @@ INPUT: layer_type, location (APN or coordinates), radius_feet, limit`,
       required: ['layer_type'],
     },
   },
+  {
+    name: 'get_county_code_sections',
+    description: `Retrieve sections from the Solano County Code.
+
+AVAILABLE:
+- Chapter 26: Subdivisions (41 sections)
+- Chapter 28: Zoning Regulations (74 sections)
+
+SECTION ID FORMAT: "26-11", "28.21.20", "28.01"`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        section_ids: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Section IDs to retrieve',
+        },
+      },
+      required: ['section_ids'],
+    },
+  },
+  {
+    name: 'list_county_code_chapters',
+    description: 'List all available chapters in the county code database.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'list_county_code_sections',
+    description: 'List all sections in a specific chapter.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        chapter: { type: 'string', description: 'Chapter number (e.g., "26", "28")' },
+      },
+      required: ['chapter'],
+    },
+  },
+  {
+    name: 'search_county_code',
+    description: 'Search county code by keyword.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search term' },
+        chapter: { type: 'string', description: 'Limit to specific chapter' },
+        max_results: { type: 'number', description: 'Max results (default: 10)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'get_parcels_in_buffer',
+    description: `Find parcels within a radius of a location.
+
+INPUT: apn or coordinates, radius_feet (default: 300)
+OUTPUT: List of parcels with owner info for notification lists`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        apn: { type: 'string', description: 'Source parcel APN' },
+        latitude: { type: 'number', description: 'Source latitude' },
+        longitude: { type: 'number', description: 'Source longitude' },
+        radius_feet: { type: 'number', description: 'Buffer radius (default: 300)' },
+        include_source: { type: 'boolean', description: 'Include source parcel' },
+      },
+    },
+  },
 ];
 
 // Handle list tools request
@@ -371,6 +448,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'get_nearby':
         result = await getNearby(args as Parameters<typeof getNearby>[0]);
+        break;
+      case 'get_county_code_sections':
+        result = await getCountyCodeSections(args as { section_ids: string[] });
+        break;
+      case 'list_county_code_chapters':
+        result = await listCountyCodeChapters();
+        break;
+      case 'list_county_code_sections':
+        result = await listCountyCodeSections(args as { chapter: string });
+        break;
+      case 'search_county_code':
+        result = await searchCountyCode(args as { query: string; chapter?: string; max_results?: number });
+        break;
+      case 'get_parcels_in_buffer':
+        result = await getParcelsInBuffer(args as Parameters<typeof getParcelsInBuffer>[0]);
         break;
       default:
         return {

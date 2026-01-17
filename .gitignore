@@ -48,3 +48,4 @@ temp/
 
 # Claude Code local settings (keep structure, ignore local overrides)
 .claude/settings.local.json
+test-output/

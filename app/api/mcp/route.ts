@@ -548,23 +548,33 @@ USE CASE: "What schools are within 1 mile?" or
 
 WHEN TO USE THIS TOOL:
 - User asks about subdivision requirements, procedures, or definitions
+- User asks about zoning regulations, allowed uses, or permit requirements
 - User needs exact legal language from the county code
 - User asks "what does the code say about..." something specific
 - You need to cite specific regulations in your response
-- User asks about lot line adjustments, parcel maps, tentative maps, etc.
 
 STRATEGY - Batch multiple sections in one call:
 If a user asks about "subdivision exemptions", retrieve sections 26-15, 26-15.1, and 26-15.2 together.
-If discussing a definition, also pull related procedural sections.
+If discussing zoning, retrieve the relevant district section (e.g., 28.21.20 for Agricultural districts).
 
 CURRENTLY AVAILABLE:
-- Chapter 26: Subdivisions (Articles I-II: General Provisions, Definitions)
+- Chapter 26: Subdivisions (41 sections)
   - Sections 26-11 through 26-15.3: Authority, purpose, application, exemptions, fees
   - Sections 26-21 through 26-21.32: All subdivision-related definitions
+- Chapter 28: Zoning Regulations (74 sections)
+  - Section 28.01: Comprehensive zoning definitions
+  - Sections 28.21.x: Agricultural (A) district uses and standards
+  - Sections 28.22.x: Suisun Marsh Agricultural district
+  - Sections 28.23.x: Suisun Valley Agricultural district
+  - Sections 28.31.x: Rural Residential (R-R) district
+  - Sections 28.32.x: Residential-Traditional Community district
+  - Sections 28.41.x: Commercial (C) district
+  - Sections 28.61: Park (P) district
 
-SECTION ID FORMAT: "26-11", "26-21.3", "26-15.1" (chapter-section or chapter-section.subsection)
+SECTION ID FORMAT: "26-11", "28.21.20", "28.01" (chapter-section or chapter.section.subsection)
 
-OUTPUT: Full section text with title, chapter info, and ordinance references.
+OUTPUT: Full section text with title, chapter info. For allowed uses sections, includes
+markdown tables showing permit requirements (A/AP/MUP/UP) by zoning district.
 
 TIP: If unsure which sections to retrieve, use search_county_code first to find relevant sections.`,
       {
