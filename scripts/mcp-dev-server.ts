@@ -48,6 +48,7 @@ import {
 } from '../lib/tools/budget.js';
 import {
   generateImage,
+  editImage,
   getImageRateLimitStatus,
 } from '../lib/tools/image-generation.js';
 
@@ -549,6 +550,63 @@ Returns how many infographics have been generated today, remaining quota, and bu
       properties: {},
     },
   },
+  {
+    name: 'edit_image',
+    description: `Edit or combine images using AI.
+
+**CRITICAL**: This tool returns image URLs. You MUST include these URLs in your response
+to the user so they can view the edited images. Format as clickable markdown links.
+
+Capabilities:
+- Modify existing images based on text prompts
+- Combine multiple images into one
+- Add annotations, labels, or callouts
+- Change style, colors, or composition
+- Remove or add elements
+
+Input images:
+- Use URLs from previous generate_infographic calls
+- Use any publicly accessible image URL
+- Can provide multiple images to combine/reference
+
+Rate limited: shares daily quota with generate_infographic (~66 images/day total).`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        prompt: {
+          type: 'string',
+          description: 'Description of the edits to make. Be specific about what to change, add, or remove.',
+        },
+        image_urls: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'URLs of source images to edit. Can be FAL URLs from previous generations or any public image URL.',
+        },
+        aspect_ratio: {
+          type: 'string',
+          enum: ['auto', '21:9', '16:9', '3:2', '4:3', '5:4', '1:1', '4:5', '3:4', '2:3', '9:16'],
+          description: 'Aspect ratio. Default: auto (preserves original)',
+        },
+        resolution: {
+          type: 'string',
+          enum: ['1K', '2K', '4K'],
+          description: 'Output resolution. Default: 1K',
+        },
+        output_format: {
+          type: 'string',
+          enum: ['jpeg', 'png', 'webp'],
+          description: 'Output format. Default: png',
+        },
+        num_images: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 4,
+          description: 'Number of variations to generate (1-4). Default: 1',
+        },
+      },
+      required: ['prompt', 'image_urls'],
+    },
+  },
 ];
 
 // Handle list tools request
@@ -658,6 +716,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'get_infographic_rate_limit':
         result = await getImageRateLimitStatus();
+        break;
+      case 'edit_image':
+        result = await editImage(args as unknown as Parameters<typeof editImage>[0]);
         break;
       default:
         return {

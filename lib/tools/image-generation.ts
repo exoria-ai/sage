@@ -223,3 +223,128 @@ export async function getImageRateLimitStatus(): Promise<{
     cost_per_image: `$${COST_PER_IMAGE.toFixed(2)}`,
   };
 }
+
+// Edit image types
+type EditAspectRatio = 'auto' | AspectRatio;
+
+interface EditImageParams {
+  prompt: string;
+  image_urls: string[];
+  aspect_ratio?: EditAspectRatio;
+  resolution?: Resolution;
+  output_format?: OutputFormat;
+  num_images?: number;
+}
+
+interface EditImageResult {
+  success: boolean;
+  images?: Array<{
+    url: string;
+    file_name: string;
+    content_type: string;
+  }>;
+  description?: string;
+  error?: string;
+  rate_limit?: {
+    images_generated_today: number;
+    images_remaining_today: number;
+    daily_budget_used: string;
+  };
+}
+
+/**
+ * Edit images using Nano Banana Pro.
+ *
+ * Takes one or more source image URLs and a prompt describing the desired edits.
+ * Can combine multiple images, add annotations, modify content, etc.
+ *
+ * IMPORTANT: Returns image URLs that MUST be included in the response to the user.
+ * The agent should always display these URLs as clickable links.
+ */
+export async function editImage(params: EditImageParams): Promise<EditImageResult> {
+  const {
+    prompt,
+    image_urls,
+    aspect_ratio = 'auto',
+    resolution = '1K',
+    output_format = 'png',
+    num_images = 1,
+  } = params;
+
+  // Validate image_urls
+  if (!image_urls || image_urls.length === 0) {
+    return {
+      success: false,
+      error: 'At least one image URL is required for editing.',
+    };
+  }
+
+  // Check rate limit
+  const limitCheck = checkRateLimit(num_images);
+  if (!limitCheck.allowed) {
+    return {
+      success: false,
+      error: limitCheck.message,
+      rate_limit: {
+        images_generated_today: MAX_IMAGES_PER_DAY - limitCheck.remaining,
+        images_remaining_today: limitCheck.remaining,
+        daily_budget_used: `$${((MAX_IMAGES_PER_DAY - limitCheck.remaining) * COST_PER_IMAGE).toFixed(2)}`,
+      },
+    };
+  }
+
+  // Validate num_images
+  const imageCount = Math.min(Math.max(1, num_images), 4);
+
+  // Check API key
+  const apiKey = process.env.FAL_API_KEY;
+  if (!apiKey) {
+    return {
+      success: false,
+      error: 'FAL_API_KEY environment variable not set.',
+    };
+  }
+
+  // Configure fal client
+  fal.config({ credentials: apiKey });
+
+  try {
+    const result = await fal.subscribe('fal-ai/nano-banana-pro/edit', {
+      input: {
+        prompt,
+        image_urls,
+        aspect_ratio,
+        resolution,
+        output_format,
+        num_images: imageCount,
+      },
+    });
+
+    // Record successful generation
+    recordGeneration(imageCount);
+    const state = loadRateLimitState();
+
+    const images = (result.data as { images: Array<{ url: string; file_name: string; content_type: string }> }).images;
+    const description = (result.data as { description?: string }).description;
+
+    return {
+      success: true,
+      images: images.map((img) => ({
+        url: img.url,
+        file_name: img.file_name,
+        content_type: img.content_type,
+      })),
+      description,
+      rate_limit: {
+        images_generated_today: state.count,
+        images_remaining_today: MAX_IMAGES_PER_DAY - state.count,
+        daily_budget_used: `$${state.totalCost.toFixed(2)}`,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error during image editing',
+    };
+  }
+}
