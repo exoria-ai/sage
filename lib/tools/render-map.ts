@@ -519,17 +519,10 @@ async function fetchCityBoundariesOverlay(
     ];
 
     let pathElements = '';
-    let labelElements = '';
 
     queryData.features.forEach((feature: { geometry: { rings: Array<Array<[number, number]>> }; attributes: { name: string } }, index: number) => {
       const rings = feature.geometry.rings;
-      const cityName = feature.attributes.name || 'Unknown';
       const color = cityColors[index % cityColors.length];
-
-      // Calculate centroid for label placement
-      let centroidX = 0;
-      let centroidY = 0;
-      let pointCount = 0;
 
       // Convert coordinates to SVG path
       let pathData = '';
@@ -541,10 +534,6 @@ async function fetchCityBoundariesOverlay(
           const px = (x - min.x) * scaleX;
           const py = height - (y - min.y) * scaleY;
 
-          centroidX += px;
-          centroidY += py;
-          pointCount++;
-
           if (i === 0) {
             pathData += `M ${px} ${py} `;
           } else {
@@ -554,10 +543,6 @@ async function fetchCityBoundariesOverlay(
         pathData += 'Z ';
       }
 
-      // Average for centroid
-      centroidX /= pointCount;
-      centroidY /= pointCount;
-
       const fillColor = showFill ? `${color}1a` : 'none'; // 10% opacity if fill
       pathElements += `<path d="${pathData}"
         fill="${fillColor}"
@@ -566,24 +551,11 @@ async function fetchCityBoundariesOverlay(
         stroke-opacity="0.8"
       />`;
 
-      // Add city label at centroid
-      // Use DejaVu Sans which is available on most Linux systems including Vercel
-      labelElements += `
-        <text x="${centroidX}" y="${centroidY}"
-          text-anchor="middle"
-          font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif"
-          font-size="14"
-          font-weight="bold"
-          fill="${color}"
-          stroke="white"
-          stroke-width="3"
-          paint-order="stroke"
-        >${cityName.toUpperCase()}</text>`;
+      // Labels come from the basemap, no need to add our own
     });
 
     const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
       ${pathElements}
-      ${labelElements}
     </svg>`;
 
     const buffer = await sharp(Buffer.from(svg)).png().toBuffer();
@@ -635,6 +607,7 @@ function generateMarkerSvg(width: number, height: number): string {
 
 /**
  * Generate north arrow SVG overlay
+ * Arrow shape only - no text (fonts don't render reliably in serverless)
  */
 function generateNorthArrowSvg(width: number, height: number): string {
   const x = width - 40;
@@ -643,26 +616,22 @@ function generateNorthArrowSvg(width: number, height: number): string {
     <g transform="translate(${x}, ${y})">
       <circle cx="15" cy="15" r="14" fill="white" fill-opacity="0.9"/>
       <path d="M15 4 L12 18 L15 14 L18 18 Z" fill="#374151"/>
-      <text x="15" y="28" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif" font-size="8" font-weight="bold" fill="#374151">N</text>
     </g>
   </svg>`;
 }
 
 /**
  * Generate disclaimer watermark SVG overlay
+ * No text - fonts don't render reliably in serverless environments
  */
-function generateWatermarkSvg(width: number, height: number): string {
-  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-    <g transform="translate(8, 8)">
-      <rect x="0" y="0" width="140" height="24" rx="4" fill="white" fill-opacity="0.9"/>
-      <text x="8" y="16" font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif" font-size="10" fill="#6B7280">SAGE - Solano County GIS</text>
-    </g>
-  </svg>`;
+function generateWatermarkSvg(_width: number, _height: number): string {
+  // Return empty SVG - watermark text doesn't render in serverless
+  return '';
 }
 
 /**
  * Generate buffer ring SVG overlay
- * Draws a dashed circle around the center point with radius label
+ * Draws a dashed circle around the center point (no text label - fonts don't render)
  */
 function generateBufferRingSvg(
   width: number,
@@ -670,17 +639,8 @@ function generateBufferRingSvg(
   centerX: number,
   centerY: number,
   radiusPixels: number,
-  radiusFeet: number
+  _radiusFeet: number
 ): string {
-  // Format radius label
-  const label = radiusFeet >= 5280
-    ? `${(radiusFeet / 5280).toFixed(2)} mi`
-    : `${radiusFeet} ft`;
-
-  // Calculate label position (top of circle)
-  const labelY = centerY - radiusPixels - 8;
-  const labelX = centerX;
-
   return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
     <!-- Buffer ring - dashed orange circle -->
     <circle
@@ -693,26 +653,6 @@ function generateBufferRingSvg(
       stroke-dasharray="8,4"
       opacity="0.9"
     />
-    <!-- Radius label background -->
-    <rect
-      x="${labelX - 30}"
-      y="${labelY - 12}"
-      width="60"
-      height="18"
-      rx="3"
-      fill="white"
-      fill-opacity="0.9"
-    />
-    <!-- Radius label text -->
-    <text
-      x="${labelX}"
-      y="${labelY}"
-      text-anchor="middle"
-      font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif"
-      font-size="11"
-      font-weight="bold"
-      fill="#F97316"
-    >${label} buffer</text>
   </svg>`;
 }
 
@@ -1373,9 +1313,11 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     const northArrowSvg = generateNorthArrowSvg(actualWidth, actualHeight);
     overlays.push({ input: Buffer.from(northArrowSvg), top: 0, left: 0 });
 
-    // Add watermark
+    // Add watermark (if not empty)
     const watermarkSvg = generateWatermarkSvg(actualWidth, actualHeight);
-    overlays.push({ input: Buffer.from(watermarkSvg), top: 0, left: 0 });
+    if (watermarkSvg) {
+      overlays.push({ input: Buffer.from(watermarkSvg), top: 0, left: 0 });
+    }
 
     // Composite all overlays
     const finalImage = sharp(baseBuffer).composite(overlays);
