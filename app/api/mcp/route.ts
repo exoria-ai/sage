@@ -393,7 +393,7 @@ REMEMBER: Always include the imageUrl in your response!`,
             console.error('Blob upload failed:', uploadError);
             const baseUrl = process.env.VERCEL_URL
               ? `https://${process.env.VERCEL_URL}`
-              : 'https://sage.solano.ai';
+              : 'https://sage-three-theta.vercel.app';
             const params = new URLSearchParams();
             if (apn) params.set('apn', apn);
             if (center) {

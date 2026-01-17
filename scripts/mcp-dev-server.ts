@@ -12,7 +12,7 @@
  *   → app/api/mcp/route.ts (the LIVE production server)
  *
  * A feature is NOT complete until it works on the live server.
- * The user tests via the live server at sage.solano.ai, not this dev server.
+ * The user tests via the live server at sage-three-theta.vercel.app, not this dev server.
  *
  * Usage:
  *   npx tsx scripts/mcp-dev-server.ts

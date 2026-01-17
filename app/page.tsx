@@ -68,7 +68,7 @@ export default function Home() {
 {`{
   "mcpServers": {
     "sage-gis": {
-      "url": "https://sage.solano.ai/api/mcp"
+      "url": "https://sage-three-theta.vercel.app/api/mcp"
     }
   }
 }`}
