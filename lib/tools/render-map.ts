@@ -567,10 +567,11 @@ async function fetchCityBoundariesOverlay(
       />`;
 
       // Add city label at centroid
+      // Use DejaVu Sans which is available on most Linux systems including Vercel
       labelElements += `
         <text x="${centroidX}" y="${centroidY}"
           text-anchor="middle"
-          font-family="Arial, sans-serif"
+          font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif"
           font-size="14"
           font-weight="bold"
           fill="${color}"
@@ -642,7 +643,7 @@ function generateNorthArrowSvg(width: number, height: number): string {
     <g transform="translate(${x}, ${y})">
       <circle cx="15" cy="15" r="14" fill="white" fill-opacity="0.9"/>
       <path d="M15 4 L12 18 L15 14 L18 18 Z" fill="#374151"/>
-      <text x="15" y="28" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#374151">N</text>
+      <text x="15" y="28" text-anchor="middle" font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif" font-size="8" font-weight="bold" fill="#374151">N</text>
     </g>
   </svg>`;
 }
@@ -654,7 +655,7 @@ function generateWatermarkSvg(width: number, height: number): string {
   return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
     <g transform="translate(8, 8)">
       <rect x="0" y="0" width="140" height="24" rx="4" fill="white" fill-opacity="0.9"/>
-      <text x="8" y="16" font-family="Arial, sans-serif" font-size="10" fill="#6B7280">SAGE - Solano County GIS</text>
+      <text x="8" y="16" font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif" font-size="10" fill="#6B7280">SAGE - Solano County GIS</text>
     </g>
   </svg>`;
 }
@@ -707,7 +708,7 @@ function generateBufferRingSvg(
       x="${labelX}"
       y="${labelY}"
       text-anchor="middle"
-      font-family="Arial, sans-serif"
+      font-family="DejaVu Sans, Liberation Sans, FreeSans, sans-serif"
       font-size="11"
       font-weight="bold"
       fill="#F97316"

@@ -353,7 +353,7 @@ REMEMBER: Always include the imageUrl in your response!`,
           // Generate a unique filename
           const ext = format || 'png';
           const timestamp = Date.now();
-          const identifier = apn || apns?.[0] || `${center?.latitude}_${center?.longitude}` || 'map';
+          const identifier = apn || apns?.[0] || buffer?.apn || extent || `${center?.latitude}_${center?.longitude}` || 'map';
           const filename = `maps/${identifier.replace(/[^a-zA-Z0-9-_]/g, '-')}_${timestamp}.${ext}`;
 
           // Convert base64 to buffer and upload
