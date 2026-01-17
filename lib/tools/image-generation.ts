@@ -1,93 +1,10 @@
 /**
  * Image generation tools using fal.ai Nano Banana Pro.
  *
- * Rate limited to prevent runaway costs ($10/day max at $0.15/image).
+ * Cost control is handled by fal.ai account top-up balance.
  */
 
 import { fal } from '@fal-ai/client';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import path from 'path';
-
-// Rate limiting configuration
-const COST_PER_IMAGE = 0.15; // dollars
-const DAILY_BUDGET = 10.0; // dollars
-const MAX_IMAGES_PER_DAY = Math.floor(DAILY_BUDGET / COST_PER_IMAGE); // ~66 images
-
-// Rate limit state file
-const RATE_LIMIT_FILE = path.join(process.cwd(), 'data', '.image-rate-limit.json');
-
-interface RateLimitState {
-  date: string; // YYYY-MM-DD
-  count: number;
-  totalCost: number;
-}
-
-/**
- * Load rate limit state from file.
- */
-function loadRateLimitState(): RateLimitState {
-  const today = new Date().toISOString().slice(0, 10);
-
-  if (!existsSync(RATE_LIMIT_FILE)) {
-    return { date: today, count: 0, totalCost: 0 };
-  }
-
-  try {
-    const content = readFileSync(RATE_LIMIT_FILE, 'utf-8');
-    const state = JSON.parse(content) as RateLimitState;
-
-    // Reset if it's a new day
-    if (state.date !== today) {
-      return { date: today, count: 0, totalCost: 0 };
-    }
-
-    return state;
-  } catch {
-    return { date: today, count: 0, totalCost: 0 };
-  }
-}
-
-/**
- * Save rate limit state to file.
- */
-function saveRateLimitState(state: RateLimitState): void {
-  // Ensure data directory exists
-  const dataDir = path.dirname(RATE_LIMIT_FILE);
-  if (!existsSync(dataDir)) {
-    const { mkdirSync } = require('fs');
-    mkdirSync(dataDir, { recursive: true });
-  }
-
-  writeFileSync(RATE_LIMIT_FILE, JSON.stringify(state, null, 2));
-}
-
-/**
- * Check if we can generate more images today.
- */
-function checkRateLimit(numImages: number = 1): { allowed: boolean; message?: string; remaining: number } {
-  const state = loadRateLimitState();
-  const remaining = MAX_IMAGES_PER_DAY - state.count;
-
-  if (state.count + numImages > MAX_IMAGES_PER_DAY) {
-    return {
-      allowed: false,
-      message: `Daily image limit reached. Generated ${state.count}/${MAX_IMAGES_PER_DAY} images today ($${state.totalCost.toFixed(2)}/$${DAILY_BUDGET} budget). Resets at midnight.`,
-      remaining: Math.max(0, remaining),
-    };
-  }
-
-  return { allowed: true, remaining };
-}
-
-/**
- * Record image generation for rate limiting.
- */
-function recordGeneration(numImages: number): void {
-  const state = loadRateLimitState();
-  state.count += numImages;
-  state.totalCost += numImages * COST_PER_IMAGE;
-  saveRateLimitState(state);
-}
 
 // Types
 type AspectRatio = '21:9' | '16:9' | '3:2' | '4:3' | '5:4' | '1:1' | '4:5' | '3:4' | '2:3' | '9:16';
@@ -111,11 +28,6 @@ interface GenerateImageResult {
   }>;
   description?: string;
   error?: string;
-  rate_limit?: {
-    images_generated_today: number;
-    images_remaining_today: number;
-    daily_budget_used: string;
-  };
 }
 
 /**
@@ -132,20 +44,6 @@ export async function generateImage(params: GenerateImageParams): Promise<Genera
     output_format = 'png',
     num_images = 1,
   } = params;
-
-  // Check rate limit
-  const limitCheck = checkRateLimit(num_images);
-  if (!limitCheck.allowed) {
-    return {
-      success: false,
-      error: limitCheck.message,
-      rate_limit: {
-        images_generated_today: MAX_IMAGES_PER_DAY - limitCheck.remaining,
-        images_remaining_today: limitCheck.remaining,
-        daily_budget_used: `$${((MAX_IMAGES_PER_DAY - limitCheck.remaining) * COST_PER_IMAGE).toFixed(2)}`,
-      },
-    };
-  }
 
   // Validate num_images
   const imageCount = Math.min(Math.max(1, num_images), 4);
@@ -173,10 +71,6 @@ export async function generateImage(params: GenerateImageParams): Promise<Genera
       },
     });
 
-    // Record successful generation
-    recordGeneration(imageCount);
-    const state = loadRateLimitState();
-
     const images = (result.data as { images: Array<{ url: string; file_name: string; content_type: string }> }).images;
     const description = (result.data as { description?: string }).description;
 
@@ -188,11 +82,6 @@ export async function generateImage(params: GenerateImageParams): Promise<Genera
         content_type: img.content_type,
       })),
       description,
-      rate_limit: {
-        images_generated_today: state.count,
-        images_remaining_today: MAX_IMAGES_PER_DAY - state.count,
-        daily_budget_used: `$${state.totalCost.toFixed(2)}`,
-      },
     };
   } catch (error) {
     return {
@@ -200,28 +89,6 @@ export async function generateImage(params: GenerateImageParams): Promise<Genera
       error: error instanceof Error ? error.message : 'Unknown error during image generation',
     };
   }
-}
-
-/**
- * Get current rate limit status.
- */
-export async function getImageRateLimitStatus(): Promise<{
-  images_generated_today: number;
-  images_remaining_today: number;
-  daily_limit: number;
-  daily_budget: string;
-  budget_used: string;
-  cost_per_image: string;
-}> {
-  const state = loadRateLimitState();
-  return {
-    images_generated_today: state.count,
-    images_remaining_today: MAX_IMAGES_PER_DAY - state.count,
-    daily_limit: MAX_IMAGES_PER_DAY,
-    daily_budget: `$${DAILY_BUDGET.toFixed(2)}`,
-    budget_used: `$${state.totalCost.toFixed(2)}`,
-    cost_per_image: `$${COST_PER_IMAGE.toFixed(2)}`,
-  };
 }
 
 // Edit image types
@@ -245,11 +112,6 @@ interface EditImageResult {
   }>;
   description?: string;
   error?: string;
-  rate_limit?: {
-    images_generated_today: number;
-    images_remaining_today: number;
-    daily_budget_used: string;
-  };
 }
 
 /**
@@ -276,20 +138,6 @@ export async function editImage(params: EditImageParams): Promise<EditImageResul
     return {
       success: false,
       error: 'At least one image URL is required for editing.',
-    };
-  }
-
-  // Check rate limit
-  const limitCheck = checkRateLimit(num_images);
-  if (!limitCheck.allowed) {
-    return {
-      success: false,
-      error: limitCheck.message,
-      rate_limit: {
-        images_generated_today: MAX_IMAGES_PER_DAY - limitCheck.remaining,
-        images_remaining_today: limitCheck.remaining,
-        daily_budget_used: `$${((MAX_IMAGES_PER_DAY - limitCheck.remaining) * COST_PER_IMAGE).toFixed(2)}`,
-      },
     };
   }
 
@@ -320,10 +168,6 @@ export async function editImage(params: EditImageParams): Promise<EditImageResul
       },
     });
 
-    // Record successful generation
-    recordGeneration(imageCount);
-    const state = loadRateLimitState();
-
     const images = (result.data as { images: Array<{ url: string; file_name: string; content_type: string }> }).images;
     const description = (result.data as { description?: string }).description;
 
@@ -335,11 +179,6 @@ export async function editImage(params: EditImageParams): Promise<EditImageResul
         content_type: img.content_type,
       })),
       description,
-      rate_limit: {
-        images_generated_today: state.count,
-        images_remaining_today: MAX_IMAGES_PER_DAY - state.count,
-        daily_budget_used: `$${state.totalCost.toFixed(2)}`,
-      },
     };
   } catch (error) {
     return {

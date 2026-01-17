@@ -47,7 +47,6 @@ import {
 import {
   generateImage,
   editImage,
-  getImageRateLimitStatus,
 } from '@/lib/tools/image-generation';
 
 const handler = createMcpHandler(
@@ -904,8 +903,6 @@ Intended uses:
 - Visualize organizational structures or workflows
 - Generate educational materials about county services
 
-Rate limited to ~66 images/day ($10 budget at $0.15/image).
-
 Aspect ratios:
 - 16:9: Presentations, slides (default)
 - 1:1: Square infographics
@@ -933,21 +930,6 @@ Aspect ratios:
       }
     );
 
-    // Get Infographic Rate Limit Tool
-    server.tool(
-      'get_infographic_rate_limit',
-      `Check current infographic generation rate limit status.
-
-Returns how many infographics have been generated today, remaining quota, and budget usage.`,
-      {},
-      async () => {
-        const result = await getImageRateLimitStatus();
-        return {
-          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-        };
-      }
-    );
-
     // Edit Image Tool
     server.tool(
       'edit_image',
@@ -966,9 +948,7 @@ Capabilities:
 Input images:
 - Use URLs from previous generate_infographic calls
 - Use any publicly accessible image URL
-- Can provide multiple images to combine/reference
-
-Rate limited: shares daily quota with generate_infographic (~66 images/day total).`,
+- Can provide multiple images to combine/reference`,
       {
         prompt: z.string().describe('Description of the edits to make. Be specific about what to change, add, or remove.'),
         image_urls: z.array(z.string()).describe('URLs of source images to edit. Can be FAL URLs from previous generations or any public image URL.'),

@@ -58,7 +58,6 @@ import {
 import {
   generateImage,
   editImage,
-  getImageRateLimitStatus,
 } from '../lib/tools/image-generation.js';
 
 const server = new Server(
@@ -509,8 +508,6 @@ Intended uses:
 - Visualize organizational structures or workflows
 - Generate educational materials about county services
 
-Rate limited to ~66 images/day ($10 budget at $0.15/image).
-
 Aspect ratios:
 - 16:9: Presentations, slides (default)
 - 1:1: Square infographics
@@ -550,16 +547,6 @@ Aspect ratios:
     },
   },
   {
-    name: 'get_infographic_rate_limit',
-    description: `Check current infographic generation rate limit status.
-
-Returns how many infographics have been generated today, remaining quota, and budget usage.`,
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-  {
     name: 'edit_image',
     description: `Edit or combine images using AI.
 
@@ -576,9 +563,7 @@ Capabilities:
 Input images:
 - Use URLs from previous generate_infographic calls
 - Use any publicly accessible image URL
-- Can provide multiple images to combine/reference
-
-Rate limited: shares daily quota with generate_infographic (~66 images/day total).`,
+- Can provide multiple images to combine/reference`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -722,9 +707,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'generate_infographic':
         result = await generateImage(args as unknown as Parameters<typeof generateImage>[0]);
-        break;
-      case 'get_infographic_rate_limit':
-        result = await getImageRateLimitStatus();
         break;
       case 'edit_image':
         result = await editImage(args as unknown as Parameters<typeof editImage>[0]);
