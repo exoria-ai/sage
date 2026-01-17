@@ -145,8 +145,8 @@ async function loadAllChapters(): Promise<void> {
     const chapterFiles = files.filter(f => f.startsWith('chapter-') && f.endsWith('.json'));
 
     for (const file of chapterFiles) {
-      // Extract chapter number from filename (e.g., "chapter-26-subdivisions.json" -> "26")
-      const match = file.match(/^chapter-(\d+)-/);
+      // Extract chapter number from filename (e.g., "chapter-26-subdivisions.json" -> "26", "chapter-26.5-..." -> "26.5")
+      const match = file.match(/^chapter-([\d.]+)-/);
       if (match) {
         await loadChapter(match[1]!);
       }

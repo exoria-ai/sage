@@ -580,9 +580,23 @@ If a user asks about "subdivision exemptions", retrieve sections 26-15, 26-15.1,
 If discussing zoning, retrieve the relevant district section (e.g., 28.21.20 for Agricultural districts).
 
 CURRENTLY AVAILABLE:
+- Chapter 19: Parks, Recreation and Other Public Property (31 sections)
+  - Article I: Parks, Playgrounds and Recreation Fund
+  - Article II: In General (definitions, enforcement, boating, swimming, vehicles, pets, prohibited acts)
+  - Article III: Camping or Squatting
+  - Article IV: Use of Public Property
+- Chapter 23: Refuse and Garbage (28 sections)
+  - Articles I-VII: Definitions, storage, collections, disposal sites, fees, appeals, enforcement
+- Chapter 24: Roads, Streets and Other Public Property (16 sections)
+  - Article I: Encroachments (permits for work on county roads)
+  - Article II: Terminal Access Routes
+  - Article III: Working of Prisoners on Public Works
+  - Article IV: Travel Reduction Requirements
 - Chapter 26: Subdivisions (41 sections)
   - Sections 26-11 through 26-15.3: Authority, purpose, application, exemptions, fees
   - Sections 26-21 through 26-21.32: All subdivision-related definitions
+- Chapter 26.5: Underground Utilities (10 sections)
+  - Underground utility district establishment, requirements, responsibilities
 - Chapter 28: Zoning Regulations (166 sections)
   - Article I (28.01-28.05): General provisions, definitions
   - Article II (28.10-28.69): Districts and allowed uses
@@ -611,6 +625,13 @@ CURRENTLY AVAILABLE:
     - 28.106: Use Permit (MUP/UP)
     - 28.107: Variance
     - 28.112: Appeals
+- Chapter 30: Address Numbering System (9 sections)
+  - Articles I-V: System description, numbering, road naming, road signs, penalties
+- Chapter 31: Grading, Drainage, Land Leveling, and Erosion Control (22 sections)
+  - Article I: Title, Purpose and General Provisions (definitions, appeals, fees)
+  - Article II: Procedure (permit requirements, exemptions, minor/major permits)
+  - Article III: Design Principles and Standards
+  - Article IV: Implementation and Enforcement
 
 SECTION ID FORMAT: "26-11", "28.21.20", "28.01" (chapter-section or chapter.section.subsection)
 

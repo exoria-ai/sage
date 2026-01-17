@@ -1,0 +1,242 @@
+{
+  "chapter": "31",
+  "title": "GRADING, DRAINAGE, LAND LEVELING, AND EROSION CONTROL",
+  "articles": [
+    {
+      "id": "I",
+      "title": "TITLE, PURPOSE AND GENERAL PROVISIONS",
+      "sections": [
+        {
+          "id": "31-10",
+          "title": "Title",
+          "text": "This chapter shall be known as the Solano County Grading, Drainage, Land Leveling and Erosion Control ordinance.",
+          "ordinances": [
+            "1087",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-11",
+          "title": "Purpose",
+          "text": "The purpose of this chapter, in conjunction with Uniform Building Code as adopted, is to provide the means for controlling soil erosion, sedimentation, increased rates of water runoff and related environmental damage by establishing minimum standards and providing regulations for the construction and maintenance of fills, excavations, cuts and clearing of vegetation, revegetation of cleared areas, drainage control, and the protection of exposed soil surfaces in order to protect downstream waterways and wetlands and to promote the safety, public health, convenience and general welfare of the community.",
+          "ordinances": [
+            "1087",
+            "1512",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-12",
+          "title": "Definitions",
+          "text": "For the purpose of this chapter, the following definitions shall apply: **Agriculture** is the art or science of cultivating the ground, including harvesting of crops and rearing and management of livestock for food or fiber; tillage, husbandry, farming, horticulture and forestry; the science and art of the production of plants and animals useful to man. **Applicant** means a person, partnership, corporation or public agency requesting permission to engage in any activity covered in this chapter. **Best Management Practice (BMP)** is a storm water pollution mitigation measure which is required to be employed in order to comply with the requirements of the National Pollutant Discharge Elimination System (NPDES) permit issued to the County of Solano. **Biofiltration** means filtering pollutants through natural materials and by natural processes. **Civil engineer** means a professional engineer registered as a civil engineer by the state of California. **Director** means the Director of the Resource Management department of the County of Solano, or his/her authorized representative. **Diversion** means a temporary or permanent structure consisting of a channel, ditch or ridge constructed across a sloping land surface to intercept and divert surface runoff. **Engineering Geologist** shall mean a person holding a valid certificate of registration as a geologist in the specialty of engineering geology issued by the State of California under the applicable provisions of the Geologist and Geophysicist Act of the Business and Professions Code. **Erosion** means detachment and movement of soil or rock fragments by water, wind, ice or gravity. **Excavation or cut** means any act by which soil, rock, earth, sand, gravel or any similar material is cut into, dug, quarried, uncovered, removed, displaced or relocated, and shall include the resulting conditions. **Fill** means a deposit of earth or other material placed by artificial means. **Floodplain** means the relatively flat area generally adjoining the channel of a natural stream which has been or may be hereafter covered by floodwater. **Grading** means any stripping of vegetation, excavation, cutting, filling or stockpiling, or any combination thereof which alters land. **Land disturbance** means any activity which results in the deposit or removal of any material or the alteration of either land or vegetation and which may result in increased potential for soil erosion or sedimentation. **Land leveling** means redistributing earth by mechanical means to alter the existing contours and change drainage. **Mulching** means the application of plant residue or other suitable materials to the land surface to conserve moisture, hold soil in place, and aid in establishing plant cover. **On-Site Sewage Disposal System** (also termed septic system, or sewage disposal system) means any system of piping, treatment devices, appurtenant components, or other facilities that convey, store, treat, or dispose of sewage wastewater onto or into the ground for subsurface treatment and disposal on the same lot from which the waste flow is generated. **Planing** means evening the existing grade by filling low areas and cutting high areas. **Runoff** means the surface water flow following precipitation. **Sedimentation** means the process by which mineral or organic matter is removed from its site of origin, transported, and deposited by water, wind, or gravity. **Sediment basin** means a reservoir which retards flows sufficiently to cause or allow deposition of transported sediment. **Site** means any lot or parcel of land or a series of lots or parcels of land adjoining or contiguous or joined together under one ownership where grading, excavating or filling is, was or will be performed. **Storm Water Pollution Prevention Plan** is a site drawing with details, notes, and related documents that identify the measures taken by the applicant to (1) control erosion and prevent sediment and construction-related pollutants from being carried offsite by stormwater, and (2) prevent nonstormwater discharges from entering the storm drain system. **Storm Water Quality Handbooks, Construction Site Best Management Practices (BMPs) Manual** means the latest edition of the manual prepared by Caltrans to provide instructions for the selection and implementation of construction site BMPs. Construction site BMPs are best conventional technology/best available technology (BCT/BAT)-based BMPs that are consistent with the BMPs and control practices required under the Clean Water Act. **Watercourse** means any natural or manmade channel for transporting water, including the streambed and the banks, whether continuously flowing or intermittent.",
+          "ordinances": [
+            "1087",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-13",
+          "title": "Appeals",
+          "text": "Appeals from decisions under this chapter shall be made to the board of supervisors in writing within ten days from the date of such decision.",
+          "ordinances": [
+            "1087"
+          ]
+        },
+        {
+          "id": "31-14",
+          "title": "Validity and severability",
+          "text": "Should any section, subsection, subdivision, sentence, clause, or phrase of this chapter be held unconstitutional, such section shall be deleted and shall not affect the validity or enforceability of the remaining sections of this chapter.",
+          "ordinances": [
+            "1087"
+          ]
+        },
+        {
+          "id": "31-15",
+          "title": "Fees",
+          "text": "A schedule of fees may be established by resolution of the board of supervisors for all costs incurred in the processing of any grading application. Such fees shall cover the full costs of review, approvals, inspections, certification of compliance, or other determinations or actions necessitated by the permit application. A separate and distinct fee may be set by the board of supervisors by resolution for the cost of appeals filed pursuant to this chapter.",
+          "ordinances": [
+            "1087"
+          ]
+        },
+        {
+          "id": "31-16",
+          "title": "Construction season",
+          "text": "The construction season commences on April 15th and ends on October 15th of each calendar year. Work performed under this Chapter shall not occur at a time outside of the construction season without the written approval of the Director.",
+          "ordinances": [
+            "1687"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "II",
+      "title": "PROCEDURE",
+      "sections": [
+        {
+          "id": "31-20",
+          "title": "Grading and drainage permit requirement",
+          "text": "(a) Except as exempted in sections 31-21 and 31-22 of this article, no person shall commence or perform any of the following acts: change the topography of any land in such manner that alters or interferes with existing water drainage; fill, close or divert any storm water drainage channel or water course; grade, fill, excavate, or clear vegetation for any purpose without having first obtained a grading and drainage permit from the Resource Management department. A separate permit shall be required for each site and may cover both excavations and fills. When immediate action by a person performing a public service is required to protect life and public property from imminent danger, or to restore, repair, or maintain public works, levees, dikes, utilities, or services destroyed or damaged by natural disaster, serious accident, or other types of emergencies, work bay be commenced prior to obtaining a permit. Notification of any such work must be given to the County on the next business day and an application for a grading permit must be submitted within ten days. (b) Interference with Public Drainage and Flood Control Facilities. It shall be unlawful for any person to do any of the following acts within the county without first receiving a written permit from the Director. (1) Destroy, remove, damage or interfere with the operation or maintenance of any levee, embankment, channel, dam, reservoir, canal, stream, protective work, access easement or other water delivery, drainage or flood control facility constructed, operated or maintained by any public agency. (2) Place, or cause to be placed in any channel, drainage ditch, water course, conduit, water delivery channel or upon any property over which the county or any public agency within the county has an easement for flood control, water delivery, drainage or access, any rubbish, trash or material of any kind that may interfere with the intended usage of the easement or facility. (3) Use for any purpose or in any manner any levee, embankment, service road, channel, dam, reservoir, canal, protective work or facility constructed by any public agency for flood control, water delivery or drainage, unless permission for the use has been previously granted by the public agency involved. (c) Suisun Marsh Protection. (1) Prior to the issuance of a grading and drainage permit for sites located within the Suisun Marsh area, a marsh development permit must be obtained. (2) It shall be unlawful to do any of the following activities without a grading and drainage permit within, or in areas within the buffer extending 25 feet from the top of a bank to, those channels within the Suisun marsh or those channels flowing or which will flow into the Suisun Marsh identified on that diagram entitled “Protected Channels of the Suisun Marsh Watershed,” which is on file at the Department of Resource Management and is incorporated herein as though set forth in full: (A) Newly construct any structure, except that the repair, replacement, reconstruction, improvement or maintenance of any existing structure may be performed unless the Director determines that such repair, replacement, reconstruction, improvement or maintenance will result in an increase in flood elevation, public flood hazard, or increase sedimentation to such an extent that adverse environmental impacts will occur in the Suisun Marsh. (B) Fill, grade, excavate, obstruct, close, divert, repair or reconstruct the channel or adjacent area of the channel. Emergency repairs may be commenced prior to obtaining a permit. (C) Cut or remove vegetation except for: (i) Grazing, cultivation of land, and other agriculturally related activities, including cutting or removing vegetation from channels or adjacent areas for agricultural, habitat, or flood control purposes; or (ii) Gardening and landscape activities associated with an established use. (D) Store or handle toxic substances, excepting application of chemicals to land or crops in the course of agricultural practices or customary home landscaping activities. (d) Approval of a grading and drainage permit will not relieve the applicant from requirements under the law to obtain additional permits from the Department of Resource Management, including but not limited to building permits and use permits, as well as permits from other local State or Federal agencies.",
+          "ordinances": [
+            "528",
+            "843",
+            "1087",
+            "1166",
+            "1511",
+            "1512",
+            "1687",
+            "1733"
+          ]
+        },
+        {
+          "id": "31-21",
+          "title": "Requirements to qualify for exemption",
+          "text": "Before grading activities may qualify for one of the exemptions listed under Section 31-22, the following conditions and requirements must apply: (a) The activities must not adversely impact adjacent property, cause increased erosion, sedimentation or rate of water runoff, divert or impair the flow of water for an offsite watercourse or cause a public nuisance. (b) All development activities, other than agricultural activities for production exempted from the grading and drainage permit requirement shall be carried out in a manner consistent with the design principles in Sec. 31-30 and standards set out in this chapter to assure that the potential for erosion of any project is minimized.",
+          "ordinances": [
+            "1687"
+          ]
+        },
+        {
+          "id": "31-22",
+          "title": "Exemptions",
+          "text": "When the conditions and requirements of Section 31-21 above are met, a grading and drainage permit shall not be required when the proposed work consists of any one or more of the following activities: (a) Accepted commercial agricultural or managed wetland activities including but not limited to the following: (1) Routine plowing, harrowing, disking, planting and riprapping on slopes less than seven horizontal to one vertical (7:1 or 14%). (2) Routine plowing, harrowing, disking, planting and riprapping on slopes greater then seven horizontal to one vertical (7:1 or 14%) provided the work follows a conservation plan developed through the Resource Conservation Districts. (3) Ridging, planing and similar operations necessary to prepare an existing field for a crop or flooding on slopes less than seven horizontal to one vertical (7:1 or 14%). (4) Trenching for the purpose of managing irrigation water or installation of irrigation piping and related equipment. (5) Activities related to the maintenance and cleaning of corrals, stables or animal pens. (6) Ridging, planing, grading or leveling of land not previously ridged, planed, graded or leveled for agricultural production, if the ridging, planing, grading or leveling (i) does not result in the movement of more than fifty cubic yards of materials, (ii) is less than eight thousand square feet of surface area, (iii) is less than three feet in vertical depth at its deepest point measured from the natural ground surface, (iv) does not create a cut slope steeper than two horizontal to one vertical (2:1), (v) is on slopes less than seven horizontal to one vertical (7:1 or 14%), and (vi) does not change the existing off-site drainage pattern above or below the grading site. (7) Exempted agricultural activities that do not include terracing. (b) Gardening primarily for home use and landscaping activity, which involves land disturbance of less than ten thousand square feet of surface area. (c) An excavation below finished grade for swimming pools, septic tanks, leaching systems, basements and footings of a building, retaining wall or other structure authorized by a valid building or encroachment permit. This shall not exempt lot grading or filling for a construction site unless otherwise provided for by this section. (d) An excavation which (1) does not result in the movement of more than fifty cubic yards of material on any one site, (2) is less than eight thousand square feet of surface area, (3) is less than one foot (three feet for non-structural fill) in vertical depth at its deepest point measured from the natural ground surface, (4) does not create a cut slope steeper than two horizontal to one vertical (2:1), and (5) which is promptly stabilized or revegetated in a manner to prevent erosion. (e) A fill which (1) does not exceed fifty cubic yards of material on any one site, (2) is less than five thousand square feet of surface area, (3) is less than three feet in vertical depth at its deepest point measured from the natural ground surface, (4) is placed on a surface having a slope not steeper than seven horizontal to one vertical (7:1), (5) does not create a slope steeper than two horizontal to one vertical (2:1), (6) does not change the existing off-site drainage pattern above or below the grading site, (7) will not be used for structural support, and (8) is promptly stabilized or revegetated where needed to prevent erosion. (f) Routine maintenance of existing facilities and access roads currently being utilized. Routine maintenance consists of placing gravel, filling pot holes and repairing ruts. Routine maintenance must not include cutting soil in excess of 50 CY. (g) Exploratory excavations under the direction of soil engineers or engineering geologist, cemetery graves, water well drilling, tunnels and trenches for utilities. (h) Refuse disposal areas, sanitary landfills, mining, quarrying, excavating processing, stockpiling of rock, sand, gravel aggregate or clay, as authorized in the zoning ordinance, for which a use permit has been granted by Solano County where the operation and conduct thereof is being carried out in accordance with an approved plan for grading and erosion and sediment control and the project does not block or divert any natural drainage way or unduly increase runoff upon any adjacent or contiguous property. (i) Grading or development performed by Solano County or special districts which have incorporated grading standards as set forth in this chapter as part of their operating policies. (j) Development and maintenance of roads used primarily for fire access, firebreaks and stock trails. (k) Projects on state and/or federally owned and operated property. (l) Posthole digging for fences.",
+          "ordinances": [
+            "1087",
+            "1512",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-23",
+          "title": "Minor grading and drainage permit",
+          "text": "A minor grading and drainage permit may be issued by the Director for proposed projects of a minor nature. Factors used by the Director in determining if a project is of a minor nature include, but are not limited to, the following: (a) The development will disturb an area of land less than one acre and result in less than one thousand cubic yards of earth movement. (b) The project will limit the establishment of impervious surfaces to a maximum of fifteen thousand square feet and will provide for the control of runoff from such surfaces. (c) There is an absence of steep slopes defined as fifteen percent or greater, highly erodible soils or unstable slopes defined as Type A lands in the health and safety element of the Solano County general plan. (d) The project will not damage structures on or adjacent to the site. (e) The project will not obstruct or block the drainage of waterways and channels. (f) The project will not impair significant natural vegetation, biological habitats, public views, or other sensitive natural resources. (g) The project consists purely of land leveling. (h) The project consists purely of wetland mitigation. Such a permit shall require the applicant to adhere to the provisions of the approved site map, grading plan and erosion control plan and to any additional site specific conditions, with written justification for each, as required by the Director in order for the project to conform to the standards set forth in this chapter. Such conditions may include but are not limited to drainage provisions, revegetation requirements and erosion and sediment control measurers.",
+          "ordinances": [
+            "1087",
+            "1512",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-24",
+          "title": "Application procedure for a minor grading and drainage permit",
+          "text": "The application for a minor grading and drainage permit shall be made in writing on a form prescribed by the Director and shall include all information, plans and maps deemed necessary for a comprehensive review of the project by the county. The application must be signed and certified by the owner of the property, or by an authorized agent. The application shall be accompanied by scaled drawings, and the permit application fee. The Director may waive portions of the application requirements or require additional information as needed. The application for a minor grading and drainage permit shall include but not be limited to the following: (a) A vicinity map showing the relationship of the site to the surrounding area roads, streams and important geographic features. (b) A site map to include the exterior boundaries of the property, adjacent roads, existing and/or proposed structures, easements, location and type of any existing and/or proposed on-site sewage disposal system, major landmarks, stream alignments, contour intervals, soils description and all appropriate geologic information. (c) A grading plan indicating elevations, dimensions, quantity, location and the extent of the proposed grading and a schedule for construction activities. The grading plan shall also include a report showing the extent and manner of tree cutting and vegetation clearing and disposal, provisions for stockpiling topsoil used in revegetation of the site, plans for replacement of trees that have been cut and plans for temporary and final revegetation of the site. (d) An erosion control plan which indicates necessary land treatment, structural measures and timing requirements which will effectively minimize soil erosion and sedimentation.",
+          "ordinances": [
+            "1087",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-25",
+          "title": "Major grading and drainage permit",
+          "text": "A proposed project which does not qualify for a minor grading and drainage permit as set forth in section 31-24, or as determined by the Director, shall require a major grading and drainage permit",
+          "ordinances": [
+            "1087",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-26",
+          "title": "Application procedure for a major grading and drainage permit",
+          "text": "The application for a major grading and drainage permit shall be made in writing on a form prescribed by the Director and shall include all information, plans and maps deemed necessary for a comprehensive review of the project by the county. The application for a major grading and drainage permit shall include but not be limited to the following: (a) A vicinity map, site map and grading plan as required for a minor grading and drainage permit under section 31-24. (b) An engineered erosion, sediment and runoff control plan which indicates necessary land treatment, structural measures and timing requirements which will effectively minimize soil erosion, sedimentation and rate of water runoff. The erosion, and sediment and runoff control plan shall contain appropriate information required by this section and as deemed necessary by the Director. The plan shall be prepared under the direction of a registered civil engineer and signed and sealed by the engineer unless this requirement is waived by the Director. Following submittal of the application, the county shall determine the adequacy of the plan and may require the submission of further information when necessary to judge the adequacy of the planned erosion, sediment and runoff control measures. The proposed measures shall incorporate recommendations contained in the Storm Water Quality Handbooks, Construction Site Best Management Practices (BMPs) Manual. The plan shall contain a description of the following: (1) Vegetative measures. (2) Drainage protection and control measures. (3) Erosion and sediment control measures. (4) Runoff control measures. (5) Cut and fill construction. (6) Disposal of excess materials. (7) Stockpiling of materials. (8) Dust control measures. (9) A construction schedule. (c) A soil engineering report including data regarding the nature, distribution and strength of existing soils, conclusions and recommendations for grading procedures and design criteria for corrective measures when necessary, and opinions and recommendations covering adequacy of sites to be developed by the proposed grading. (d) An engineering geology report including an adequate description of the geology of the site, conclusions and recommendations regarding the effect of geologic conditions on the proposed development and opinions and recommendations covering the adequacy of sites to be developed by the proposed grading. (e) Performance bond.",
+          "ordinances": [
+            "1087",
+            "1121",
+            "1512",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-27",
+          "title": "Performance bond",
+          "text": "(a) The Director may require a performance bond to be posted for a major grading and drainage permit when two or more of the following conditions apply: (1) Grading extends into the moratorium. (2) Work endangers the integrity of the Solano County transportation system and facilities within the right of way. (3) Soil import or export exceeds 1000 cubic yards. (b) If a road maintenance bond has already been posted with the Director as a requirement of another permit the Director may accept the road maintenance bond in lieu of a performance bond. (c) The performance bond or security must be posted in one of the following forms. (1) A bond furnished by a corporate surety authorized to do business in this state. (2) A cash bond. (d) Amount of Security. The amount of security shall be based on the number of cubic yards of material in either excavation or fill, whichever is greater, plus the cost of all drainage or other protective devices or work necessary to eliminate geotechnical hazards. That portion of the security valuation based on the volume of material in either excavation or fill shall be computed as 50 percent of the estimated cost of grading work. When the rough grading has been completed in conformance with the requirements of this Code, the Director may at his or her discretion consent to a proportionate reduction of the security to an amount estimated to be adequate to ensure completion of the grading work, site development or planting remaining to be performed. The costs referred to in this section shall be as estimated by the Director. (e) Conditions. All security shall include the conditions that the principal shall: (1) Comply with all of the provisions of this Code, applicable laws, and ordinances. (2) Comply with all of the terms and conditions of the grading and drainage permit. (3) Complete all the work authorized by the permit. (f) Term of Security. The term of each security shall begin upon the filing thereof with the Director and the security shall remain in effect until the work authorized by the grading and drainage permit is completed and approved by the Director. (g) Default Procedures. In the event the applicant or the applicant’s agent shall fail to complete the work or fail to comply with all terms and conditions of the grading and drainage permit, it shall be deemed a default has occurred. The Director shall give notice thereof to the principal and security or financial institution on the grading and drainage permit security, or to the applicant in the case of a cash deposit or assignment, and may order the work required to complete the grading in conformance with the requirements of this Code be performed. The surety or financial institution executing the security shall continue to be firmly bound under an obligation up to the full amount of the security, for the payment of all necessary costs and expenses that may be incurred by the Director in causing any and all such required work to be done. In the case of a cash deposit or assignment, the unused portion of such deposit or funds assigned shall be returned or reassigned to the person making said deposit or assignment.",
+          "ordinances": [
+            "1087",
+            "1121",
+            "1512",
+            "1687"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "III",
+      "title": "DESIGN PRINCIPLES AND STANDARDS",
+      "sections": [
+        {
+          "id": "31-30",
+          "title": "General design principles and standards",
+          "text": "The purpose of the general design principles and standards is to assure that development, other than agricultural activities for production, be accomplished so as to minimize adverse effects upon the existing terrain and to minimize the potential for erosion. Control measures are to apply to all aspects of the proposed grading and are intended to be operational during all stages of development. The following basic design principles and standards shall serve as minimum guidelines for grading plans and erosion, sediment and runoff control plans. (a) Stripping or burning of vegetation, tilling, grading, or other soil disturbance shall be done in a manner which will minimize soil erosion. (b) Existing natural vegetation shall be retained, protected and supplemented wherever feasible. Site development shall be accomplished so that existing trees are preserved whenever possible and practical. (c) Exposure of soil to erosion by removal of vegetation shall be limited to the smallest area practical and for the shortest time practical. Soil exposure shall not exceed an area in which development will be completed during a single construction season to insure that soils are stabilized and vegetation is established by the end of the construction season. Grading and drainage permits will be withheld during this time; however extensions to or restrictions of this time period may be established by the Director on a case-by-case basis. (d) Facilities shall be constructed to retain sediment produced on site. (e) Sediment basins, sediment traps, diversions or similar required measures shall be installed well in advance of any clearing or grading and maintained throughout any such operations until removal is authorized by the Director. The design of such structures should account for abating potential mosquito problems. (f) Temporary and final seeding, mulching, or other suitable stabilization measures shall be used to protect exposed erodible areas during development and by the end of the construction season (April 15 - October 15). (g) Permanent control structures and final vegetation should be installed as soon as practical in the development and a long-range maintenance plan developed and adhered to. (h) The plan shall identify mitigation measures that result in no net increase in peak runoff due to the development. (i) Development that creates impervious surfaces in excess of 5000 square feet must insure that surface runoff rates exceeding predevelopment levels shall be retarded by appropriate structural and vegetative measures to be maintained on an annual basis. (j) Runoff water from impervious surface areas resulting from grading activities shall be treated with biofiltration or another approved alternative before leaving the property or entering any waters of the State or Federal government. (k) Slopes, both cut and fill, shall not be steeper than two horizontal to one vertical (2:1) unless a thorough geological and engineering analysis indicates that steeper slopes are safe and appropriate erosion control measures are specified. (l) Cuts and fills shall not encroach upon natural watercourses, their floodplains, or constructed channels in a manner so as to adversely affect other properties. (m) Disposal of cleared vegetation and excavated materials shall be done in a manner which reduces the risk of erosion and shall strictly conform to the provisions of the approved grading permit. Topsoil shall be conserved for reuse in revegetation of disturbed areas whenever possible. (n) Proposed development and roadway alignments shall be done in accordance with the county Road Improvement Standards and fitted to the topography and soils to minimize erosion. (o) Waterways shall be designed to avoid erosion as much as practical. Wide channels should be constructed with flat side slopes surfaces and the channel and slopes should be lined with grass or other appropriate vegetation. Every effort must be made to preserve natural channels and drainage ways. (p) Except as limited by section 28-51 of this code, (Watershed and Conservation (W) District), filling, grading, excavating or obstructing the bed or banks of a watercourse and removal of the riparian vegetation shall be allowed only where no reasonable alternative is available and, where allowed, shall be limited to the minimum amount necessary. In the Suisun Marsh, stream modification should be permitted only if necessary to ensure the protection of life or existing structures from floods, and only the minimum amount of modification necessary shall be allowed in such cases. (q) Cuts and fills are not allowed within five feet of property boundaries unless a retaining wall is placed. The height of the wall must not exceed its distance from the property line. Exemptions are allowed with the approval of adjoining land owner(s) and county staff.",
+          "ordinances": [
+            "1087",
+            "1121",
+            "1512",
+            "1687",
+            "1733"
+          ]
+        },
+        {
+          "id": "31-31",
+          "title": "National Pollution Discharge Elimination System (NPDES)",
+          "text": "All grading plans and permits with land disturbance equal to or greater than 1 acre shall comply with the provisions of this section for NPDES compliance. (a) No grading and drainage permit shall be issued unless the plans for such work include a Storm Water Pollution Prevention Plan with details of best management practices, including desilting basins or other temporary drainage or control measures, or both, as may be necessary to control construction-related pollutants which originate from the site as a result of construction related activities. (b) All best management practices shall be installed before grading begins. As grading progresses, all best management practices shall be maintained in good working order to the satisfaction of the Director unless final grading approval has been granted by the Director and all permanent drainage and erosion control systems, if required, are in place.",
+          "ordinances": [
+            "1687"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "IV",
+      "title": "IMPLEMENTATION AND ENFORCEMENT",
+      "sections": [
+        {
+          "id": "31-40",
+          "title": "Review and approval",
+          "text": "(a) Grading and drainage permit applications and accompanying maps and plans shall be reviewed by the Department of Resource Management and approved when found to be in compliance with the provisions of this chapter, and conformance with acceptable grading and erosion control techniques. Permits required as a condition of a building permit, use permit, marsh development permit, or other land development permit will be issued only in conjunction with, or subsequent to, approval of such a permit and not in anticipation of such a permit. (b) Within the Suisun Marsh Watershed, the Department of Resource Management shall issue a permit only if the Director finds that riparian habitat will be protected and that the proposed activity will not increase sedimentation and runoff within or into the Suisun Marsh to such an extent that significant adverse environmental impacts will occur in the Suisun Marsh.",
+          "ordinances": [
+            "1087",
+            "1512",
+            "1687",
+            "1733"
+          ]
+        },
+        {
+          "id": "31-41",
+          "title": "Inspection and enforcement",
+          "text": "The provisions of this chapter shall be enforced by the Director who shall require inspection of all work and require compliance with all the provisions of the chapter. Whenever necessary to make an inspection to enforce any provision of this chapter, or whenever the Director has reasonable cause to believe that there exists on any private property a condition or activity which requires a permit as specified by this chapter, the Director may enter such property at all reasonable times to inspect the same or to perform any duty imposed upon the Director by this chapter.",
+          "ordinances": [
+            "1087",
+            "1121",
+            "1512",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-42",
+          "title": "Applicant’s responsibilities",
+          "text": "(a) The applicant shall install all soil erosion and sediment control measures in strict compliance with the ordinance and in accordance with the approved erosion control plan. (b) A copy of the approved permit and plans must also be retained on site for review by staff at any time. (c) All soil erosion and sediment control measures shall be adequately maintained by the applicant for a period of on year or until such measures are permanently stabilized as determined by the Director. (d) An order to stop work may be issued and further work shall be prohibited if it is determined that the work does not comply with the provisions of the approved erosion control plan or with the provisions of this chapter until such time as compliance with the chapter is assured. (e) A new or modified erosion and sediment control technique may be allowed to be used provided there is written approval from the Director to the applicant that the technique meets the intent of the erosion control plan. (f) The Director may require modifications to grading plans and operations if delays occur as a result of weather or other natural phenomena not considered at the time a permit was issued. (g) The Director may cause remedial work to be done at the applicant’s expense if it is determined that it is necessary to protect completed work or to prevent damage.",
+          "ordinances": [
+            "1087",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-43",
+          "title": "Suspension or revocation",
+          "text": "The Director may in writing, suspend or revoke a permit issued under the provisions of this Chapter whenever the permit is issued in error or on the basis of incorrect information supplied, or in violation of any ordinance or regulation or any of the provisions of this Chapter.",
+          "ordinances": [
+            "1087",
+            "1687"
+          ]
+        },
+        {
+          "id": "31-44",
+          "title": "Violations",
+          "text": "(a) Public nuisance - Any grading done in violation of the terms of this Chapter and/or in violation of any permit issued under this Chapter is declared to be a public nuisance and may be abated and/or enjoined as provided by law, including but not limited to the filing of a civil suit for injunctive relief. (b) Noncompliance - Whenever the Director determines that a violation of this Chapter or the terms of a permit exist, he/she shall issue a written notice of violation. The notice shall specify the corrective action that is needed and give the operator a timeframe to comply. (c) Any person, firm, corporation or agency whether as principal agent, employee, or otherwise failing to comply with the provisions of this chapter shall be guilty of a misdemeanor and upon conviction thereof, shall be punishable by a fine of not more than five hundred dollars for each separate offense and shall be strictly liable for the cost of any work required by the county to abate any erosion, sediment or runoff hazard. Every day any violation of this chapter shall continue shall constitute a separate offense. (d) Remedies Cumulative: The remedies provided in this Chapter are cumulative and not exclusive. Nothing in this Chapter bars any legal, equitable, administrative or summary remedy to which any aggrieved public agency or private party is entitled.",
+          "ordinances": [
+            "1087",
+            "1687"
+          ]
+        }
+      ]
+    }
+  ]
+}
