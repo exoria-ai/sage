@@ -38,6 +38,14 @@ import {
   searchCountyCode,
 } from '../lib/tools/county-code.js';
 import { getParcelsInBuffer } from '../lib/tools/parcels-in-buffer.js';
+import {
+  searchBudget,
+  getBudgetChunk,
+  listBudgetDepartments,
+  listBudgetSections,
+  getDepartmentBudget,
+  getBudgetOverview,
+} from '../lib/tools/budget.js';
 
 const server = new Server(
   {
@@ -378,6 +386,100 @@ OUTPUT: List of parcels with owner info for notification lists`,
       },
     },
   },
+  // Budget document tools
+  {
+    name: 'search_budget',
+    description: `Search the FY2025-26 Recommended Budget document.
+
+Use this tool when users ask questions about:
+- County department budgets and funding
+- Staffing levels and positions
+- Budget priorities and challenges
+- Program accomplishments and workload
+- Revenue sources and expenditures
+
+INPUT:
+- query: Search terms (required)
+- top_k: Number of results (default: 5)
+- department: Filter by department name
+- section: Filter by section letter (A-N)
+- chunk_type: Filter by type (narrative, table, summary)
+
+OUTPUT: Matching budget document chunks with relevance scores.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query' },
+        top_k: { type: 'number', description: 'Max results (default: 5)' },
+        department: { type: 'string', description: 'Filter by department' },
+        section: { type: 'string', description: 'Filter by section (A-N)' },
+        chunk_type: { type: 'string', description: 'Filter by type: narrative, table, summary' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'get_budget_chunk',
+    description: `Retrieve the full text of a specific budget chunk by ID.
+
+Use after search_budget to get complete text of a result.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        chunk_id: { type: 'string', description: 'Chunk ID from search results' },
+      },
+      required: ['chunk_id'],
+    },
+  },
+  {
+    name: 'list_budget_departments',
+    description: `List all departments in the budget document.
+
+Returns a list of all department names for filtering searches.`,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'list_budget_sections',
+    description: `List all major sections in the budget document.
+
+Sections are lettered A-N and cover different functional areas:
+A. Budget Summary
+B. Permanent Position Summary
+C. County Statistical Profile
+...etc.`,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_department_budget',
+    description: `Get all budget information for a specific department.
+
+Returns all chunks (narrative and tables) for a department.`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        department: { type: 'string', description: 'Department name (partial match)' },
+        include_narrative: { type: 'boolean', description: 'Include narrative chunks (default: true)' },
+        include_tables: { type: 'boolean', description: 'Include table chunks (default: true)' },
+      },
+      required: ['department'],
+    },
+  },
+  {
+    name: 'get_budget_overview',
+    description: `Get overview statistics about the budget document.
+
+Returns document metadata, section list, and chunk counts.`,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
 ];
 
 // Handle list tools request
@@ -463,6 +565,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'get_parcels_in_buffer':
         result = await getParcelsInBuffer(args as Parameters<typeof getParcelsInBuffer>[0]);
+        break;
+      case 'search_budget':
+        result = await searchBudget(args as Parameters<typeof searchBudget>[0]);
+        break;
+      case 'get_budget_chunk':
+        result = await getBudgetChunk(args as Parameters<typeof getBudgetChunk>[0]);
+        break;
+      case 'list_budget_departments':
+        result = await listBudgetDepartments();
+        break;
+      case 'list_budget_sections':
+        result = await listBudgetSections();
+        break;
+      case 'get_department_budget':
+        result = await getDepartmentBudget(args as Parameters<typeof getDepartmentBudget>[0]);
+        break;
+      case 'get_budget_overview':
+        result = await getBudgetOverview();
         break;
       default:
         return {
