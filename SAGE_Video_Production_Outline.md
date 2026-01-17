@@ -2,8 +2,8 @@
 
 ## Topic 7: Agentic Artificial Intelligence and GIS
 
-**Target Length**: 10-12 minutes  
-**Deadline**: Noon PST, Monday January 26, 2026  
+**Target Length**: 10-12 minutes
+**Deadline**: Noon PST, Monday January 26, 2026
 **Format**: YouTube (Public or Unlisted)
 
 ---
@@ -14,44 +14,83 @@ Every segment must address these criteria:
 
 | Criteria | How We'll Demonstrate It |
 |----------|-------------------------|
-| **Technical Depth** | Real MCP server code, actual ArcGIS REST queries, Claude reasoning |
+| **Technical Depth** | Real MCP server code, actual ArcGIS REST queries, Claude reasoning, RAG systems |
 | **Use of GIS Tools** | Live queries against Solano County's actual GIS infrastructure |
-| **Analysis/Output Quality** | Useful results: counts, values, interpretations, proper caveats |
-| **Communication** | Clear narrative arc, plain-English explanations, visual aids |
-| **Relevance to Role** | Solano-specific scenarios, jurisdiction routing, Principal-level judgment |
+| **Analysis/Output Quality** | Useful results: counts, values, interpretations, maps, infographics, proper caveats |
+| **Communication** | Clear narrative arc, plain-English explanations, AI-generated visual aids |
+| **Relevance to Role** | Solano-specific scenarios, jurisdiction routing, county code lookups, budget analysis, Principal-level judgment |
+
+---
+
+## What SAGE Actually Does (Current Implementation)
+
+SAGE has evolved significantly beyond the original plan. The current implementation includes **25 MCP tools** across 5 categories:
+
+### GIS & Property Tools (12 tools)
+- `geocode_address` - Convert address to coordinates and APN
+- `get_parcel_details` - Property info, assessed values, ownership
+- `get_zoning` - Zoning with automatic jurisdiction routing
+- `get_flood_zone` - FEMA flood zone designation
+- `get_fire_hazard_zone` - CAL FIRE FHSZ classification
+- `get_supervisor_district` - Board of Supervisors district
+- `get_special_districts` - Fire, water, school districts
+- `get_nearby` - Find schools, parks, fire stations within radius
+- `search_parcels` - Search parcels by criteria with aggregations
+- `get_parcels_in_buffer` - Parcels within radius (notification lists)
+- `render_map` - Generate static map images with parcel highlighting
+
+### County Code Tools (4 tools)
+- `get_county_code_sections` - Full text of specific code sections
+- `list_county_code_chapters` - Available chapters (26 Subdivisions, 28 Zoning)
+- `list_county_code_sections` - Sections within a chapter
+- `search_county_code` - Keyword search across code
+
+### Budget Tools (6 tools)
+- `search_budget` - Semantic RAG search of FY25-26 Recommended Budget
+- `get_budget_chunk` - Retrieve full budget chunk by ID
+- `list_budget_departments` - All county departments
+- `list_budget_sections` - Budget sections A-N
+- `get_department_budget` - Department-specific budget details
+- `get_budget_overview` - Document statistics
+
+### Visualization Tools (2 tools)
+- `generate_infographic` - AI image generation via fal.ai Nano Banana Pro
+- `edit_image` - Edit/combine multiple images
+
+### Knowledge Tools (1 tool)
+- `get_solano_context` - Retrieve reference materials on demand
 
 ---
 
 ## Visual Theme & Assets
 
 ### Aesthetic Direction
-**Style**: Clean technical/professional with warm accent colors  
-**Inspiration**: The tube amplifier and coffee machine infographics — detailed, labeled, color-coded flows  
-**Color Palette**: 
-- Primary: Deep blue (#1e3a5f) 
+**Style**: Clean technical/professional with warm accent colors
+**Inspiration**: The tube amplifier and coffee machine infographics — detailed, labeled, color-coded flows
+**Color Palette**:
+- Primary: Deep blue (#1e3a5f)
 - Accent: Warm orange (#e07020)
 - Background: Light gray/off-white
 - Success: Green (#2d8a4e)
 - Text: Near-black (#1a1a1a)
 
-### Nano Banana Pro Assets to Create
+### AI-Generated Infographics (via generate_infographic tool)
 
-| Asset | Purpose | Description |
-|-------|---------|-------------|
-| **Architecture Diagram** | Context section | SAGE architecture: Skill layer → MCP → Data Sources (similar to coffee machine flow) |
-| **Query Flow Diagram** | Demo section | Visual showing: User Question → Geocode → Jurisdiction Check → Zoning Query → Knowledge Load → Response |
-| **Knowledge Layer Infographic** | Context section | Progressive disclosure: System Prompt → Tool Descriptions → On-Demand References |
-| **Jurisdiction Map Concept** | Demo section | Stylized Solano County showing 7 cities vs unincorporated (highlight the problem) |
-| **Observability Dashboard Mockup** | Results section | Signals, traces, metrics visualization |
-| **Before/After Comparison** | Results section | Traditional GIS workflow vs SAGE-assisted workflow |
+| Asset | Purpose | Prompt Concept |
+|-------|---------|----------------|
+| **Architecture Diagram** | Context section | "Technical diagram showing SAGE architecture: Skill layer with brain icon connecting to MCP Server with 25 tools, connecting to external data sources (ArcGIS, County Code, Budget). Clean lines, blue and orange color scheme, labeled components." |
+| **Query Flow Diagram** | Demo section | "Flowchart showing: User Question → Geocode → Jurisdiction Check → Zoning Query → Knowledge Load → Response. Arrows connecting each step, icons for each stage." |
+| **Knowledge Layer Infographic** | Context section | "Diagram showing progressive disclosure: System Prompt at top, Tool Descriptions in middle, On-Demand References at bottom. Stacked layers with decreasing opacity." |
+| **Tool Categories Wheel** | Overview | "Circular diagram with 5 segments: GIS Tools (12), County Code (4), Budget (6), Visualization (2), Knowledge (1). Each segment color-coded." |
 
 ### Screen Recording Segments
 
 | Segment | Duration | What to Show |
 |---------|----------|--------------|
-| **Code walkthrough** | 60-90 sec | MCP server structure, key tool implementations |
-| **Agent interaction** | 3-4 min | Claude Code or chat interface running real queries |
-| **Raindrop dashboard** | 30-60 sec | Live traces, signals, interaction logs |
+| **Code walkthrough** | 60-90 sec | MCP server in `scripts/mcp-dev-server.ts`, tool implementations in `lib/tools/` |
+| **Agent interaction** | 4-5 min | Claude Code running real queries demonstrating multiple tool categories |
+| **Map generation** | 30-60 sec | `render_map` creating parcel maps, buffer visualizations |
+| **Infographic generation** | 30-60 sec | Live `generate_infographic` creating a diagram |
 | **GIS data verification** | 30 sec | Quick ArcGIS Online showing the actual data SAGE queried |
 
 ---
@@ -65,68 +104,71 @@ Every segment must address these criteria:
 **Narration**:
 > "Every day, Solano County GIS staff answer dozens of spatial questions: What's the zoning at this address? Is this property in a flood zone? Who's my supervisor? Each question requires knowing which layer to query, understanding the schema, writing the correct query, and — critically — interpreting the results in context.
 >
-> What if an AI agent could do this? Not just chat about GIS concepts, but actually navigate the county's ArcGIS infrastructure, execute real queries, and provide answers with the organizational knowledge that makes them useful?"
+> But there's more than just GIS data. Staff also need to reference county code regulations, understand budget allocations, and create visualizations for reports. What if an AI agent could handle all of this?"
 
 **Visuals**:
-- [Nano Banana] Infographic showing common GIS questions with complexity indicators
+- [AI Generated] Infographic showing common questions across different domains (GIS, Code, Budget)
 - Quick montage of ArcGIS REST interface / query screens
 - Transition to SAGE logo/title card
 
 #### 1B: The Solution Architecture (0:45-1:30)
 **Narration**:
-> "I built SAGE — Solano Agent for Geographic Enquiry. It combines two components:
+> "I built SAGE — Solano Agent for Geographic Enquiry. It combines three components:
 >
-> First, an MCP server — Model Context Protocol — that gives Claude direct access to Solano County's GIS. Think of it as giving Claude hands to interact with ArcGIS REST APIs.
+> First, an MCP server — Model Context Protocol — with 25 tools that give Claude direct access to Solano County's GIS, the county code database, the FY25-26 budget, and AI image generation.
 >
 > Second, a Skill that provides organizational knowledge: jurisdiction routing, data interpretation, regulatory context. This is the brain that knows what the results mean.
+>
+> Third, RAG systems — Retrieval Augmented Generation — for both county code and budget documents, so Claude can cite specific sections and figures.
 >
 > Together, they create an agent that doesn't just query data — it understands it."
 
 **Visuals**:
-- [Nano Banana] Architecture diagram showing:
+- [AI Generated] Architecture diagram showing:
   - SKILL LAYER (brain icon) → Knowledge cards flowing down
-  - MCP SERVER (hands icon) → Tools connecting to data sources
-  - EXTERNAL DATA → Solano GIS, State/Fed services
+  - MCP SERVER (25 tools icon) → Tool categories connecting to data sources
+  - DATA SOURCES → Solano GIS, County Code, Budget, fal.ai
 - Animated arrows showing data flow
-- Color coding: Blue for data, Orange for knowledge
+- Color coding: Blue for data, Orange for knowledge, Green for output
 
 #### 1C: Why This Matters (1:30-2:00)
 **Narration**:
 > "The key insight is that a GIS analyst's value isn't knowing which buttons to click — it's understanding what questions to ask, which data sources to trust, and what caveats to communicate. SAGE captures that expertise in a reusable, scalable form.
 >
-> Let me show you how it works against Solano County's actual GIS infrastructure."
+> Let me show you how it works against Solano County's actual infrastructure."
 
 **Visuals**:
-- [Nano Banana] "GIS Analyst Functions" infographic showing which SAGE can do
+- [AI Generated] "GIS Analyst Functions" infographic showing which SAGE can do
 - Transition to screen recording
 
 ---
 
 ### SEGMENT 2: Technical Demonstration (6:00-8:00)
 
+**Strategic approach**: Focus on 3 demos that showcase different capabilities. Don't try to show everything — let the architecture overview mention other tools exist.
+
 #### 2A: Quick Code Overview (1:00-1:30)
 **Purpose**: Establish technical credibility without drowning in code
 
 **Narration**:
-> "Here's the MCP server structure. The key tools are geocode_address, get_zoning, get_flood_zone, and get_parcel_details. 
+> "Here's the MCP server structure. We have 25 tools — but I won't bore you with all of them. The key insight is in the tool descriptions.
 >
-> Notice the tool descriptions — they're not just documentation, they're prompt engineering. I've baked jurisdiction routing logic directly into the descriptions so Claude knows when to check city boundaries first.
+> Notice this isn't just documentation — it's prompt engineering. I've baked jurisdiction routing logic directly into the descriptions so Claude knows when to check city boundaries first.
 >
 > Let me show you this in action."
 
 **Screen Recording**:
-- VS Code or editor showing:
-  - `src/tools/` directory structure
+- VS Code showing:
+  - `scripts/mcp-dev-server.ts` - main MCP server
   - One tool definition with rich description (highlight the jurisdiction logic)
-  - Quick scroll through available tools
-- Keep it FAST — 60-90 seconds max
+- Keep it FAST — 60 seconds max
 
 **Key Code to Highlight**:
 ```typescript
-// Tool description example (don't show full code, just this snippet)
+// Tool description example (from scripts/mcp-dev-server.ts)
 {
   name: "get_zoning",
-  description: `Query zoning for a location. 
+  description: `Query zoning for a location.
     CRITICAL: Automatically routes to correct authority:
     - First checks city boundaries
     - If inside city → queries city zoning layer
@@ -136,149 +178,143 @@ Every segment must address these criteria:
 }
 ```
 
-#### 2B: Demo Scenario 1 — Jurisdiction Routing (2:00-2:30)
-**Purpose**: Show the key differentiator
+#### 2B: Demo 1 — Jurisdiction Routing + Map (2:00-2:30)
+**Purpose**: Show the key differentiator — organizational knowledge baked in
 
 **Narration**:
 > "Here's the scenario that shows why organizational knowledge matters. I'll ask about an address with 'Fairfield' in it — but watch what happens."
 
-**Query**: "What's the zoning at 2500 Cordelia Road, Fairfield, CA?"
+**Query**: "What's the zoning at 2500 Cordelia Road, Fairfield, CA? Show me a map."
 
-**Screen Recording** (Claude Code or chat interface):
+**Screen Recording** (Claude Code):
 - Show the query being entered
-- Highlight Claude's reasoning:
-  - "Let me geocode this address..."
-  - "Checking city boundaries... this location is NOT within Fairfield city limits"
-  - "This is unincorporated Solano County, so I'll query county zoning..."
-- Show the result with proper context
+- Highlight Claude's tool calls (geocode → zoning → map)
+- Show the result with map image
 
 **Expected Response** (paraphrase):
-> "Although your mailing address says 'Fairfield,' this property is actually in unincorporated Solano County — not within Fairfield city limits. This is a common source of confusion.
+> "Although your mailing address says 'Fairfield,' this property is actually in unincorporated Solano County — not within Fairfield city limits.
 >
-> The county zoning is A-20 (Agricultural, 20-acre minimum). For zoning questions about unincorporated areas, contact Solano County Planning at (707) 784-6765, not the City of Fairfield.
+> The county zoning is A-20 (Agricultural, 20-acre minimum). For zoning questions about unincorporated areas, contact Solano County Resource Management at (707) 784-6765.
 >
-> [GIS disclaimer]"
+> [Map image showing parcel]"
 
 **Narration overlay**:
-> "See how it caught the jurisdiction mismatch? A naive query tool would have either failed or returned the wrong data. SAGE's knowledge layer caught this common mistake."
+> "See how it caught the jurisdiction mismatch and generated a map? A naive query tool would have either failed or returned the wrong data. SAGE's knowledge layer caught this common mistake."
 
-**Visual Enhancement**:
-- [Nano Banana] Simple map graphic showing the location OUTSIDE city boundary
-- Or quick screenshot from ArcGIS Online showing the same
-
-#### 2C: Demo Scenario 2 — Spatial Analysis (2:00-2:30)
-**Purpose**: Show GIS tool proficiency, multi-step reasoning
+#### 2C: Demo 2 — Multi-Hazard Property Report (2:00-2:30)
+**Purpose**: Show multi-step GIS analysis with interpretation
 
 **Narration**:
-> "Now let's try something more complex — a spatial analysis that requires multiple steps."
+> "Now let's look at something with real public safety implications — a property hazard report."
 
-**Query**: "How many residential parcels in Fairfield are within 500 feet of a park?"
+**Query**: "What hazards affect 123 Main St, Vacaville? What should I know before buying this property?"
 
 **Screen Recording**:
-- Show Claude's multi-step reasoning:
-  1. "Querying parks in Fairfield..."
-  2. "Creating 500-foot buffer around park geometries..."
-  3. "Querying parcels intersecting the buffer..."
-  4. "Filtering for residential use types..."
-  5. "Found X parcels"
-- Show the actual numbers returned
+- Show multi-tool query running
+- Flood zone, fire hazard, maybe supervisor district
+- Show the synthesized response with practical advice
+
+**Expected Response**:
+> "Property hazard assessment:
+> - **Flood Zone**: Zone X (minimal risk, outside SFHA)
+> - **Fire Hazard**: Moderate FHSZ
+> - **Supervisor**: District 4 (John Vasquez)
+>
+> For this property: No special flood insurance required for mortgages. Standard fire-safe practices apply. [Appropriate disclaimers and contacts]"
 
 **Narration overlay**:
-> "This is a multi-step spatial query that would normally require someone with GIS expertise. SAGE chained together the right operations automatically — parks layer, buffer, intersection, attribute filter."
+> "The agent didn't just return data codes — it explained what they mean for someone making a real decision. That's the difference between data and insight."
 
-**Visual Enhancement**:
-- Brief switch to ArcGIS Online showing the actual parks layer
-- Or [Nano Banana] diagram showing the buffer operation conceptually
-
-#### 2D: Demo Scenario 3 — Aggregation + Interpretation (1:30-2:00)
-**Purpose**: Show complex analysis with knowledge interpretation
+#### 2D: Demo 3 — County Code Lookup (2:00-2:30)
+**Purpose**: Show RAG capability, demonstrate breadth beyond pure GIS
 
 **Narration**:
-> "One more — this time with aggregation and interpretation."
+> "SAGE goes beyond GIS data. It can also search the county code — the actual regulations."
 
-**Query**: "What's the total assessed land value of agricultural parcels by supervisorial district?"
+**Query**: "What uses are allowed in the A-40 agricultural zone? Can I build an ADU?"
 
 **Screen Recording**:
-- Show Claude reasoning through it
-- Output as a table:
-  ```
-  District 1: $XXX,XXX,XXX
-  District 2: $XXX,XXX,XXX
-  ...
-  ```
-- Show Claude adding context about Prop 13
+- Show Claude searching county code
+- Retrieving relevant sections
+- Synthesizing answer with citations
 
-**Expected Interpretation**:
-> "Note: Assessed values in California reflect Proposition 13 rules — they're based on purchase price plus a maximum 2% annual increase, not current market value. Long-held properties may have assessed values well below market."
+**Expected Response**:
+> "According to Solano County Code Chapter 28, A-40 (General Agriculture) allows:
+> - Agricultural uses (permitted by right)
+> - Single-family dwelling (with Administrative Permit)
+> - Secondary dwelling (different from ADU rules in residential zones)
+>
+> Note: Agricultural zones use 'secondary dwelling' provisions, not standard ADU rules. Contact County Planning at (707) 784-6765 for your specific situation."
 
 **Narration overlay**:
-> "The agent didn't just return numbers — it loaded Prop 13 context from the knowledge layer to help interpret what those numbers mean. That's the difference between data and insight."
+> "The agent cited the specific code section and caught the ADU nuance — a common source of confusion. This is how a real analyst would respond."
 
-#### 2E: Demo Scenario 4 — Hazard Overlay (1:00-1:30)
-**Purpose**: Show emergency management relevance
+**OPTIONAL DEMO** (if time permits or as backup):
 
-**Narration**:
-> "Finally, let's look at something with real public safety implications."
+#### 2E: Budget or Infographic Demo (1:00-1:30)
+**Use if**: One of the above demos has issues, or you're running short and want variety.
 
-**Query**: "Is 123 Main St, Vacaville in a high fire hazard zone? What about flood risk?"
+**Budget Query**: "What's the Sheriff's budget for FY25-26?"
+- Shows RAG across a 700-page document
+- Quick, impressive, different data domain
 
-**Screen Recording**:
-- Show multi-hazard query
-- FEMA flood zone result + interpretation
-- CAL FIRE FHSZ result + implications (defensible space, building codes)
-- Proper disclaimer and contacts
-
-**Visual Enhancement**:
-- Quick screenshot of actual FEMA or CAL FIRE data
-- Shows SAGE is hitting real state/federal sources
+**OR Infographic Query**: "Generate a diagram showing SAGE's architecture."
+- Shows AI image generation capability
+- Visual wow factor
+- Mention rate limiting for cost control
 
 ---
 
 ### SEGMENT 3: Results & Explanation (2:00-3:00)
 
-#### 3A: Observability — Production Thinking (0:45-1:00)
-**Narration**:
-> "Building the agent is one thing. Operating it is another. I've instrumented SAGE with Raindrop for production monitoring.
->
-> Here you can see real interactions traced through tool calls, query distribution over time, and — most importantly — custom signals I've defined to catch domain-specific failures."
-
-**Screen Recording**:
-- Raindrop dashboard showing:
-  - Interaction timeline with traces
-  - Signal dashboard with custom signals
-  - Query type breakdown
-- Quick and visual — let the pretty charts speak
-
-**Narration overlay**:
-> "For example, I've set up a signal to detect when the agent might confuse city and county jurisdiction — a silent failure that traditional monitoring would never catch. This is how you'd operate an AI agent in production."
-
-#### 3B: What We Built — Summary (0:45-1:00)
+#### 3A: What We Built — Technical Summary (0:45-1:00)
 **Narration**:
 > "So what did we build?
 >
-> An MCP server that gives Claude direct access to Solano County's GIS infrastructure — parcels, zoning, flood zones, fire hazard, districts.
+> An MCP server with 25 tools that gives Claude direct access to:
+> - Solano County's GIS infrastructure — parcels, zoning, flood zones, fire hazard, districts
+> - The county code — full text of Chapters 26 and 28 with keyword search
+> - The FY25-26 budget — semantic search across the entire document
+> - AI image generation — for maps, infographics, and visualizations
 >
 > A Skill that provides organizational knowledge — jurisdiction routing, data interpretation, regulatory context, contacts.
->
-> And observability that treats AI failures as seriously as we treat software errors.
 >
 > The result is an agent that doesn't just query data — it understands what it means in context."
 
 **Visuals**:
-- [Nano Banana] Summary infographic showing the three components
+- [AI Generated] Summary infographic showing the five tool categories with counts
 - Architecture diagram callback
 
-#### 3C: Relevance & Future (0:30-0:45)
+#### 3B: Production Considerations (0:30-0:45)
 **Narration**:
-> "This isn't about replacing GIS analysts. It's about giving them a collaborator for repetitive query work while they focus on analysis, decisions, and the human relationships that make government work.
+> "Building the agent is one thing. Operating it is another.
 >
-> The same infrastructure could power public-facing tools — letting residents get property information without calling the office.
+> Key considerations for production deployment:
+> - Rate limiting on AI image generation to control costs
+> - Reference data that can be updated independently of code
+> - Comprehensive disclaimers that GIS data is for reference only
+> - Clear routing to appropriate departments for official determinations
+>
+> This isn't a toy demo — it's infrastructure that could actually be deployed."
+
+**Visuals**:
+- Quick scroll through reference files in `sage-skill/references/`
+- Highlight disclaimer text
+
+#### 3C: Relevance & Future (0:45-1:00)
+**Narration**:
+> "This isn't about replacing GIS analysts. It's about giving them a collaborator for repetitive lookup work while they focus on analysis, decisions, and the human relationships that make government work.
+>
+> The same infrastructure could power:
+> - Internal tools for staff to quickly research properties
+> - Public-facing chatbots for common questions
+> - Automated report generation with maps and citations
 >
 > The foundation is here. The question is what we build on it."
 
 **Visuals**:
-- [Nano Banana] Before/After comparison:
-  - Before: Staff manually running queries
+- [AI Generated] Before/After comparison:
+  - Before: Staff manually searching GIS, code, budget documents
   - After: Staff focusing on complex analysis while SAGE handles lookups
 - Fade to title card / contact info
 
@@ -289,55 +325,77 @@ Every segment must address these criteria:
 ### Recording Setup
 - **Screen capture**: OBS or similar, 1080p minimum, 60fps
 - **Audio**: External mic, quiet room, consistent levels
-- **IDE**: Clean VS Code with relevant extensions visible
-- **Browser**: ArcGIS tabs pre-loaded, Raindrop dashboard ready
-- **Agent interface**: Claude Code or appropriate chat interface
+- **IDE**: VS Code with `scripts/` and `lib/` folders visible
+- **Browser**: ArcGIS tabs pre-loaded for verification
+- **Agent interface**: Claude Code terminal
+
+### Key Files to Show
+```
+sage/
+├── scripts/
+│   └── mcp-dev-server.ts      # Main MCP server (25 tools)
+├── lib/
+│   └── tools/
+│       ├── gis.ts             # GIS query functions
+│       ├── county-code.ts     # County code search
+│       ├── budget-rag.ts      # Budget RAG system
+│       └── image-generation.ts # fal.ai integration
+├── sage-skill/
+│   ├── SKILL.md               # Main skill prompt
+│   └── references/            # On-demand knowledge
+└── data/
+    ├── codes/solano/          # County code JSON
+    └── budget/                # Budget embeddings
+```
 
 ### Editing Priorities
 
-| Priority | Task | Est. Time |
-|----------|------|-----------|
-| **High** | Screen recording (demos must work flawlessly) | 2-3 hours |
-| **High** | Nano Banana Pro visuals creation | 2-3 hours |
-| **High** | Audio recording (clear, professional) | 1-2 hours |
-| **Medium** | Transitions and timing polish | 1-2 hours |
-| **Medium** | Callouts/highlights on screen recordings | 1 hour |
-| **Lower** | Background music (subtle, optional) | 30 min |
-
-### Contingency
-- Pre-record demo scenarios multiple times
-- Have backup queries if primary ones fail
-- Know exact timestamps for each segment to hit 10-12 min target
+| Priority | Task |
+|----------|------|
+| **High** | Screen recording (demos must work flawlessly) |
+| **High** | AI-generated visuals (architecture, flow diagrams) |
+| **High** | Audio recording (clear, professional) |
+| **Medium** | Transitions and timing polish |
+| **Medium** | Callouts/highlights on screen recordings |
+| **Lower** | Background music (subtle, optional) |
 
 ### Pre-Recording Checklist
-- [ ] MCP server running and tested
-- [ ] All demo queries verified working
-- [ ] Raindrop dashboard populated with test data
-- [ ] Nano Banana assets created and exported
+- [ ] MCP server running (`bun run scripts/mcp-dev-server.ts`)
+- [ ] All 5 demo queries verified working
+- [ ] AI infographic generation tested (check rate limit status)
+- [ ] Reference files present in `sage-skill/references/`
 - [ ] Script rehearsed for timing
 - [ ] Screen recording software tested
 - [ ] Audio levels checked
 
 ---
 
-## Timeline to Deadline
+## Demo Query Bank
 
-**Today**: Finalize spec and outline  
-**Day 1-2**: Build MCP server core tools  
-**Day 3**: Complete skill, test demo scenarios  
-**Day 4**: Create Nano Banana visuals, record screen demos  
-**Day 5**: Record narration, edit video  
-**Day 6**: Polish, review, upload  
-**Day 7**: Buffer for fixes
+**Primary demos (in order):**
+
+| # | Demo | Primary Query | Backup Query |
+|---|------|---------------|--------------|
+| 1 | Jurisdiction + Map | "What's the zoning at 2500 Cordelia Road, Fairfield, CA? Show me a map." | "What's the zoning at 1234 Suisun Valley Road?" |
+| 2 | Hazard Report | "What hazards affect 123 Main St, Vacaville? What should I know before buying?" | "Is 456 Oak St, Dixon in a flood zone or fire hazard area?" |
+| 3 | County Code | "What uses are allowed in A-40 zoning? Can I build an ADU?" | "What are the setback requirements for R-R-5?" |
+
+**Optional/backup demos:**
+
+| Demo | Query | When to Use |
+|------|-------|-------------|
+| Budget | "What's the Sheriff's budget for FY25-26?" | If county code demo has issues |
+| Infographic | "Generate a diagram showing SAGE's architecture." | If you want visual variety |
+| Simple lookup | "What's the APN for 675 Texas Street, Fairfield?" | Quick fallback if running short |
 
 ---
 
 ## Key Messages to Reinforce
 
 1. **"Not just queries — understanding"**: SAGE interprets, not just returns data
-2. **"Organizational knowledge baked in"**: Jurisdiction routing, Prop 13 context, disclaimers
-3. **"Real infrastructure, real data"**: Not mocked — actual Solano County GIS
-4. **"Production-ready thinking"**: Observability, failure detection, operational maturity
+2. **"25 tools across 5 domains"**: GIS, County Code, Budget, Visualization, Knowledge
+3. **"Real infrastructure, real data"**: Not mocked — actual Solano County systems
+4. **"Production-ready thinking"**: Rate limiting, disclaimers, clear department routing
 5. **"Principal-level judgment"**: Knowing when to refer, what caveats matter, how to communicate
 
 ---
@@ -349,6 +407,7 @@ Every segment must address these criteria:
 - "Notice how..."
 - "This is the key insight..."
 - "What makes this different is..."
+- "The agent didn't just return data — it..."
 
 ### Phrases to Avoid
 - "Um", "Uh", "So basically"
@@ -361,24 +420,6 @@ Every segment must address these criteria:
 - Technical but accessible
 - Demonstrating, not lecturing
 - Enthusiastic about the possibilities
-
----
-
-## Appendix: Demo Query Bank
-
-**Backup queries if primary scenarios have issues:**
-
-| Category | Query |
-|----------|-------|
-| Simple lookup | "What's the zoning at [address]?" |
-| Jurisdiction | "Is [address] in city limits or unincorporated?" |
-| Flood zone | "Is [address] in a flood zone? What does that mean?" |
-| Fire hazard | "What fire hazard zone is [address] in?" |
-| Supervisor | "Who is my supervisor for [address]?" |
-| Parcels | "How many parcels in District 3?" |
-| Spatial | "What's the nearest park to [address]?" |
-| Aggregation | "What's the average parcel size in [city]?" |
-| Complex | "Show me residential parcels over 1 acre in flood zones" |
 
 ---
 
