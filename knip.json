@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "scripts/mcp-dev-server.ts",
+    "scripts/parse-chapter-28.ts",
+    "scripts/test-*.ts",
+    "lib/tools/*.ts",
+    "lib/budget-search.ts"
+  ],
+  "project": ["lib/**/*.ts", "scripts/**/*.ts"],
+  "ignore": ["**/*.test.ts", "**/*.spec.ts"],
+  "ignoreDependencies": ["eslint", "eslint-config-next"]
+}
