@@ -41,6 +41,9 @@ When you need detailed information on these topics, read the corresponding refer
 - **Detailed county history/demographics** → `references/solano-county-encyclopedia.md`
 - **Jurisdiction routing** → `references/jurisdiction.md`
 
+### County Organization
+- **Departments, leadership, org chart** → `references/org-structure.md`
+
 ### Property & Zoning
 - **Zoning codes and meanings** → `references/zoning-codes.md`
 - **Prop 13 / assessed values** → `references/prop13.md`
