@@ -95,9 +95,10 @@ export async function geocodeAddress(args: { address: string }): Promise<Geocode
     }
 
     // Format APN with dashes if not already formatted
+    // APNs can be 9 or 10 digits: XXX-XXX-XXX or XXX-XXX-XXXX
     let apn = String(attrs['apn'] || '');
-    if (apn && !apn.includes('-') && apn.length === 9) {
-      apn = `${apn.substring(0, 3)}-${apn.substring(3, 6)}-${apn.substring(6, 9)}`;
+    if (apn && !apn.includes('-') && (apn.length === 9 || apn.length === 10)) {
+      apn = `${apn.substring(0, 3)}-${apn.substring(3, 6)}-${apn.substring(6)}`;
     }
 
     // Build street address from components

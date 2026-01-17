@@ -66,7 +66,7 @@ export async function getParcelDetails(args: {
           success: false,
           error_type: 'INVALID_APN',
           message: `Invalid APN format: "${apn}"`,
-          suggestion: 'APN should be 9 digits, optionally with dashes (e.g., "123-456-789" or "123456789")',
+          suggestion: 'APN should be 9-10 digits, optionally with dashes (e.g., "123-456-789" or "003-025-1020")',
         };
       }
 
