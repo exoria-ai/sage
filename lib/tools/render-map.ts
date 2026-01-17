@@ -16,6 +16,15 @@ const TILE_SIZE = 256;
 const AUMENTUM_MAPSERVER = 'https://solanocountygis.com/server/rest/services/Aumentum/AumentumPublic/MapServer';
 const AERIAL_TILES = 'https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2025_WGS84/MapServer/tile';
 
+interface BufferOptions {
+  apn?: string;           // Source parcel for buffer
+  latitude?: number;      // Or source point lat
+  longitude?: number;     // Or source point lon
+  radius_feet: number;    // Buffer radius
+  show_ring?: boolean;    // Draw the buffer circle (default: true)
+  highlight_parcels?: boolean; // Highlight parcels in buffer (default: true)
+}
+
 interface MapOptions {
   center?: { latitude: number; longitude: number };
   apn?: string;
@@ -28,6 +37,7 @@ interface MapOptions {
   format?: 'png' | 'jpg';
   basemap?: 'streets' | 'aerial';
   highlightApn?: string;  // Specific APN to highlight differently
+  buffer?: BufferOptions; // Buffer visualization options
 }
 
 interface RenderMapResult {
@@ -375,6 +385,170 @@ function generateWatermarkSvg(width: number, height: number): string {
 }
 
 /**
+ * Generate buffer ring SVG overlay
+ * Draws a dashed circle around the center point with radius label
+ */
+function generateBufferRingSvg(
+  width: number,
+  height: number,
+  centerX: number,
+  centerY: number,
+  radiusPixels: number,
+  radiusFeet: number
+): string {
+  // Format radius label
+  const label = radiusFeet >= 5280
+    ? `${(radiusFeet / 5280).toFixed(2)} mi`
+    : `${radiusFeet} ft`;
+
+  // Calculate label position (top of circle)
+  const labelY = centerY - radiusPixels - 8;
+  const labelX = centerX;
+
+  return `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+    <!-- Buffer ring - dashed orange circle -->
+    <circle
+      cx="${centerX}"
+      cy="${centerY}"
+      r="${radiusPixels}"
+      fill="none"
+      stroke="#F97316"
+      stroke-width="2.5"
+      stroke-dasharray="8,4"
+      opacity="0.9"
+    />
+    <!-- Radius label background -->
+    <rect
+      x="${labelX - 30}"
+      y="${labelY - 12}"
+      width="60"
+      height="18"
+      rx="3"
+      fill="white"
+      fill-opacity="0.9"
+    />
+    <!-- Radius label text -->
+    <text
+      x="${labelX}"
+      y="${labelY}"
+      text-anchor="middle"
+      font-family="Arial, sans-serif"
+      font-size="11"
+      font-weight="bold"
+      fill="#F97316"
+    >${label} buffer</text>
+  </svg>`;
+}
+
+/**
+ * Fetch source parcel overlay (highlighted in orange/red for buffer visualization)
+ */
+async function fetchSourceParcelOverlay(
+  bbox: { xmin: number; ymin: number; xmax: number; ymax: number },
+  width: number,
+  height: number,
+  apn: string
+): Promise<Buffer | null> {
+  try {
+    const parsed = parseAPN(apn);
+    if (!parsed) return null;
+
+    const whereClause = `parcelid='${parsed.raw}'`;
+
+    // Convert bbox to Web Mercator for MapServer
+    const min = toWebMercator(bbox.xmin, bbox.ymin);
+    const max = toWebMercator(bbox.xmax, bbox.ymax);
+
+    const dynamicLayers = [{
+      id: 104,
+      source: { type: 'mapLayer', mapLayerId: 2 },
+      definitionExpression: whereClause,
+      drawingInfo: {
+        renderer: {
+          type: 'simple',
+          symbol: {
+            type: 'esriSFS',
+            style: 'esriSFSSolid',
+            color: [249, 115, 22, 100],  // Orange with 40% opacity (#F97316)
+            outline: {
+              type: 'esriSLS',
+              style: 'esriSLSSolid',
+              color: [234, 88, 12, 255],  // Darker orange (#EA580C)
+              width: 3
+            }
+          }
+        },
+        showLabels: false
+      }
+    }];
+
+    const params = new URLSearchParams({
+      bbox: `${min.x},${min.y},${max.x},${max.y}`,
+      bboxSR: '3857',
+      size: `${width},${height}`,
+      format: 'png32',
+      transparent: 'true',
+      dynamicLayers: JSON.stringify(dynamicLayers),
+      layers: 'dynamic',
+      f: 'image',
+    });
+
+    const url = `${AUMENTUM_MAPSERVER}/export?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`MapServer source parcel overlay failed: ${response.status}`);
+      return null;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (error) {
+    console.error('Failed to fetch source parcel overlay:', error);
+    return null;
+  }
+}
+
+/**
+ * Calculate zoom level that fits a buffer radius within the image
+ */
+function calculateZoomForBuffer(radiusFeet: number, width: number, height: number): number {
+  // We want the buffer circle to fit comfortably with some margin
+  // Use 70% of the smaller dimension for the diameter
+  const marginFactor = 0.7;
+  const availablePixels = Math.min(width, height) * marginFactor;
+  const diameterFeet = radiusFeet * 2;
+
+  // At zoom 17, 1 pixel ≈ 2.4 feet at this latitude (roughly)
+  // feet per pixel = 364000 / (256 * 2^zoom) * cos(lat) -- approximate
+  // For Solano County (~38° lat), we can use a simplified formula
+
+  // Target: diameterFeet should span availablePixels
+  // feetPerPixel = diameterFeet / availablePixels
+  const targetFeetPerPixel = diameterFeet / availablePixels;
+
+  // At zoom z, feetPerPixel ≈ 78271.52 / 2^z (at equator, adjust for latitude)
+  // At 38° latitude: feetPerPixel ≈ 78271.52 * cos(38°) / 2^z ≈ 61700 / 2^z
+  const latFactor = 61700; // feet per pixel at zoom 0, 38° latitude
+
+  const zoom = Math.log2(latFactor / targetFeetPerPixel);
+
+  // Clamp to reasonable range
+  return Math.max(13, Math.min(19, Math.round(zoom)));
+}
+
+/**
+ * Convert feet to pixels at a given zoom level and latitude
+ */
+function feetToPixels(feet: number, zoom: number, latitude: number = 38.25): number {
+  // At zoom z, meters per pixel = 156543.03 * cos(lat) / 2^z
+  // Convert to feet: feet per pixel = metersPerPixel * 3.28084
+  const metersPerPixel = (156543.03 * Math.cos((latitude * Math.PI) / 180)) / Math.pow(2, zoom);
+  const feetPerPixel = metersPerPixel * 3.28084;
+  return feet / feetPerPixel;
+}
+
+/**
  * Convert pixel coordinates back to lon/lat (inverse of lonLatToPixel)
  */
 function pixelToLonLat(
@@ -446,54 +620,112 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     format = 'png',
     basemap = 'aerial',
     highlightApn,
+    buffer,
   } = args;
 
   // Determine center and parcel info
-  let lat: number;
-  let lon: number;
+  let lat: number | undefined;
+  let lon: number | undefined;
   let zoom = requestedZoom || DEFAULT_ZOOM;
   let parcelApns: string[] = [];
 
-  // Collect APNs to display
-  if (apn) parcelApns.push(apn);
-  if (apns) parcelApns.push(...apns);
-  if (highlightApn && !parcelApns.includes(highlightApn)) {
+  // Buffer visualization state
+  let bufferSourceApn: string | undefined;
+  let bufferRadiusFeet: number | undefined;
+  let bufferCenterLat: number | undefined;
+  let bufferCenterLon: number | undefined;
+
+  // Handle buffer option - this takes priority for centering
+  if (buffer) {
+    bufferRadiusFeet = buffer.radius_feet;
+
+    if (buffer.apn) {
+      const parcelExtent = await getParcelExtent(buffer.apn);
+      if (!parcelExtent) {
+        return {
+          success: false,
+          error_type: 'APN_NOT_FOUND',
+          message: `Could not find buffer source parcel with APN "${buffer.apn}"`,
+          suggestion: 'Verify the APN format or provide coordinates instead',
+        };
+      }
+      bufferSourceApn = buffer.apn;
+      bufferCenterLat = parcelExtent.centerLat;
+      bufferCenterLon = parcelExtent.centerLon;
+      lat = bufferCenterLat;
+      lon = bufferCenterLon;
+    } else if (buffer.latitude !== undefined && buffer.longitude !== undefined) {
+      bufferCenterLat = buffer.latitude;
+      bufferCenterLon = buffer.longitude;
+      lat = bufferCenterLat;
+      lon = bufferCenterLon;
+    } else {
+      return {
+        success: false,
+        error_type: 'INVALID_INPUT',
+        message: 'Buffer requires either apn or latitude/longitude',
+        suggestion: 'Provide buffer.apn or buffer.latitude and buffer.longitude',
+      };
+    }
+
+    // Auto-calculate zoom to fit buffer if not specified
+    if (!requestedZoom) {
+      zoom = calculateZoomForBuffer(bufferRadiusFeet, width, height);
+    }
+  }
+
+  // Collect APNs to display (but not source parcel if buffer mode)
+  if (apn && apn !== bufferSourceApn) parcelApns.push(apn);
+  if (apns) parcelApns.push(...apns.filter(a => a !== bufferSourceApn));
+  if (highlightApn && !parcelApns.includes(highlightApn) && highlightApn !== bufferSourceApn) {
     parcelApns.push(highlightApn);
   }
 
-  // Determine map center
-  if (apn) {
-    const parcelExtent = await getParcelExtent(apn);
-    if (!parcelExtent) {
+  // Determine map center (if not already set by buffer)
+  if (!buffer) {
+    if (apn) {
+      const parcelExtent = await getParcelExtent(apn);
+      if (!parcelExtent) {
+        return {
+          success: false,
+          error_type: 'APN_NOT_FOUND',
+          message: `Could not find parcel with APN "${apn}"`,
+          suggestion: 'Verify the APN format or provide coordinates instead',
+        };
+      }
+      lat = parcelExtent.centerLat;
+      lon = parcelExtent.centerLon;
+    } else if (center) {
+      lat = center.latitude;
+      lon = center.longitude;
+    } else if (bbox) {
+      lat = (bbox.ymin + bbox.ymax) / 2;
+      lon = (bbox.xmin + bbox.xmax) / 2;
+      // Auto-calculate zoom from bbox
+      const lonSpan = bbox.xmax - bbox.xmin;
+      const latSpan = bbox.ymax - bbox.ymin;
+      const maxSpan = Math.max(lonSpan, latSpan);
+      if (maxSpan > 0.01) zoom = 15;
+      else if (maxSpan > 0.005) zoom = 16;
+      else if (maxSpan > 0.002) zoom = 17;
+      else zoom = 18;
+    } else {
       return {
         success: false,
-        error_type: 'APN_NOT_FOUND',
-        message: `Could not find parcel with APN "${apn}"`,
-        suggestion: 'Verify the APN format or provide coordinates instead',
+        error_type: 'INVALID_INPUT',
+        message: 'Must provide either center coordinates, APN, bbox, or buffer',
+        suggestion: 'Provide at least one location parameter',
       };
     }
-    lat = parcelExtent.centerLat;
-    lon = parcelExtent.centerLon;
-  } else if (center) {
-    lat = center.latitude;
-    lon = center.longitude;
-  } else if (bbox) {
-    lat = (bbox.ymin + bbox.ymax) / 2;
-    lon = (bbox.xmin + bbox.xmax) / 2;
-    // Auto-calculate zoom from bbox
-    const lonSpan = bbox.xmax - bbox.xmin;
-    const latSpan = bbox.ymax - bbox.ymin;
-    const maxSpan = Math.max(lonSpan, latSpan);
-    if (maxSpan > 0.01) zoom = 15;
-    else if (maxSpan > 0.005) zoom = 16;
-    else if (maxSpan > 0.002) zoom = 17;
-    else zoom = 18;
-  } else {
+  }
+
+  // Final validation that we have coordinates
+  if (lat === undefined || lon === undefined) {
     return {
       success: false,
       error_type: 'INVALID_INPUT',
-      message: 'Must provide either center coordinates, APN, or bbox',
-      suggestion: 'Provide at least one location parameter',
+      message: 'Could not determine map center coordinates',
+      suggestion: 'Provide center, APN, bbox, or buffer parameters',
     };
   }
 
@@ -609,18 +841,58 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       }
     }
 
-    // Highlight specific parcels in blue if APNs provided
-    if (parcelApns.length > 0) {
-      const highlightOverlay = await fetchHighlightedParcels(mapBbox, actualWidth, actualHeight, parcelApns);
-      if (highlightOverlay) {
-        overlays.push({ input: highlightOverlay, top: 0, left: 0 });
-      }
-    }
+    // Buffer visualization overlays
+    if (buffer && bufferRadiusFeet && bufferCenterLat !== undefined && bufferCenterLon !== undefined) {
+      // Calculate buffer center position in the extracted image
+      // The buffer center should be at the image center since we centered on it
+      const bufferCenterX = actualWidth / 2;
+      const bufferCenterY = actualHeight / 2;
 
-    // Add center marker if no specific parcels highlighted
-    if (parcelApns.length === 0) {
-      const markerSvg = generateMarkerSvg(actualWidth, actualHeight);
-      overlays.push({ input: Buffer.from(markerSvg), top: 0, left: 0 });
+      // Calculate buffer radius in pixels
+      const radiusPixels = feetToPixels(bufferRadiusFeet, zoom, bufferCenterLat);
+
+      // Add source parcel highlight (orange) if APN provided
+      if (bufferSourceApn) {
+        const sourceOverlay = await fetchSourceParcelOverlay(mapBbox, actualWidth, actualHeight, bufferSourceApn);
+        if (sourceOverlay) {
+          overlays.push({ input: sourceOverlay, top: 0, left: 0 });
+        }
+      }
+
+      // Highlight parcels within buffer (blue) if requested
+      if (buffer.highlight_parcels !== false && parcelApns.length > 0) {
+        const highlightOverlay = await fetchHighlightedParcels(mapBbox, actualWidth, actualHeight, parcelApns);
+        if (highlightOverlay) {
+          overlays.push({ input: highlightOverlay, top: 0, left: 0 });
+        }
+      }
+
+      // Add buffer ring SVG if requested
+      if (buffer.show_ring !== false) {
+        const bufferRingSvg = generateBufferRingSvg(
+          actualWidth,
+          actualHeight,
+          bufferCenterX,
+          bufferCenterY,
+          radiusPixels,
+          bufferRadiusFeet
+        );
+        overlays.push({ input: Buffer.from(bufferRingSvg), top: 0, left: 0 });
+      }
+    } else {
+      // Non-buffer mode: highlight specific parcels in blue if APNs provided
+      if (parcelApns.length > 0) {
+        const highlightOverlay = await fetchHighlightedParcels(mapBbox, actualWidth, actualHeight, parcelApns);
+        if (highlightOverlay) {
+          overlays.push({ input: highlightOverlay, top: 0, left: 0 });
+        }
+      }
+
+      // Add center marker if no specific parcels highlighted and not in buffer mode
+      if (parcelApns.length === 0) {
+        const markerSvg = generateMarkerSvg(actualWidth, actualHeight);
+        overlays.push({ input: Buffer.from(markerSvg), top: 0, left: 0 });
+      }
     }
 
     // Add north arrow

@@ -25,6 +25,7 @@ import {
   listCountyCodeSections,
   searchCountyCode,
 } from '@/lib/tools/county-code';
+import { getParcelsInBuffer } from '@/lib/tools/parcels-in-buffer';
 
 const handler = createMcpHandler(
   (server) => {
@@ -268,22 +269,35 @@ INPUT (provide ONE of these):
 - apn: Assessor's Parcel Number - map centered on parcel with boundary highlighted
 - apns: Array of APNs - display multiple parcels (e.g., search results)
 - bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
+- buffer: Buffer visualization (see BUFFER MODE below)
 
 OPTIONS:
 - width: Image width in pixels (default: 600)
 - height: Image height in pixels (default: 400)
-- zoom: Map zoom level 1-19 (default: 17, street level)
+- zoom: Map zoom level 1-19 (default: 17, street level). Auto-calculated for buffer mode.
 - format: 'png' or 'jpg' (default: 'png')
 - basemap: 'aerial' or 'streets'
-  - 'aerial' (RECOMMENDED): High-resolution 2025 Solano County aerial photography. Best for viewing property boundaries, structures, and land features.
-  - 'streets': Generic CARTO street map. Use only when street names/navigation context is more important than property details.
+  - 'aerial' (RECOMMENDED): High-resolution 2025 Solano County aerial photography.
+  - 'streets': Generic CARTO street map.
+
+BUFFER MODE - For property owner notification maps:
+Use the 'buffer' parameter to visualize a radius around a parcel or point.
+  buffer: {
+    apn: "123-456-789",    // Source parcel (highlighted in orange)
+    radius_feet: 300,      // Buffer radius (displayed as dashed circle)
+    show_ring: true,       // Show buffer circle (default: true)
+    highlight_parcels: true // Highlight buffer parcels in blue (default: true)
+  }
+
+BUFFER WORKFLOW - Combine with get_parcels_in_buffer:
+  1. get_parcels_in_buffer({ apn: "123-456-789", radius_feet: 300 }) → get parcel list
+  2. render_map({ buffer: { apn: "123-456-789", radius_feet: 300 }, apns: [list from step 1] })
 
 OUTPUT:
 Returns both an embedded image AND a permanent imageUrl.
 
 **CRITICAL**: You MUST include the imageUrl in your response to the user. The image may not render
-in all clients, so the URL is essential for users to view the map. Format it as a clickable link:
-"View map: [URL]" or similar.
+in all clients, so the URL is essential for users to view the map.
 
 MULTI-PARCEL USE CASE:
 After search_parcels, pass the APNs to render_map to visualize results:
@@ -291,7 +305,7 @@ After search_parcels, pass the APNs to render_map to visualize results:
   2. render_map({ apns: [apn1, apn2, ...], zoom: 14 })`,
       {
         apn: z.string().optional().describe("Assessor's Parcel Number to center map on"),
-        apns: z.array(z.string()).optional().describe('Array of APNs to display (for search results)'),
+        apns: z.array(z.string()).optional().describe('Array of APNs to display (for search results or buffer parcels)'),
         center: z.object({
           latitude: z.number(),
           longitude: z.number(),
@@ -302,18 +316,27 @@ After search_parcels, pass the APNs to render_map to visualize results:
           xmax: z.number(),
           ymax: z.number(),
         }).optional().describe('Bounding box in WGS84'),
+        buffer: z.object({
+          apn: z.string().optional().describe('Source parcel APN for buffer center'),
+          latitude: z.number().optional().describe('Source point latitude (if no APN)'),
+          longitude: z.number().optional().describe('Source point longitude (if no APN)'),
+          radius_feet: z.number().describe('Buffer radius in feet (e.g., 300, 500, 1000)'),
+          show_ring: z.boolean().optional().describe('Show buffer circle (default: true)'),
+          highlight_parcels: z.boolean().optional().describe('Highlight parcels in buffer (default: true)'),
+        }).optional().describe('Buffer visualization options'),
         width: z.number().optional().describe('Image width in pixels (default: 600)'),
         height: z.number().optional().describe('Image height in pixels (default: 400)'),
-        zoom: z.number().optional().describe('Map zoom level 1-19 (default: 17)'),
+        zoom: z.number().optional().describe('Map zoom level 1-19 (auto-calculated for buffer mode)'),
         format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
-        basemap: z.enum(['aerial', 'streets']).optional().describe('Basemap type: aerial (default, Solano imagery) or streets'),
+        basemap: z.enum(['aerial', 'streets']).optional().describe('Basemap type: aerial (default) or streets'),
       },
-      async ({ apn, apns, center, bbox, width, height, zoom, format, basemap }) => {
+      async ({ apn, apns, center, bbox, buffer, width, height, zoom, format, basemap }) => {
         const result = await renderMap({
           apn,
           apns,
           center,
           bbox,
+          buffer,
           width,
           height,
           zoom,
@@ -617,6 +640,56 @@ Title matches are ranked higher than text matches.`,
       },
       async ({ query, chapter, max_results }) => {
         const result = await searchCountyCode({ query, chapter, max_results });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Get Parcels in Buffer Tool
+    server.tool(
+      'get_parcels_in_buffer',
+      `Find all parcels within a specified radius of a location or parcel.
+
+PRIMARY USE CASE: Property owner notification lists for discretionary permits.
+California jurisdictions typically require notifying owners within 300-1000 feet
+of a project site for use permits, variances, subdivisions, and rezonings.
+
+INPUT (provide ONE):
+- apn: Source parcel APN - buffer measured from parcel boundary
+- latitude/longitude: Point location - buffer measured from point
+
+OPTIONS:
+- radius_feet: Buffer distance (default: 300)
+  Common values: 300 (typical minimum), 500, 1000 (large projects)
+- include_source: Include the source parcel in results (default: false)
+
+OUTPUT for each parcel:
+- apn: Assessor's Parcel Number
+- situs_address: Property street address
+- owner_name: Owner of record (if available in public data)
+- city: City/jurisdiction
+- acreage: Parcel size
+- distance_feet: Distance from source (0 = adjacent/touching)
+- centroid: Lat/lon of parcel center
+
+WORKFLOW for notification list:
+1. get_parcels_in_buffer({ apn: "123-456-789", radius_feet: 300 })
+2. Review results for owner/address info
+3. (Future) Export to mailing labels
+
+NOTE: Distance is measured from source parcel boundary (if APN provided)
+or from source point (if coordinates provided). Parcels are included if
+any part of their boundary falls within the buffer radius.`,
+      {
+        apn: z.string().optional().describe("Source parcel APN - buffer measured from this parcel's boundary"),
+        latitude: z.number().optional().describe('Source point latitude (use if no APN)'),
+        longitude: z.number().optional().describe('Source point longitude (use if no APN)'),
+        radius_feet: z.number().optional().describe('Buffer radius in feet (default: 300)'),
+        include_source: z.boolean().optional().describe('Include source parcel in results (default: false)'),
+      },
+      async ({ apn, latitude, longitude, radius_feet, include_source }) => {
+        const result = await getParcelsInBuffer({ apn, latitude, longitude, radius_feet, include_source });
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };
