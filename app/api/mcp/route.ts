@@ -561,15 +561,34 @@ CURRENTLY AVAILABLE:
 - Chapter 26: Subdivisions (41 sections)
   - Sections 26-11 through 26-15.3: Authority, purpose, application, exemptions, fees
   - Sections 26-21 through 26-21.32: All subdivision-related definitions
-- Chapter 28: Zoning Regulations (74 sections)
-  - Section 28.01: Comprehensive zoning definitions
-  - Sections 28.21.x: Agricultural (A) district uses and standards
-  - Sections 28.22.x: Suisun Marsh Agricultural district
-  - Sections 28.23.x: Suisun Valley Agricultural district
-  - Sections 28.31.x: Rural Residential (R-R) district
-  - Sections 28.32.x: Residential-Traditional Community district
-  - Sections 28.41.x: Commercial (C) district
-  - Sections 28.61: Park (P) district
+- Chapter 28: Zoning Regulations (166 sections)
+  - Article I (28.01-28.05): General provisions, definitions
+  - Article II (28.10-28.69): Districts and allowed uses
+    - 28.21.x: Agricultural (A-40, A-80, A-20, A-160) districts
+    - 28.22.x: Suisun Marsh Agricultural district
+    - 28.23.x: Suisun Valley Agricultural district
+    - 28.31.x: Rural Residential (R-R-5, R-R-10) districts
+    - 28.32.x: Residential-Traditional Community district
+    - 28.41.x: Commercial (C) district
+    - 28.61.x: Park (P) district
+  - Article III (28.70-28.82): Land Use Regulations (specific use requirements)
+    - 28.71: Agricultural uses
+    - 28.72: Residential uses (including ADUs)
+    - 28.73: Recreation, education, public assembly
+    - 28.74: Retail and office uses
+    - 28.75: Tourist uses (agritourism, vacation rentals)
+    - 28.76: Commercial services
+    - 28.80-28.82: Wind energy, wireless facilities, cannabis
+  - Article IV (28.90-28.99): Site Development Standards
+    - 28.91: Architectural standards
+    - 28.94: Parking requirements
+    - 28.96: Signs
+    - 28.97: Yards and setbacks
+  - Article V (28.100-28.119): Operations (permits, procedures)
+    - 28.101: Administrative Permit (AP)
+    - 28.106: Use Permit (MUP/UP)
+    - 28.107: Variance
+    - 28.112: Appeals
 
 SECTION ID FORMAT: "26-11", "28.21.20", "28.01" (chapter-section or chapter.section.subsection)
 

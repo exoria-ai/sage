@@ -374,16 +374,45 @@ async function parseHtmlFile(filePath: string): Promise<CodeSection[]> {
  */
 function groupIntoArticles(sections: CodeSection[]): CodeArticle[] {
   // Chapter 28 articles based on section ranges
+  // Based on actual HTML structure:
+  // - Article I: General Provisions (28.01-28.09)
+  // - Article II: Districts and Allowable Uses (28.10-28.69, includes 28.21, 28.22, 28.23, 28.31, 28.32, 28.41, 28.61)
+  // - Article III: Land Use Regulations (28.70-28.89, specific use requirements)
+  // - Article IV: Site Development and Other Standards (28.90-28.99, parking, signs, yards, etc.)
+  // - Article V: Operations of Chapter (28.100-28.119, permits, procedures, administration)
+  // More specific prefixes must come FIRST to avoid false matches
+  // e.g., 28.100 should match Article V, not 28.1x (Article II)
   const articleDefs: Array<{id: string; title: string; prefix: string}> = [
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.100' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.101' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.102' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.103' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.104' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.105' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.106' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.107' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.108' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.109' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.110' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.111' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.112' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.113' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.114' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.115' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.116' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.117' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.118' },
+    { id: 'V', title: 'Operations of Chapter', prefix: '28.119' },
     { id: 'I', title: 'General Provisions', prefix: '28.0' },
     { id: 'II', title: 'Districts and Allowable Uses', prefix: '28.1' },
     { id: 'II', title: 'Districts and Allowable Uses', prefix: '28.2' },
     { id: 'II', title: 'Districts and Allowable Uses', prefix: '28.3' },
     { id: 'II', title: 'Districts and Allowable Uses', prefix: '28.4' },
-    { id: 'III', title: 'Site Development Standards', prefix: '28.5' },
-    { id: 'IV', title: 'Specific Use Regulations', prefix: '28.7' },
-    { id: 'V', title: 'Nonconforming Uses', prefix: '28.8' },
-    { id: 'VI', title: 'Administration', prefix: '28.9' },
+    { id: 'II', title: 'Districts and Allowable Uses', prefix: '28.5' },
+    { id: 'II', title: 'Districts and Allowable Uses', prefix: '28.6' },
+    { id: 'III', title: 'Land Use Regulations', prefix: '28.7' },
+    { id: 'III', title: 'Land Use Regulations', prefix: '28.8' },
+    { id: 'IV', title: 'Site Development and Other Standards', prefix: '28.9' },
   ];
 
   const articles = new Map<string, CodeArticle>();
