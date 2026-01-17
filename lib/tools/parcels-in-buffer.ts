@@ -184,11 +184,16 @@ interface BufferResult {
   };
   buffer_feet?: number;
   total_parcels?: number;
+  parcels_returned?: number;
+  truncated?: boolean;
   parcels?: BufferParcel[];
   error_type?: string;
   message?: string;
   suggestion?: string;
 }
+
+// Maximum parcels to return in text response to avoid context exhaustion
+const MAX_PARCELS_RETURNED = 250;
 
 /**
  * Get all parcels within a buffer radius of a location or parcel
@@ -371,6 +376,11 @@ export async function getParcelsInBuffer(args: {
     // Sort by distance
     parcels.sort((a, b) => a.distance_feet - b.distance_feet);
 
+    // Limit results to avoid context exhaustion
+    const totalParcels = parcels.length;
+    const truncated = totalParcels > MAX_PARCELS_RETURNED;
+    const returnedParcels = truncated ? parcels.slice(0, MAX_PARCELS_RETURNED) : parcels;
+
     return {
       success: true,
       source: {
@@ -379,8 +389,13 @@ export async function getParcelsInBuffer(args: {
         longitude: sourceLon,
       },
       buffer_feet: radius_feet,
-      total_parcels: parcels.length,
-      parcels,
+      total_parcels: totalParcels,
+      parcels_returned: returnedParcels.length,
+      truncated,
+      parcels: returnedParcels,
+      ...(truncated && {
+        message: `Results limited to ${MAX_PARCELS_RETURNED} parcels (${totalParcels} total found). Consider using a smaller radius or render_map for visualization.`,
+      }),
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

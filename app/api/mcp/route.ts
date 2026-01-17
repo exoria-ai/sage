@@ -280,18 +280,20 @@ OPTIONS:
   - 'aerial' (RECOMMENDED): High-resolution 2025 Solano County aerial photography.
   - 'streets': Generic CARTO street map.
 
-BUFFER MODE - For property owner notification maps:
+BUFFER MODE - For buffer/radius visualization:
 Use the 'buffer' parameter to visualize a radius around a parcel or point.
   buffer: {
     apn: "123-456-789",    // Source parcel (highlighted in orange)
     radius_feet: 300,      // Buffer radius (displayed as dashed circle)
     show_ring: true,       // Show buffer circle (default: true)
-    highlight_parcels: true // Highlight buffer parcels in blue (default: true)
+    highlight_parcels: true // Highlight parcels intersecting buffer in blue (default: true)
   }
 
-BUFFER WORKFLOW - Combine with get_parcels_in_buffer:
-  1. get_parcels_in_buffer({ apn: "123-456-789", radius_feet: 300 }) → get parcel list
-  2. render_map({ buffer: { apn: "123-456-789", radius_feet: 300 }, apns: [list from step 1] })
+**EFFICIENT BUFFER VISUALIZATION**:
+  → Just call render_map with buffer parameter - NO need to call get_parcels_in_buffer first!
+  → render_map handles the spatial query internally and is much more efficient.
+  → Example: render_map({ buffer: { apn: "123-456-789", radius_feet: 2000 } })
+  → Only use get_parcels_in_buffer if you need the actual parcel data (owner names, addresses).
 
 OUTPUT:
 Returns both an embedded image AND a permanent imageUrl.
@@ -655,6 +657,18 @@ PRIMARY USE CASE: Property owner notification lists for discretionary permits.
 California jurisdictions typically require notifying owners within 300-1000 feet
 of a project site for use permits, variances, subdivisions, and rezonings.
 
+**IMPORTANT: CHOOSING THE RIGHT TOOL**
+
+For VISUALIZATION (buffer map image):
+  → Use render_map with buffer parameter directly. Do NOT call this tool first.
+  → render_map({ buffer: { apn: "123-456-789", radius_feet: 300 } })
+  → This is much more efficient - the map renderer handles spatial queries internally.
+
+For NOTIFICATION LISTS (owner/address data):
+  → Use this tool to get structured parcel data.
+  → Results are limited to 250 parcels to avoid context exhaustion.
+  → For larger buffers with 250+ parcels, consider smaller radius or just use render_map.
+
 INPUT (provide ONE):
 - apn: Source parcel APN - buffer measured from parcel boundary
 - latitude/longitude: Point location - buffer measured from point
@@ -673,14 +687,11 @@ OUTPUT for each parcel:
 - distance_feet: Distance from source (0 = adjacent/touching)
 - centroid: Lat/lon of parcel center
 
-WORKFLOW for notification list:
-1. get_parcels_in_buffer({ apn: "123-456-789", radius_feet: 300 })
-2. Review results for owner/address info
-3. (Future) Export to mailing labels
-
 NOTE: Distance is measured from source parcel boundary (if APN provided)
 or from source point (if coordinates provided). Parcels are included if
-any part of their boundary falls within the buffer radius.`,
+any part of their boundary falls within the buffer radius.
+
+LIMITS: Maximum 250 parcels returned. If truncated, total_parcels shows full count.`,
       {
         apn: z.string().optional().describe("Source parcel APN - buffer measured from this parcel's boundary"),
         latitude: z.number().optional().describe('Source point latitude (use if no APN)'),
