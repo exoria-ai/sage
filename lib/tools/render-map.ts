@@ -54,8 +54,8 @@ interface RenderMapResult {
 }
 
 // Default settings
-const DEFAULT_WIDTH = 1200;
-const DEFAULT_HEIGHT = 800;
+const DEFAULT_WIDTH = 1512;
+const DEFAULT_HEIGHT = 1512;
 const DEFAULT_ZOOM = 17;
 
 /**
@@ -214,38 +214,18 @@ async function getParcelExtent(apn: string): Promise<{
 /**
  * Fetch parcel boundary overlay from MapServer/export
  * Returns a transparent PNG with all parcel lines in view (green, like Solano's viewer)
+ * When showLabels is true, uses server's default styling which includes APN labels
  */
 async function fetchParcelBoundaries(
   bbox: { xmin: number; ymin: number; xmax: number; ymax: number },
   width: number,
-  height: number
+  height: number,
+  showLabels: boolean = false
 ): Promise<Buffer | null> {
   try {
     // Convert bbox to Web Mercator for MapServer
     const min = toWebMercator(bbox.xmin, bbox.ymin);
     const max = toWebMercator(bbox.xmax, bbox.ymax);
-
-    // Use dynamicLayers to style parcels with green outlines (matching Solano's viewer)
-    const dynamicLayers = [{
-      id: 102,
-      source: { type: 'mapLayer', mapLayerId: 2 },
-      drawingInfo: {
-        renderer: {
-          type: 'simple',
-          symbol: {
-            type: 'esriSFS',
-            style: 'esriSFSNull',  // No fill
-            outline: {
-              type: 'esriSLS',
-              style: 'esriSLSSolid',
-              color: [34, 197, 94, 255],  // Green (#22C55E)
-              width: 1.5
-            }
-          }
-        },
-        showLabels: false
-      }
-    }];
 
     const params = new URLSearchParams({
       bbox: `${min.x},${min.y},${max.x},${max.y}`,
@@ -253,16 +233,46 @@ async function fetchParcelBoundaries(
       size: `${width},${height}`,
       format: 'png32',
       transparent: 'true',
-      dynamicLayers: JSON.stringify(dynamicLayers),
-      layers: 'dynamic',
       f: 'image',
     });
+
+    if (showLabels) {
+      // Use server's default styling which includes labels
+      // The server's parcel layer (2) has built-in labeling with PARCELID
+      params.set('layers', 'show:2');
+    } else {
+      // Use dynamicLayers to customize styling without labels
+      // Set minScale to 0 to override the layer's default minScale:8000 limit
+      const dynamicLayers = [{
+        id: 102,
+        source: { type: 'mapLayer', mapLayerId: 2 },
+        minScale: 0,
+        maxScale: 0,
+        drawingInfo: {
+          renderer: {
+            type: 'simple',
+            symbol: {
+              type: 'esriSFS',
+              style: 'esriSFSNull',  // No fill
+              outline: {
+                type: 'esriSLS',
+                style: 'esriSLSSolid',
+                color: [34, 197, 94, 255],  // Green (#22C55E)
+                width: 1.5
+              }
+            }
+          },
+          showLabels: false
+        }
+      }];
+      params.set('dynamicLayers', JSON.stringify(dynamicLayers));
+      params.set('layers', 'dynamic');
+    }
 
     const url = `${AUMENTUM_MAPSERVER}/export?${params.toString()}`;
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.error(`MapServer parcel boundaries failed: ${response.status}`);
       return null;
     }
 
@@ -300,6 +310,8 @@ async function fetchHighlightedParcels(
     const dynamicLayers = [{
       id: 103,
       source: { type: 'mapLayer', mapLayerId: 2 },
+      minScale: 0,  // Override default minScale:8000 to show at any zoom
+      maxScale: 0,
       definitionExpression: whereClause,
       drawingInfo: {
         renderer: {
@@ -465,6 +477,8 @@ async function fetchSourceParcelOverlay(
     const dynamicLayers = [{
       id: 104,
       source: { type: 'mapLayer', mapLayerId: 2 },
+      minScale: 0,  // Override default minScale:8000 to show at any zoom
+      maxScale: 0,
       definitionExpression: whereClause,
       drawingInfo: {
         renderer: {
@@ -500,7 +514,6 @@ async function fetchSourceParcelOverlay(
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.error(`MapServer source parcel overlay failed: ${response.status}`);
       return null;
     }
 
@@ -558,6 +571,8 @@ async function fetchBufferParcelsOverlay(
     const dynamicLayers = [{
       id: 105,
       source: { type: 'mapLayer', mapLayerId: 2 },
+      minScale: 0,  // Override default minScale:8000 to show at any zoom
+      maxScale: 0,
       definitionExpression: whereClause,
       drawingInfo: {
         renderer: {
@@ -609,7 +624,6 @@ async function fetchBufferParcelsOverlay(
     const response = await fetch(url);
 
     if (!response.ok) {
-      console.error(`MapServer buffer parcels overlay failed: ${response.status}`);
       return null;
     }
 
@@ -622,18 +636,46 @@ async function fetchBufferParcelsOverlay(
 }
 
 /**
- * Calculate zoom level that fits a buffer radius within the image
+ * Calculate zoom level that fits a buffer around a parcel within the image.
+ * Uses whichever is larger: the buffer diameter or the parcel extent + buffer.
  */
-function calculateZoomForBuffer(radiusFeet: number, width: number, height: number): number {
-  // We want the buffer circle to fit comfortably with some margin
-  // Use 70% of the smaller dimension for the diameter
+function calculateZoomForBuffer(
+  radiusFeet: number,
+  width: number,
+  height: number,
+  parcelExtent?: { xmin: number; ymin: number; xmax: number; ymax: number }
+): number {
+  // We want the content to fit comfortably with some margin
+  // Use 70% of the image dimensions
   const marginFactor = 0.7;
-  const availablePixels = Math.min(width, height) * marginFactor;
-  const diameterFeet = radiusFeet * 2;
+  const availableWidth = width * marginFactor;
+  const availableHeight = height * marginFactor;
 
-  // Target: diameterFeet should span availablePixels
-  // feetPerPixel = diameterFeet / availablePixels
-  const targetFeetPerPixel = diameterFeet / availablePixels;
+  // Calculate the total extent we need to show
+  let extentWidthFeet: number;
+  let extentHeightFeet: number;
+
+  if (parcelExtent) {
+    // Parcel extent is in degrees - convert to feet
+    // At 38° lat: 1 degree lon ≈ 288,000 ft, 1 degree lat ≈ 364,000 ft
+    const parcelWidthFeet = (parcelExtent.xmax - parcelExtent.xmin) * 288000;
+    const parcelHeightFeet = (parcelExtent.ymax - parcelExtent.ymin) * 364000;
+
+    // Total extent = parcel + buffer on all sides
+    extentWidthFeet = parcelWidthFeet + (radiusFeet * 2);
+    extentHeightFeet = parcelHeightFeet + (radiusFeet * 2);
+  } else {
+    // No parcel extent - just use buffer diameter
+    extentWidthFeet = radiusFeet * 2;
+    extentHeightFeet = radiusFeet * 2;
+  }
+
+  // Calculate required feet per pixel for each dimension
+  const feetPerPixelWidth = extentWidthFeet / availableWidth;
+  const feetPerPixelHeight = extentHeightFeet / availableHeight;
+
+  // Use the larger (more zoomed out) requirement
+  const targetFeetPerPixel = Math.max(feetPerPixelWidth, feetPerPixelHeight);
 
   // At zoom z, meters per pixel = 156543.03 * cos(lat) / 2^z
   // At 38° latitude (cos(38°) ≈ 0.788): meters per pixel = 123,356 / 2^z
@@ -642,6 +684,8 @@ function calculateZoomForBuffer(radiusFeet: number, width: number, height: numbe
 
   const zoom = Math.log2(latFactor / targetFeetPerPixel);
 
+  // Note: MapServer parcel layer has minScale: 8000, so parcel overlays
+  // won't appear when zoomed out beyond ~1:8000 scale (large buffers/parcels)
   // Clamp to reasonable range (13 = county scale, 19 = building scale)
   return Math.max(13, Math.min(19, Math.round(zoom)));
 }
@@ -727,7 +771,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     zoom: requestedZoom,
     showParcel = true,
     format = 'png',
-    basemap = 'aerial',
+    basemap = 'streets',  // Default to streets basemap (cleaner, more context)
     highlightApn,
     buffer,
   } = args;
@@ -743,6 +787,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
   let bufferRadiusFeet: number | undefined;
   let bufferCenterLat: number | undefined;
   let bufferCenterLon: number | undefined;
+  let bufferSourceExtent: { xmin: number; ymin: number; xmax: number; ymax: number } | undefined;
 
   // Handle buffer option - this takes priority for centering
   if (buffer) {
@@ -761,6 +806,12 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       bufferSourceApn = buffer.apn;
       bufferCenterLat = parcelExtent.centerLat;
       bufferCenterLon = parcelExtent.centerLon;
+      bufferSourceExtent = {
+        xmin: parcelExtent.xmin,
+        ymin: parcelExtent.ymin,
+        xmax: parcelExtent.xmax,
+        ymax: parcelExtent.ymax,
+      };
       lat = bufferCenterLat;
       lon = bufferCenterLon;
     } else if (buffer.latitude !== undefined && buffer.longitude !== undefined) {
@@ -777,9 +828,9 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       };
     }
 
-    // Auto-calculate zoom to fit buffer if not specified
+    // Auto-calculate zoom to fit buffer + source parcel if not specified
     if (!requestedZoom) {
-      zoom = calculateZoomForBuffer(bufferRadiusFeet, width, height);
+      zoom = calculateZoomForBuffer(bufferRadiusFeet, width, height, bufferSourceExtent);
     }
   }
 
@@ -941,10 +992,12 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       startTileY,
       tileSize
     );
-
     // Always show parcel boundaries (green lines like Solano's viewer)
+    // Show APN labels when zoom >= 17 (readable at neighborhood scale)
+    // Labels get too cluttered at lower zooms and unreadable at higher zooms would be fine
     if (showParcel) {
-      const parcelBoundaries = await fetchParcelBoundaries(mapBbox, actualWidth, actualHeight);
+      const shouldShowLabels = zoom >= 17;
+      const parcelBoundaries = await fetchParcelBoundaries(mapBbox, actualWidth, actualHeight, shouldShowLabels);
       if (parcelBoundaries) {
         overlays.push({ input: parcelBoundaries, top: 0, left: 0 });
       }
