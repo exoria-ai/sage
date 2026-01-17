@@ -150,7 +150,11 @@ function parseAllowedUsesTable(table: Element): AllowedUseTable | null {
   const legend: Record<string, string> = {};
   const legendMatches = legendText.matchAll(/([A-Z]+)\s*=\s*([^,]+)/g);
   for (const match of legendMatches) {
-    legend[match[1]] = match[2].trim();
+    const key = match[1];
+    const value = match[2];
+    if (key && value) {
+      legend[key] = value.trim();
+    }
   }
   // Add common ones if not found
   if (!legend['A']) legend['A'] = 'Allowed by right';
@@ -174,6 +178,7 @@ function parseAllowedUsesTable(table: Element): AllowedUseTable | null {
 
     // Check if this is a category header row (spans full width, has bold text)
     const firstCell = cells[0];
+    if (!firstCell) continue;
     const colspan = parseInt(firstCell.getAttribute('colspan') || '1');
     const hasBold = firstCell.querySelector('.bold, span.bold') !== null;
     const text = cleanText(firstCell.textContent || '');
@@ -186,12 +191,15 @@ function parseAllowedUsesTable(table: Element): AllowedUseTable | null {
 
     // Check for lettered subcategory (A., B., C., etc.)
     if (cells.length >= 2) {
-      const letterCell = cleanText(cells[0].textContent || '');
+      const cell0 = cells[0];
+      const cell1 = cells[1];
+      if (!cell0 || !cell1) continue;
+      const letterCell = cleanText(cell0.textContent || '');
       const letterMatch = letterCell.match(/^([A-Z])\.?$/);
 
-      if (letterMatch && cells[1].querySelector('.bold')) {
+      if (letterMatch && letterMatch[1] && cell1.querySelector('.bold')) {
         // New category
-        const categoryName = cleanText(cells[1].textContent || '');
+        const categoryName = cleanText(cell1.textContent || '');
         currentCategory = {
           letter: letterMatch[1],
           name: categoryName,
@@ -213,6 +221,7 @@ function parseAllowedUsesTable(table: Element): AllowedUseTable | null {
 
     for (let i = 0; i < cells.length; i++) {
       const cell = cells[i];
+      if (!cell) continue;
       const cellText = cleanText(cell.textContent || '');
 
       if (i === 0 && cellText === '') {
@@ -251,7 +260,11 @@ function parseAllowedUsesTable(table: Element): AllowedUseTable | null {
     if (useName && permitValues.length > 0) {
       const permits: Record<string, string> = {};
       for (let i = 0; i < Math.min(zones.length, permitValues.length); i++) {
-        permits[zones[i]] = permitValues[i];
+        const zone = zones[i];
+        const permit = permitValues[i];
+        if (zone && permit) {
+          permits[zone] = permit;
+        }
       }
 
       currentCategory.uses.push({
@@ -317,6 +330,7 @@ async function parseHtmlFile(filePath: string): Promise<CodeSection[]> {
 
   for (let i = 0; i < headers.length; i++) {
     const header = headers[i];
+    if (!header) continue;
     const id = header.getAttribute('id') || '';
     const anchor = header.querySelector('a[name]');
     const sectionId = anchor?.getAttribute('name') || id;
@@ -324,7 +338,7 @@ async function parseHtmlFile(filePath: string): Promise<CodeSection[]> {
     // Extract title (text after the section number)
     const headerText = cleanText(header.textContent || '');
     const titleMatch = headerText.match(/^[\d.-]+\s*(.*)$/);
-    const title = titleMatch ? titleMatch[1] : headerText;
+    const title = (titleMatch && titleMatch[1]) ? titleMatch[1] : headerText;
 
     // Collect content until next header
     let content = '';
@@ -423,7 +437,9 @@ function groupIntoArticles(sections: CodeSection[]): CodeArticle[] {
 
     if (!articleDef) {
       // Default to General Provisions
-      articleDef = articleDefs[0];
+      const defaultDef = articleDefs[0];
+      if (!defaultDef) continue;
+      articleDef = defaultDef;
     }
 
     if (!articles.has(articleDef.id)) {
