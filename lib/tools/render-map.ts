@@ -285,9 +285,10 @@ async function fetchHighlightedParcels(
   apns: string[]
 ): Promise<Buffer | null> {
   try {
+    // parcelid field has no dashes - use numeric format
     const whereClause = apns.map(apn => {
       const parsed = parseAPN(apn);
-      return parsed ? `parcelid='${parsed.raw}'` : null;
+      return parsed ? `parcelid='${parsed.numeric}'` : null;
     }).filter(Boolean).join(' OR ');
 
     if (!whereClause) return null;
@@ -507,6 +508,115 @@ async function fetchSourceParcelOverlay(
     return Buffer.from(arrayBuffer);
   } catch (error) {
     console.error('Failed to fetch source parcel overlay:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch buffer parcels overlay - highlights all parcels within a buffer envelope
+ * Renders parcels that intersect the buffer area with blue highlight
+ */
+async function fetchBufferParcelsOverlay(
+  mapBbox: { xmin: number; ymin: number; xmax: number; ymax: number },
+  width: number,
+  height: number,
+  centerLat: number,
+  centerLon: number,
+  radiusFeet: number,
+  excludeApn?: string
+): Promise<Buffer | null> {
+  try {
+    // Convert radius to degrees (approximate for Solano County latitude)
+    // 1 degree lat ≈ 364,000 feet, 1 degree lon ≈ 288,000 feet at 38°
+    const radiusDegreesLat = radiusFeet / 364000;
+    const radiusDegreesLon = radiusFeet / 288000;
+
+    // Create a buffer envelope around the center point (in WGS84)
+    const bufferEnvelope = {
+      xmin: centerLon - radiusDegreesLon,
+      ymin: centerLat - radiusDegreesLat,
+      xmax: centerLon + radiusDegreesLon,
+      ymax: centerLat + radiusDegreesLat,
+    };
+
+    // Convert both bboxes to Web Mercator
+    const mapMin = toWebMercator(mapBbox.xmin, mapBbox.ymin);
+    const mapMax = toWebMercator(mapBbox.xmax, mapBbox.ymax);
+    const bufferMin = toWebMercator(bufferEnvelope.xmin, bufferEnvelope.ymin);
+    const bufferMax = toWebMercator(bufferEnvelope.xmax, bufferEnvelope.ymax);
+
+    // Build WHERE clause to exclude source parcel if provided
+    let whereClause = '1=1';
+    if (excludeApn) {
+      const parsed = parseAPN(excludeApn);
+      if (parsed) {
+        whereClause = `parcelid <> '${parsed.numeric}'`;
+      }
+    }
+
+    // Style for buffer parcels - blue highlight
+    const dynamicLayers = [{
+      id: 105,
+      source: { type: 'mapLayer', mapLayerId: 2 },
+      definitionExpression: whereClause,
+      drawingInfo: {
+        renderer: {
+          type: 'simple',
+          symbol: {
+            type: 'esriSFS',
+            style: 'esriSFSSolid',
+            color: [59, 130, 246, 60],  // Blue with ~25% opacity
+            outline: {
+              type: 'esriSLS',
+              style: 'esriSLSSolid',
+              color: [59, 130, 246, 200],  // Blue outline
+              width: 2
+            }
+          }
+        },
+        showLabels: false
+      }
+    }];
+
+    // Use the buffer envelope as a geometry filter
+    // MapServer will only render parcels that intersect this envelope
+    const geometryParam = JSON.stringify({
+      xmin: bufferMin.x,
+      ymin: bufferMin.y,
+      xmax: bufferMax.x,
+      ymax: bufferMax.y,
+      spatialReference: { wkid: 3857 }
+    });
+
+    const params = new URLSearchParams({
+      bbox: `${mapMin.x},${mapMin.y},${mapMax.x},${mapMax.y}`,
+      bboxSR: '3857',
+      size: `${width},${height}`,
+      format: 'png32',
+      transparent: 'true',
+      dynamicLayers: JSON.stringify(dynamicLayers),
+      layers: 'dynamic',
+      // Spatial filter: only parcels intersecting the buffer envelope
+      layerDefs: JSON.stringify({ 2: whereClause }),
+      // Use geometry parameter to spatially filter
+      geometry: geometryParam,
+      geometryType: 'esriGeometryEnvelope',
+      spatialRel: 'esriSpatialRelIntersects',
+      f: 'image',
+    });
+
+    const url = `${AUMENTUM_MAPSERVER}/export?${params.toString()}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`MapServer buffer parcels overlay failed: ${response.status}`);
+      return null;
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (error) {
+    console.error('Failed to fetch buffer parcels overlay:', error);
     return null;
   }
 }
@@ -859,10 +969,19 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       }
 
       // Highlight parcels within buffer (blue) if requested
-      if (buffer.highlight_parcels !== false && parcelApns.length > 0) {
-        const highlightOverlay = await fetchHighlightedParcels(mapBbox, actualWidth, actualHeight, parcelApns);
-        if (highlightOverlay) {
-          overlays.push({ input: highlightOverlay, top: 0, left: 0 });
+      if (buffer.highlight_parcels !== false) {
+        // Use spatial query to highlight parcels in the buffer area
+        const bufferOverlay = await fetchBufferParcelsOverlay(
+          mapBbox,
+          actualWidth,
+          actualHeight,
+          bufferCenterLat,
+          bufferCenterLon,
+          bufferRadiusFeet,
+          bufferSourceApn  // Exclude source parcel from blue highlight
+        );
+        if (bufferOverlay) {
+          overlays.push({ input: bufferOverlay, top: 0, left: 0 });
         }
       }
 
