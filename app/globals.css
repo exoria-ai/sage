@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+/* Base styles for full-height layout */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure the body fills the viewport */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fix for ESRI map container taking full height */
+.esri-view {
+  height: 100% !important;
+  width: 100% !important;
+}
