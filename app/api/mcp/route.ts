@@ -48,6 +48,15 @@ import {
   generateImage,
   editImage,
 } from '@/lib/tools/image-generation';
+import {
+  getOrgOverview,
+  getDepartment,
+  searchPositions,
+  getPositionDistribution,
+  getDivision,
+  listJobClasses,
+  compareDepartments,
+} from '@/lib/tools/org-chart';
 
 const handler = createMcpHandler(
   (server) => {
@@ -1041,6 +1050,165 @@ ${result.description ? `Description: ${result.description}` : ''}`,
         }
 
         // Error case
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    // Org Chart Tools
+    server.tool(
+      'get_org_overview',
+      `Get county org chart overview with department list.
+
+Returns high-level stats and all departments sorted by FTE.
+Use this first to orient before drilling into specific departments.
+
+OUTPUT:
+- asOf: Data date (April 2025)
+- totalFte/ltFte: County-wide totals (3,284 FTE)
+- departments: List with code, name, fte, division count`,
+      {},
+      async () => {
+        const result = await getOrgOverview();
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    server.tool(
+      'get_department',
+      `Get department details with divisions and top positions.
+
+INPUT:
+- code_or_name: Department code (e.g., "7500") or partial name (e.g., "sheriff", "health")
+- include_positions: If true, include full position list per division (more tokens)
+
+OUTPUT:
+- Division breakdown with FTE
+- Top 15 positions aggregated across divisions (always included)
+- Full position list per division (if include_positions=true)`,
+      {
+        code_or_name: z.string().describe('Department code or partial name'),
+        include_positions: z.boolean().optional().describe('Include full position list (default: false)'),
+      },
+      async ({ code_or_name, include_positions }) => {
+        const result = await getDepartment({ code_or_name, include_positions });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    server.tool(
+      'search_positions',
+      `Search position titles across all departments.
+
+INPUT:
+- query: Position title to search (e.g., "social worker", "analyst", "clerk")
+- department: Optional filter by department code/name
+- limit: Max results (default: 20)
+
+OUTPUT:
+- Total matches and FTE
+- Results with title, FTE, grade, department, division`,
+      {
+        query: z.string().describe('Position title to search'),
+        department: z.string().optional().describe('Filter by department'),
+        limit: z.number().optional().describe('Max results (default: 20)'),
+      },
+      async ({ query, department, limit }) => {
+        const result = await searchPositions({ query, department, limit });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    server.tool(
+      'get_position_distribution',
+      `Get distribution of a position title across departments.
+
+Shows where a job class is allocated county-wide.
+Useful for understanding staffing patterns.
+
+INPUT:
+- title: Exact or partial position title
+
+OUTPUT:
+- Total FTE county-wide
+- Breakdown by department with division details`,
+      {
+        title: z.string().describe('Position title to find'),
+      },
+      async ({ title }) => {
+        const result = await getPositionDistribution({ title });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    server.tool(
+      'get_division',
+      `Get details for a specific division by code.
+
+INPUT:
+- code: Division code (e.g., "7501", "6552")
+
+OUTPUT:
+- Division name, FTE, parent department
+- All positions with FTE and grade`,
+      {
+        code: z.string().describe('Division code'),
+      },
+      async ({ code }) => {
+        const result = await getDivision({ code });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    server.tool(
+      'list_job_classes',
+      `List job classifications with optional filtering.
+
+INPUT:
+- search: Search by title or job code
+- grade: Filter by salary grade
+- limit: Max results (default: 50)
+
+OUTPUT:
+- Job code, title, grade, FLSA status`,
+      {
+        search: z.string().optional().describe('Search by title or job code'),
+        grade: z.string().optional().describe('Filter by grade'),
+        limit: z.number().optional().describe('Max results (default: 50)'),
+      },
+      async ({ search, grade, limit }) => {
+        const result = await listJobClasses({ search, grade, limit });
+        return {
+          content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+        };
+      }
+    );
+
+    server.tool(
+      'compare_departments',
+      `Compare staffing between multiple departments.
+
+INPUT:
+- departments: Array of department codes or names
+
+OUTPUT:
+- Side-by-side comparison with FTE, divisions, top positions`,
+      {
+        departments: z.array(z.string()).describe('Department codes or names to compare'),
+      },
+      async ({ departments }) => {
+        const result = await compareDepartments({ departments });
         return {
           content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
         };

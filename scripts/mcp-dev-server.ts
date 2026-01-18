@@ -59,6 +59,15 @@ import {
   generateImage,
   editImage,
 } from '../lib/tools/image-generation.js';
+import {
+  getOrgOverview,
+  getDepartment,
+  searchPositions,
+  getPositionDistribution,
+  getDivision,
+  listJobClasses,
+  compareDepartments,
+} from '../lib/tools/org-chart.js';
 
 const server = new Server(
   {
@@ -601,6 +610,146 @@ Input images:
       required: ['prompt', 'image_urls'],
     },
   },
+  // Org chart tools
+  {
+    name: 'get_org_overview',
+    description: `Get county org chart overview with department list.
+
+Returns high-level stats and all departments sorted by FTE.
+Use this first to orient before drilling into specific departments.
+
+OUTPUT:
+- asOf: Data date
+- totalFte/ltFte: County-wide totals
+- departments: List with code, name, fte, division count`,
+    inputSchema: {
+      type: 'object',
+      properties: {},
+    },
+  },
+  {
+    name: 'get_department',
+    description: `Get department details with divisions and top positions.
+
+INPUT:
+- code_or_name: Department code (e.g., "7500") or partial name (e.g., "sheriff", "health")
+- include_positions: If true, include full position list per division (more tokens)
+
+OUTPUT:
+- Division breakdown with FTE
+- Top 15 positions aggregated across divisions (always included)
+- Full position list per division (if include_positions=true)`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        code_or_name: { type: 'string', description: 'Department code or partial name' },
+        include_positions: { type: 'boolean', description: 'Include full position list (default: false)' },
+      },
+      required: ['code_or_name'],
+    },
+  },
+  {
+    name: 'search_positions',
+    description: `Search position titles across all departments.
+
+INPUT:
+- query: Position title to search (e.g., "social worker", "analyst", "clerk")
+- department: Optional filter by department code/name
+- limit: Max results (default: 20)
+
+OUTPUT:
+- Total matches and FTE
+- Results with title, FTE, grade, department, division`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Position title to search' },
+        department: { type: 'string', description: 'Filter by department' },
+        limit: { type: 'number', description: 'Max results (default: 20)' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'get_position_distribution',
+    description: `Get distribution of a position title across departments.
+
+Shows where a job class is allocated county-wide.
+Useful for understanding staffing patterns.
+
+INPUT:
+- title: Exact or partial position title
+
+OUTPUT:
+- Total FTE county-wide
+- Breakdown by department with division details`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Position title to find' },
+      },
+      required: ['title'],
+    },
+  },
+  {
+    name: 'get_division',
+    description: `Get details for a specific division by code.
+
+INPUT:
+- code: Division code (e.g., "7501", "6552")
+
+OUTPUT:
+- Division name, FTE, parent department
+- All positions with FTE and grade`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', description: 'Division code' },
+      },
+      required: ['code'],
+    },
+  },
+  {
+    name: 'list_job_classes',
+    description: `List job classifications with optional filtering.
+
+INPUT:
+- search: Search by title or job code
+- grade: Filter by salary grade
+- limit: Max results (default: 50)
+
+OUTPUT:
+- Job code, title, grade, FLSA status`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        search: { type: 'string', description: 'Search by title or job code' },
+        grade: { type: 'string', description: 'Filter by grade' },
+        limit: { type: 'number', description: 'Max results (default: 50)' },
+      },
+    },
+  },
+  {
+    name: 'compare_departments',
+    description: `Compare staffing between multiple departments.
+
+INPUT:
+- departments: Array of department codes or names
+
+OUTPUT:
+- Side-by-side comparison with FTE, divisions, top positions`,
+    inputSchema: {
+      type: 'object',
+      properties: {
+        departments: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Department codes or names to compare',
+        },
+      },
+      required: ['departments'],
+    },
+  },
 ];
 
 // Handle list tools request
@@ -739,6 +888,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         result = editResult;
         break;
       }
+      // Org chart tools
+      case 'get_org_overview':
+        result = await getOrgOverview();
+        break;
+      case 'get_department':
+        result = await getDepartment(args as Parameters<typeof getDepartment>[0]);
+        break;
+      case 'search_positions':
+        result = await searchPositions(args as Parameters<typeof searchPositions>[0]);
+        break;
+      case 'get_position_distribution':
+        result = await getPositionDistribution(args as Parameters<typeof getPositionDistribution>[0]);
+        break;
+      case 'get_division':
+        result = await getDivision(args as Parameters<typeof getDivision>[0]);
+        break;
+      case 'list_job_classes':
+        result = await listJobClasses(args as Parameters<typeof listJobClasses>[0]);
+        break;
+      case 'compare_departments':
+        result = await compareDepartments(args as Parameters<typeof compareDepartments>[0]);
+        break;
       default:
         return {
           content: [{ type: 'text', text: `Unknown tool: ${name}` }],
