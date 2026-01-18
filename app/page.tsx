@@ -50,6 +50,27 @@ export default function Home() {
         <li><strong>get_county_code_sections</strong> - Get full text of specific sections</li>
       </ul>
 
+      <h3>Budget</h3>
+      <ul>
+        <li><strong>search_budget</strong> - Search FY2025-26 Recommended Budget document</li>
+        <li><strong>get_budget_chunk</strong> - Retrieve full text of a budget section</li>
+        <li><strong>list_budget_departments</strong> - List all departments in budget</li>
+        <li><strong>list_budget_sections</strong> - List major budget sections (A-N)</li>
+        <li><strong>get_department_budget</strong> - Get all budget info for a department</li>
+        <li><strong>get_budget_overview</strong> - Budget document stats and metadata</li>
+      </ul>
+
+      <h3>Org Chart &amp; Staffing</h3>
+      <ul>
+        <li><strong>get_org_overview</strong> - County org chart with 21 departments, 3,284 FTE</li>
+        <li><strong>get_department</strong> - Department details with divisions and top positions</li>
+        <li><strong>search_positions</strong> - Search position titles across all departments</li>
+        <li><strong>get_position_distribution</strong> - Where a job class is allocated county-wide</li>
+        <li><strong>get_division</strong> - Division details by code</li>
+        <li><strong>list_job_classes</strong> - Search job classifications (399 classes)</li>
+        <li><strong>compare_departments</strong> - Side-by-side department staffing comparison</li>
+      </ul>
+
       <h3>Mapping</h3>
       <ul>
         <li><strong>render_map</strong> - Generate static map images with parcel overlays</li>
@@ -60,6 +81,12 @@ export default function Home() {
           <li>County-wide extent view</li>
           <li>Aerial or streets basemap</li>
         </ul>
+      </ul>
+
+      <h3>Image Generation</h3>
+      <ul>
+        <li><strong>generate_infographic</strong> - Create infographics, diagrams, and visualizations</li>
+        <li><strong>edit_image</strong> - Edit or combine images using AI</li>
       </ul>
 
       <h2>Usage</h2>
@@ -82,17 +109,28 @@ geocode_address({ address: "675 Texas St, Fairfield, CA" })
 // Generate a parcel map
 render_map({ apn: "003-025-1020" })
 
-// Show county-wide map with boundaries
-render_map({
-  extent: "county",
-  boundaries: { showCounty: true, showCities: true }
-})
+// Search county code for ADU regulations
+search_county_code({ query: "accessory dwelling unit" })
 
-// Buffer map for notification list
-render_map({
-  buffer: { apn: "003-025-1020", radius_feet: 300 }
-})`}
+// Get Sheriff's department staffing
+get_department({ code_or_name: "sheriff" })
+
+// Find all social worker positions county-wide
+search_positions({ query: "social worker" })
+
+// Compare public safety departments
+compare_departments({ departments: ["sheriff", "probation", "district attorney"] })
+
+// Search budget for mental health funding
+search_budget({ query: "behavioral health", department: "H&SS" })`}
       </pre>
+
+      <h2>Data Sources</h2>
+      <p style={{ fontSize: '0.9em', color: '#666' }}>
+        GIS data from Solano County ArcGIS services. County Code from official ordinances.
+        Budget data from FY2025-26 Recommended Budget. Staffing data from Position Allocation
+        Report (April 2025) and Salary Listing (January 2026).
+      </p>
     </main>
   );
 }
