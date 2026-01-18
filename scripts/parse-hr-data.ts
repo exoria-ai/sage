@@ -198,7 +198,7 @@ function parsePositionAllocation(content: string, jobClasses: Map<string, JobCla
 
     // Check for DEPARTMENT TOTAL - this finalizes a department
     const deptTotalMatch = line.match(deptTotalRegex);
-    if (deptTotalMatch) {
+    if (deptTotalMatch && deptTotalMatch[1]) {
       if (currentDept) {
         // Finish current division
         if (currentDiv) {
@@ -221,7 +221,7 @@ function parsePositionAllocation(content: string, jobClasses: Map<string, JobCla
 
     // Check for unit header (dept or sub-unit)
     const unitMatch = line.match(unitHeaderRegex);
-    if (unitMatch) {
+    if (unitMatch && unitMatch[1] && unitMatch[3]) {
       const code1 = unitMatch[1];
       const code2 = unitMatch[2];  // Optional second code
       const name = unitMatch[3].trim();
@@ -268,7 +268,7 @@ function parsePositionAllocation(content: string, jobClasses: Map<string, JobCla
 
     // Check for division line (indented 4-digit code)
     const divMatch = line.match(divLineRegex);
-    if (divMatch && currentDept) {
+    if (divMatch && divMatch[1] && divMatch[2] && currentDept) {
       if (currentDiv) {
         currentDept.divisions.push(currentDiv);
       }
@@ -284,7 +284,7 @@ function parsePositionAllocation(content: string, jobClasses: Map<string, JobCla
 
     // Check for division total
     const divTotalMatch = line.match(divTotalRegex);
-    if (divTotalMatch && currentDiv) {
+    if (divTotalMatch && divTotalMatch[1] && currentDiv) {
       currentDiv.totalFte = parseNum(divTotalMatch[1]);
       currentDiv.ltFte = divTotalMatch[2] ? parseNum(divTotalMatch[2]) : 0;
       continue;
@@ -292,7 +292,7 @@ function parsePositionAllocation(content: string, jobClasses: Map<string, JobCla
 
     // Check for position line
     const posMatch = line.match(positionRegex);
-    if (posMatch) {
+    if (posMatch && posMatch[1] && posMatch[2]) {
       const title = posMatch[1].trim();
 
       // Skip if this looks like a date-only line or total line
