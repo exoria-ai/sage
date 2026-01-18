@@ -28,6 +28,26 @@ function MapPageContent() {
   const webMapId = searchParams.get('id') || undefined;
   const preset = (searchParams.get('preset') as keyof typeof WEB_MAPS) || 'base';
 
+  // Parse feature highlight parameters
+  const highlightApn = searchParams.get('apn') || undefined;
+  const highlightAddress = searchParams.get('address') || undefined;
+
+  // Parse view parameters
+  const centerParam = searchParams.get('center'); // format: "lng,lat"
+  const zoomParam = searchParams.get('zoom');
+
+  const initialCenter = centerParam
+    ? (() => {
+        const parts = centerParam.split(',');
+        if (parts.length !== 2) return undefined;
+        const lng = Number(parts[0]);
+        const lat = Number(parts[1]);
+        return !isNaN(lng) && !isNaN(lat) ? { longitude: lng, latitude: lat } : undefined;
+      })()
+    : undefined;
+
+  const initialZoom = zoomParam && !isNaN(Number(zoomParam)) ? Number(zoomParam) : undefined;
+
   return (
     <div className="flex flex-col h-full min-h-screen">
       {/* Header */}
@@ -68,6 +88,10 @@ function MapPageContent() {
           webMapId={webMapId}
           preset={preset}
           className="absolute inset-0"
+          highlightApn={highlightApn}
+          highlightAddress={highlightAddress}
+          initialCenter={initialCenter}
+          initialZoom={initialZoom}
         />
       </main>
 

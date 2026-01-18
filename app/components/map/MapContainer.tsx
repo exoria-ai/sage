@@ -17,6 +17,12 @@ import Legend from '@arcgis/core/widgets/Legend';
 import ScaleBar from '@arcgis/core/widgets/ScaleBar';
 import BasemapGallery from '@arcgis/core/widgets/BasemapGallery';
 import Expand from '@arcgis/core/widgets/Expand';
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import Graphic from '@arcgis/core/Graphic';
+import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
+import * as query from '@arcgis/core/rest/query';
+import Query from '@arcgis/core/rest/support/Query';
+import { SOLANO_SERVICES } from '@/lib/esri/webmaps';
 
 // ESRI CSS - must be imported for proper styling
 import '@arcgis/core/assets/esri/themes/light/main.css';
@@ -29,15 +35,26 @@ interface MapContainerProps {
   webMapId?: string;
   preset?: keyof typeof WEB_MAPS;
   className?: string;
+  // URL parameter options for initial view
+  initialCenter?: { longitude: number; latitude: number };
+  initialZoom?: number;
+  // Feature to highlight on load
+  highlightApn?: string;
+  highlightAddress?: string;
 }
 
 export function MapContainer({
   webMapId,
   preset = 'base',
   className = '',
+  initialCenter,
+  initialZoom,
+  highlightApn,
+  highlightAddress,
 }: MapContainerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<MapView | null>(null);
+  const highlightLayerRef = useRef<GraphicsLayer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -67,6 +84,135 @@ export function MapContainer({
     }
 
     let isMounted = true;
+
+    // Highlight symbol for parcels
+    const highlightSymbol = new SimpleFillSymbol({
+      color: [255, 255, 0, 0.3], // Yellow with transparency
+      outline: {
+        color: [255, 165, 0], // Orange outline
+        width: 3,
+      },
+    });
+
+    /**
+     * Handle initial view positioning and feature highlighting based on URL params
+     */
+    const handleInitialView = async (view: MapView, highlightLayer: GraphicsLayer) => {
+      // Priority: APN > Address > Center/Zoom
+
+      if (highlightApn) {
+        // Query parcel by APN and zoom to it
+        try {
+          console.log('Querying parcel by APN:', highlightApn);
+          // parcelid field is the APN without dashes
+          const apnNoDashes = highlightApn.replace(/-/g, '');
+          const queryTask = new Query({
+            where: `parcelid = '${apnNoDashes}' OR parcelid = '${highlightApn}'`,
+            outFields: ['*'],
+            returnGeometry: true,
+          });
+
+          const result = await query.executeQueryJSON(SOLANO_SERVICES.parcels, queryTask);
+
+          if (result.features && result.features.length > 0) {
+            const feature = result.features[0]!;
+
+            // Add highlight graphic
+            const graphic = new Graphic({
+              geometry: feature.geometry ?? undefined,
+              symbol: highlightSymbol,
+              attributes: feature.attributes ?? {},
+            });
+            highlightLayer.add(graphic);
+
+            // Zoom to the parcel with some padding
+            if (feature.geometry) {
+              await view.goTo({
+                target: feature.geometry,
+                zoom: initialZoom || 18,
+              });
+            }
+            console.log('Highlighted parcel:', feature.attributes ?? {});
+          } else {
+            console.warn('No parcel found for APN:', highlightApn);
+          }
+        } catch (err) {
+          console.error('Error querying parcel by APN:', err);
+        }
+      } else if (highlightAddress) {
+        // Geocode address and zoom to it
+        try {
+          console.log('Geocoding address:', highlightAddress);
+          const queryTask = new Query({
+            where: `UPPER(fulladdress) LIKE UPPER('%${highlightAddress.replace(/'/g, "''")}%')`,
+            outFields: ['*'],
+            returnGeometry: true,
+            num: 1,
+          });
+
+          const result = await query.executeQueryJSON(SOLANO_SERVICES.addressPoints, queryTask);
+
+          if (result.features && result.features.length > 0) {
+            const feature = result.features[0]!;
+            const attrs = feature.attributes ?? {};
+            const apn = attrs.APN || attrs.apn;
+
+            // If we got an APN from the address, query the parcel to highlight it
+            if (apn) {
+              const apnNoDashes = apn.replace(/-/g, '');
+              const parcelQuery = new Query({
+                where: `parcelid = '${apnNoDashes}' OR parcelid = '${apn}'`,
+                outFields: ['*'],
+                returnGeometry: true,
+              });
+
+              const parcelResult = await query.executeQueryJSON(SOLANO_SERVICES.parcels, parcelQuery);
+
+              if (parcelResult.features && parcelResult.features.length > 0) {
+                const parcelFeature = parcelResult.features[0]!;
+                const graphic = new Graphic({
+                  geometry: parcelFeature.geometry ?? undefined,
+                  symbol: highlightSymbol,
+                  attributes: parcelFeature.attributes ?? {},
+                });
+                highlightLayer.add(graphic);
+
+                if (parcelFeature.geometry) {
+                  await view.goTo({
+                    target: parcelFeature.geometry,
+                    zoom: initialZoom || 18,
+                  });
+                }
+                console.log('Highlighted parcel for address:', attrs);
+                return;
+              }
+            }
+
+            // Fallback: just zoom to the address point
+            if (feature.geometry) {
+              await view.goTo({
+                target: feature.geometry,
+                zoom: initialZoom || 18,
+              });
+            }
+            console.log('Found address:', attrs);
+          } else {
+            console.warn('No address found for:', highlightAddress);
+          }
+        } catch (err) {
+          console.error('Error geocoding address:', err);
+        }
+      } else if (initialCenter) {
+        // Just zoom to the specified center/zoom
+        await view.goTo({
+          center: [initialCenter.longitude, initialCenter.latitude],
+          zoom: initialZoom || 15,
+        });
+      } else if (initialZoom) {
+        // Just set zoom level
+        await view.goTo({ zoom: initialZoom });
+      }
+    };
 
     const initializeMap = async () => {
       try {
@@ -118,6 +264,18 @@ export function MapContainer({
           // Log layer info after load
           console.log('Layers loaded:', view.map.allLayers.map(l => `${l.title} (${l.type})`).toArray());
         }
+
+        // Create highlight graphics layer
+        const highlightLayer = new GraphicsLayer({
+          id: 'highlight-layer',
+          title: 'Highlighted Features',
+          listMode: 'hide', // Don't show in layer list
+        });
+        view.map?.add(highlightLayer);
+        highlightLayerRef.current = highlightLayer;
+
+        // Handle initial view positioning and feature highlighting
+        await handleInitialView(view, highlightLayer);
 
         // Store the view reference for MCP tools
         setMapView(view);
