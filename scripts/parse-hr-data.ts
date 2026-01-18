@@ -73,7 +73,7 @@ function parseSalaryListing(content: string): Map<string, JobClass> {
 
   for (const line of lines) {
     const match = line.match(jobLineRegex);
-    if (match) {
+    if (match && match[1] && match[2] && match[3] && match[4] && match[5] && match[6]) {
       const [, jobCode, rawTitle, salaryPlan, grade, flsa, eeo4] = match;
       const title = rawTitle.trim();
 
