@@ -1,0 +1,1240 @@
+{
+  "discoveredAt": "2026-01-18T19:51:37.768Z",
+  "pages": [
+    {
+      "url": "/rest/",
+      "title": "Home",
+      "category": "services-online"
+    },
+    {
+      "url": "/rest/location-based-services/",
+      "title": "Location services",
+      "category": "services-online"
+    },
+    {
+      "url": "/rest/analysis-services/",
+      "title": "Analysis services",
+      "category": "services-online"
+    },
+    {
+      "url": "/rest/users-groups-and-items/",
+      "title": "Content management",
+      "category": "services-online"
+    },
+    {
+      "url": "/rest/services-reference/enterprise/",
+      "title": "All services",
+      "category": "services-online",
+      "subcategory": "services-reference"
+    },
+    {
+      "url": "/rest/enterprise-administration/",
+      "title": "Enterprise administration",
+      "category": "services-online"
+    },
+    {
+      "url": "/rest/services-reference/online/",
+      "title": "Online",
+      "category": "services-online",
+      "subcategory": "services-reference"
+    },
+    {
+      "url": "/rest/services-reference/mission/",
+      "title": "Mission",
+      "category": "services-online",
+      "subcategory": "services-reference"
+    },
+    {
+      "url": "/rest/services-reference/online/resource-hierarchy/",
+      "title": "Resource hierarchy",
+      "category": "services-online",
+      "subcategory": "services-reference"
+    },
+    {
+      "url": "/rest/geocode/",
+      "title": "ArcGIS REST APIs",
+      "category": "geocode"
+    },
+    {
+      "url": "/rest/services-reference/",
+      "title": "All services",
+      "category": "geocode"
+    },
+    {
+      "url": "/rest/geocode/get-started/",
+      "title": "Get started",
+      "category": "geocode",
+      "subcategory": "geocode"
+    },
+    {
+      "url": "/rest/geocode/whats-new-world-geocoding-service/",
+      "title": "Release notes",
+      "category": "geocode",
+      "subcategory": "geocode"
+    },
+    {
+      "url": "/rest/routing/",
+      "title": "ArcGIS REST APIs",
+      "category": "routing"
+    },
+    {
+      "url": "/rest/routing/get-started/",
+      "title": "Get started",
+      "category": "routing",
+      "subcategory": "routing"
+    },
+    {
+      "url": "/rest/elevation/",
+      "title": "Elevation service",
+      "category": "elevation"
+    },
+    {
+      "url": "/rest/users-groups-and-items/working-with-users-groups-and-items/",
+      "title": "Content management",
+      "category": "elevation",
+      "subcategory": "users-groups-and-items"
+    },
+    {
+      "url": "/rest/elevation/get-started/",
+      "title": "Get started",
+      "category": "elevation",
+      "subcategory": "elevation"
+    },
+    {
+      "url": "/rest/elevation/release-notes/current-release/",
+      "title": "Current release",
+      "category": "elevation",
+      "subcategory": "elevation"
+    },
+    {
+      "url": "/rest/elevation/release-notes/beta/",
+      "title": "Beta release",
+      "category": "elevation",
+      "subcategory": "elevation"
+    },
+    {
+      "url": "/rest/elevation/elevation-at-point-get/",
+      "title": "/at-point",
+      "category": "elevation",
+      "subcategory": "elevation"
+    },
+    {
+      "url": "/rest/elevation/elevation-at-many-points-post/",
+      "title": "/at-many-points",
+      "category": "elevation",
+      "subcategory": "elevation"
+    },
+    {
+      "url": "/rest/elevation/service-data/",
+      "title": "Service data",
+      "category": "elevation",
+      "subcategory": "elevation"
+    },
+    {
+      "url": "/rest/elevation/types/",
+      "title": "Types",
+      "category": "elevation",
+      "subcategory": "elevation"
+    },
+    {
+      "url": "/rest/places/",
+      "title": "Places service",
+      "category": "places"
+    },
+    {
+      "url": "/rest/places/get-started/",
+      "title": "Get started",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/release-notes/current-release/",
+      "title": "Current release",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/release-notes/beta/",
+      "title": "Beta",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/near-point-get/",
+      "title": "/near-point",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/within-extent-get/",
+      "title": "/within-extent",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/place-id-get/",
+      "title": "/{placeId}",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/categories-get/",
+      "title": "/categories",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/categories-category-id-get/",
+      "title": "/categories/{categoryId}",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/types/",
+      "title": "Types",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/places/service-data/",
+      "title": "Service data",
+      "category": "places",
+      "subcategory": "places"
+    },
+    {
+      "url": "/rest/basemap-styles/",
+      "title": "Basemap styles service",
+      "category": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/get-started/",
+      "title": "Get started",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/release-notes/current-release/",
+      "title": "Current release",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/release-notes/beta/",
+      "title": "Beta",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/sessions-start-get/",
+      "title": "/start",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-navigation-style-get/",
+      "title": "/navigation",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-navigationnight-style-get/",
+      "title": "/navigation-night",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-streets-style-get/",
+      "title": "/streets",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-streetsnight-style-get/",
+      "title": "/streets-night",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-streetsrelief-style-get/",
+      "title": "/streets-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-streetsrelief-base-style-get/",
+      "title": "/streets-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-community-style-get/",
+      "title": "/community",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-outdoor-style-get/",
+      "title": "/outdoor",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-topographic-style-get/",
+      "title": "/topographic",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-topographic-base-style-get/",
+      "title": "/topographic/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-imagery-style-get/",
+      "title": "/imagery",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-imagery-standard-style-get/",
+      "title": "/imagery/standard",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-imagery-labels-style-get/",
+      "title": "/imagery/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-oceans-style-get/",
+      "title": "/oceans",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-oceans-base-style-get/",
+      "title": "/oceans/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-oceans-labels-style-get/",
+      "title": "/oceans/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-hillshade-light-style-get/",
+      "title": "/hillshade/light",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-hillshade-dark-style-get/",
+      "title": "/hillshade/dark",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-terrain-style-get/",
+      "title": "/terrain",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-terrain-base-style-get/",
+      "title": "/terrain/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-terrain-detail-style-get/",
+      "title": "/terrain/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-lightgray-style-get/",
+      "title": "/light-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-lightgray-base-style-get/",
+      "title": "/light-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-lightgray-labels-style-get/",
+      "title": "/light-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-darkgray-style-get/",
+      "title": "/dark-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-darkgray-base-style-get/",
+      "title": "/dark-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-darkgray-labels-style-get/",
+      "title": "/dark-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeography-style-get/",
+      "title": "/human-geography",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeography-base-style-get/",
+      "title": "/human-geography/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeography-detail-style-get/",
+      "title": "/human-geography/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeography-labels-style-get/",
+      "title": "/human-geography/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeographydark-style-get/",
+      "title": "/human-geography-dark",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeographydark-base-style-get/",
+      "title": "/human-geography-dark/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeographydark-detail-style-get/",
+      "title": "/human-geography-dark/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeographydark-labels-style-get/",
+      "title": "/human-geography-dark/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-chartedterritory-style-get/",
+      "title": "/charted-territory",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-chartedterritory-base-style-get/",
+      "title": "/charted-territory/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-coloredpencil-style-get/",
+      "title": "/colored-pencil",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-nova-style-get/",
+      "title": "/nova",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-modernantique-style-get/",
+      "title": "/modern-antique",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-modernantique-base-style-get/",
+      "title": "/modern-antique/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-midcentury-style-get/",
+      "title": "/midcentury",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-newspaper-style-get/",
+      "title": "/newspaper",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-osm-style-style-get/",
+      "title": "/osm-style",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-osm-gray-relief-style-get/",
+      "title": "/osm-style-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-osm-style-relief-base-style-get/",
+      "title": "/osm-style-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-navigation-style-get/",
+      "title": "/navigation",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-navigation-dark-style-get/",
+      "title": "/navigation-dark",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-streets-style-get/",
+      "title": "/streets",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-streets-relief-style-get/",
+      "title": "/streets-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-streets-relief-base-style-get/",
+      "title": "/streets-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-streets-gray-get/",
+      "title": "/streets-night",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-hybrid-style-get/",
+      "title": "/hybrid",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-hybrid-detail-style-get/",
+      "title": "/hybrid/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-light-gray-style-get/",
+      "title": "/light-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-light-gray-base-style-get/",
+      "title": "/light-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-light-gray-labels-style-get/",
+      "title": "/light-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-dark-gray-style-get/",
+      "title": "/dark-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-dark-gray-base-style-get/",
+      "title": "/dark-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-dark-gray-labels-style-get/",
+      "title": "/dark-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-blueprint-style-get/",
+      "title": "/blueprint",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-standard-style-get/",
+      "title": "/standard",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-standardrelief-style-get/",
+      "title": "/standard-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-standardrelief-base-style-get/",
+      "title": "/standard-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-navigation-style-get/",
+      "title": "/navigation",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-navigationdark-style-get/",
+      "title": "/navigation-dark",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-streets-style-get/",
+      "title": "/streets",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-streetsrelief-style-get/",
+      "title": "/streets-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-streetsrelief-base-style-get/",
+      "title": "/streets-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-hybrid-style-get/",
+      "title": "/hybrid",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-hybrid-detail-style-get/",
+      "title": "/hybrid/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-lightgray-style-get/",
+      "title": "/light-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-lightgray-base-style-get/",
+      "title": "/light-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-lightgray-labels-style-get/",
+      "title": "/light-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-darkgray-style-get/",
+      "title": "/dark-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-darkgray-base-style-get/",
+      "title": "/dark-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-darkgray-labels-style-get/",
+      "title": "/dark-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-blueprint-style-get/",
+      "title": "/blueprint",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/styles-items-item-id-get/",
+      "title": "/items/{item_id}",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/styles-self-get/",
+      "title": "/self",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-navigation-webmap-get/",
+      "title": "/navigation",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-navigationnight-webmap-get/",
+      "title": "/navigation-night",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-streets-webmap-get/",
+      "title": "/streets",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-streetsnight-webmap-get/",
+      "title": "/streets-night",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-streetsrelief-webmap-get/",
+      "title": "/streets-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-streetsrelief-base-webmap-get/",
+      "title": "/streets-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-community-webmap-get/",
+      "title": "/community",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-outdoor-webmap-get/",
+      "title": "/outdoor",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-topographic-webmap-get/",
+      "title": "/topographic",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-topographic-base-webmap-get/",
+      "title": "/topographic/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-imagery-webmap-get/",
+      "title": "/imagery",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-imagery-standard-webmap-get/",
+      "title": "/imagery/standard",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-imagery-labels-webmap-get/",
+      "title": "/imagery/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-oceans-webmap-get/",
+      "title": "/oceans",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-oceans-base-webmap-get/",
+      "title": "/oceans/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-oceans-labels-webmap-get/",
+      "title": "/oceans/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-hillshade-light-webmap-get/",
+      "title": "/hillshade/light",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-hillshade-dark-webmap-get/",
+      "title": "/hillshade/dark",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-terrain-webmap-get/",
+      "title": "/terrain",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-terrain-base-webmap-get/",
+      "title": "/terrain/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-terrain-detail-webmap-get/",
+      "title": "/terrain/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-lightgray-webmap-get/",
+      "title": "/light-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-lightgray-base-webmap-get/",
+      "title": "/light-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-lightgray-labels-webmap-get/",
+      "title": "/light-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-darkgray-webmap-get/",
+      "title": "/dark-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-darkgray-base-webmap-get/",
+      "title": "/dark-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-darkgray-labels-webmap-get/",
+      "title": "/dark-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeography-webmap-get/",
+      "title": "/human-geography",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeography-base-webmap-get/",
+      "title": "/human-geography/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeography-detail-webmap-get/",
+      "title": "/human-geography/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeography-labels-webmap-get/",
+      "title": "/human-geography/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeographydark-webmap-get/",
+      "title": "/human-geography-dark",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeographydark-base-webmap-get/",
+      "title": "/human-geography-dark/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeographydark-detail-webmap-get/",
+      "title": "/human-geography-dark/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-humangeographydark-labels-webmap-get/",
+      "title": "/human-geography-dark/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-chartedterritory-webmap-get/",
+      "title": "/charted-territory/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-chartedterritory-base-webmap-get/",
+      "title": "/charted-territory",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-coloredpencil-webmap-get/",
+      "title": "/colored-pencil",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-nova-webmap-get/",
+      "title": "/nova",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-modernantique-webmap-get/",
+      "title": "/modern-antique",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-modernantique-base-webmap-get/",
+      "title": "/modern-antique/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-midcentury-webmap-get/",
+      "title": "/midcentury",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/arcgis-newspaper-webmap-get/",
+      "title": "/newspaper",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-osm-style-webmap-get/",
+      "title": "/osm-style",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-osm-style-relief-webmap-get/",
+      "title": "/osm-style-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-osm-style-relief-base-webmap-get/",
+      "title": "/osm-style-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-navigation-webmap-get/",
+      "title": "/navigation",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-navigation-dark-webmap-get/",
+      "title": "/navigation-dark",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-streets-webmap-get/",
+      "title": "/streets",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-streets-relief-webmap-get/",
+      "title": "/streets-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-streets-relief-base-webmap-get/",
+      "title": "/streets-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-streets-night-webmap-get/",
+      "title": "/streets-night",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-hybrid-webmap-get/",
+      "title": "/hybrid",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-hybrid-detail-webmap-get/",
+      "title": "/hybrid/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-light-gray-webmap-get/",
+      "title": "/light-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-light-gray-base-webmap-get/",
+      "title": "/light-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-light-gray-labels-webmap-get/",
+      "title": "/light-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-dark-gray-webmap-get/",
+      "title": "/dark-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-dark-gray-base-webmap-get/",
+      "title": "/dark-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-dark-gray-labels-webmap-get/",
+      "title": "/dark-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/openbasemap-blueprint-webmap-get/",
+      "title": "/blueprint",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-standard-webmap-get/",
+      "title": "/standard",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-standardrelief-webmap-get/",
+      "title": "/standard-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-standardrelief-base-webmap-get/",
+      "title": "/standard-relief/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-navigation-webmap-get/",
+      "title": "/navigation",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-navigationdark-webmap-get/",
+      "title": "/navigation-dark",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-streets-webmap-get/",
+      "title": "/streets",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-streetsrelief-webmap-get/",
+      "title": "/streets-relief",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-hybrid-webmap-get/",
+      "title": "/hybrid",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-hybrid-detail-webmap-get/",
+      "title": "/hybrid/detail",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-lightgray-webmap-get/",
+      "title": "/light-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-lightgray-base-webmap-get/",
+      "title": "/light-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-lightgray-labels-webmap-get/",
+      "title": "/light-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-darkgray-webmap-get/",
+      "title": "/dark-gray",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-darkgray-base-webmap-get/",
+      "title": "/dark-gray/base",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-darkgray-labels-webmap-get/",
+      "title": "/dark-gray/labels",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/osm-blueprint-webmap-get/",
+      "title": "/blueprint",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/webmaps-items-item-id-get/",
+      "title": "/items/{item_id}",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/webmaps-self-get/",
+      "title": "/self",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/service-self-get/",
+      "title": "/self",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/languages/",
+      "title": "Languages",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/worldview/",
+      "title": "Boundaries and worldview",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/types/",
+      "title": "Types",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/basemap-styles/service-data/",
+      "title": "Service data",
+      "category": "basemap-styles",
+      "subcategory": "basemap-styles"
+    },
+    {
+      "url": "/rest/geoenrichment/",
+      "title": "ArcGIS REST APIs",
+      "category": "geoenrichment"
+    },
+    {
+      "url": "/rest/geoenrichment/get-started/",
+      "title": "Get started",
+      "category": "geoenrichment",
+      "subcategory": "geoenrichment"
+    },
+    {
+      "url": "/rest/analysis/",
+      "title": "ArcGIS REST APIs",
+      "category": "spatial-analysis"
+    },
+    {
+      "url": "/rest/analysis/whats-new/",
+      "title": "Whats New",
+      "category": "spatial-analysis",
+      "subcategory": "analysis"
+    }
+  ]
+}
