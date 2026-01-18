@@ -176,6 +176,7 @@ function parsePositionAllocation(content: string, jobClasses: Map<string, JobCla
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    if (!line) continue;
 
     // Skip empty lines, headers, and page markers
     if (!line.trim() ||
