@@ -20,3 +20,35 @@ body {
   height: 100% !important;
   width: 100% !important;
 }
+
+/* Increase ESRI UI control icons by 25% (16px -> 20px) */
+.esri-ui .esri-widget--button {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.esri-ui .esri-widget--button .esri-icon {
+  font-size: 20px !important;
+}
+
+/* Also increase the expand widget icons */
+.esri-expand__icon {
+  font-size: 20px !important;
+}
+
+.esri-expand__mask--icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+/* Zoom controls container */
+.esri-zoom .esri-widget--button {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+/* Compass */
+.esri-compass {
+  width: 40px !important;
+  height: 40px !important;
+}

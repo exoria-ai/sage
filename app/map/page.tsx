@@ -34,7 +34,7 @@ function MapPageContent() {
       <header className="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold text-gray-800 whitespace-nowrap">
-            SAGE Interactive Map
+            SAGE
           </h1>
           <span className="text-sm text-gray-500 whitespace-nowrap">
             Solano County GIS Explorer

@@ -230,6 +230,7 @@ export function MapContainer({
         expandIcon: 'layers',
         expandTooltip: 'Layers',
         group: 'top-right',
+        expanded: true, // Start expanded by default
       });
       view.ui.add(layerListExpand, 'top-right');
 
