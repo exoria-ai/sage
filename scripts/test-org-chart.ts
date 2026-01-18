@@ -53,7 +53,7 @@ async function runTests() {
     console.log(`${d.name}: ${d.totalFte} FTE`);
     console.log(`First division positions:`);
     const firstDiv = d.divisions[0];
-    if (firstDiv.positions) {
+    if (firstDiv && firstDiv.positions) {
       firstDiv.positions.slice(0, 3).forEach(p =>
         console.log(`  ${p.title}: ${p.fte} FTE (Grade: ${p.grade || 'N/A'})`)
       );
