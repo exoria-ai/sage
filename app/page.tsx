@@ -60,6 +60,17 @@ export default function Home() {
         <li><strong>get_budget_overview</strong> - Budget document stats and metadata</li>
       </ul>
 
+      <h3>General Plan (2008)</h3>
+      <ul>
+        <li><strong>search_general_plan</strong> - Search all General Plan documents (1,345 chunks)</li>
+        <li><strong>get_general_plan_chunk</strong> - Retrieve full text of a specific chunk</li>
+        <li><strong>list_general_plan_chapters</strong> - List all 13 chapters</li>
+        <li><strong>list_general_plan_documents</strong> - List document types (chapters, EIR, resolutions)</li>
+        <li><strong>get_general_plan_chapter</strong> - Get all content from a chapter</li>
+        <li><strong>get_general_plan_overview</strong> - Collection stats and metadata</li>
+        <li><strong>search_general_plan_policies</strong> - Search policies and goals specifically</li>
+      </ul>
+
       <h3>Org Chart &amp; Staffing</h3>
       <ul>
         <li><strong>get_org_overview</strong> - County org chart with 21 departments, 3,284 FTE</li>
@@ -122,14 +133,21 @@ search_positions({ query: "social worker" })
 compare_departments({ departments: ["sheriff", "probation", "district attorney"] })
 
 // Search budget for mental health funding
-search_budget({ query: "behavioral health", department: "H&SS" })`}
+search_budget({ query: "behavioral health", department: "H&SS" })
+
+// Search General Plan for housing policies
+search_general_plan({ query: "housing density", chapter: "9" })
+
+// Find agricultural preservation policies
+search_general_plan_policies({ query: "agricultural preservation" })`}
       </pre>
 
       <h2>Data Sources</h2>
       <p style={{ fontSize: '0.9em', color: '#666' }}>
         GIS data from Solano County ArcGIS services. County Code from official ordinances.
         Budget data from FY2025-26 Recommended Budget. Staffing data from Position Allocation
-        Report (April 2025) and Salary Listing (January 2026).
+        Report (April 2025) and Salary Listing (January 2026). General Plan from 2008 Solano
+        County General Plan including all chapters, appendices, amendments, and EIR documents.
       </p>
     </main>
   );
