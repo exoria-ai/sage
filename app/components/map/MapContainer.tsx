@@ -106,16 +106,18 @@ export function MapContainer({
         viewRef.current = view;
 
         // Ensure all layers are loaded
-        await Promise.all(
-          view.map.allLayers.map(async (layer) => {
-            if (layer.load) {
-              await layer.load();
-            }
-          })
-        );
+        if (view.map) {
+          await Promise.all(
+            view.map.allLayers.map(async (layer) => {
+              if (layer.load) {
+                await layer.load();
+              }
+            })
+          );
 
-        // Log layer info after load
-        console.log('Layers loaded:', view.map.allLayers.map(l => `${l.title} (${l.type})`).toArray());
+          // Log layer info after load
+          console.log('Layers loaded:', view.map.allLayers.map(l => `${l.title} (${l.type})`).toArray());
+        }
 
         // Store the view reference for MCP tools
         setMapView(view);
@@ -191,18 +193,20 @@ export function MapContainer({
       // Handle layer list actions
       layerList.on('trigger-action', async (event) => {
         const id = event.action.id;
-        const layer = event.item.layer;
+        const layer = event.item?.layer;
+
+        if (!layer) return;
 
         if (id === 'zoom-to-layer') {
           // Zoom to layer's full extent
-          if (layer.fullExtent) {
+          if ('fullExtent' in layer && layer.fullExtent) {
             view.goTo(layer.fullExtent).catch((err) => {
               console.error('Error zooming to layer:', err);
             });
           } else if ('queryExtent' in layer) {
             // For feature layers, query the extent
             try {
-              const result = await (layer as __esri.FeatureLayer).queryExtent();
+              const result = await (layer as unknown as __esri.FeatureLayer).queryExtent();
               if (result.extent) {
                 view.goTo(result.extent);
               }
