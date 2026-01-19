@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
   const height = searchParams.get('height') ? parseInt(searchParams.get('height')!) : undefined;
   const zoom = searchParams.get('zoom') ? parseInt(searchParams.get('zoom')!) : undefined;
   const format = (searchParams.get('format') as 'png' | 'jpg') || undefined;
-  const basemap = (searchParams.get('basemap') as 'streets' | 'aerial') || undefined;
+  const basemap = (searchParams.get('basemap') as 'topographic' | 'imagery' | 'imagery-hybrid' | 'navigation') || undefined;
 
   // Validate - need at least one location parameter
   if (!apn && !apns && !center && !bbox) {

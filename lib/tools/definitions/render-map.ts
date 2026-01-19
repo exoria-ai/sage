@@ -13,54 +13,60 @@ export const renderMapTool = defineTool({
   name: 'render_map',
   description: `Generate a static map image for the user to view.
 
-**PURPOSE**: This tool creates a visual map that the user can see. The entire point is to
-produce an image URL that you MUST share with the user.
-
-**CRITICAL - ALWAYS INCLUDE THE URL**:
-The tool returns an imageUrl field. You MUST include this URL in your response to the user.
-The embedded image may not display in all clients, so the URL is essential.
-Format: "Here's the map: [imageUrl]" or include it with your description.
+**PURPOSE**: Creates a visual map image. You MUST share the imageUrl with the user.
 
 WORKFLOW (address → map):
 1. geocode_address({ address: "675 Texas St, Fairfield, CA" }) → get APN
-2. render_map({ apn: "003-025-1020" }) → use APN directly (preferred)
-   OR render_map({ center: { latitude, longitude }, zoom: 18 })
+2. render_map({ apn: "003-025-1020" }) → centers on parcel, highlights it
 
-INPUT (provide ONE):
-- apn: Assessor's Parcel Number - PREFERRED. Centers on parcel, highlights boundary.
-- center: { latitude, longitude } - Map centered on point with marker.
-- buffer: Buffer visualization - for radius/notification maps (see below)
-- apns: Array of APNs - display multiple parcels
-- bbox: { xmin, ymin, xmax, ymax } - explicit bounding box
-- extent: 'county' - Zoom to show the entire county with boundaries
+LOCATION INPUT (provide ONE):
+- apn: Assessor's Parcel Number - centers on parcel and highlights it
+- center: { latitude, longitude } - centers on point with marker
+- apns: Array of APNs - highlights multiple parcels
+- buffer: Buffer visualization for notification radius maps
+- extent: 'county' - shows entire Solano County
 
-COUNTY MAP MODE - For county-wide visualization:
-  render_map({ extent: 'county', boundaries: { showCounty: true, showCities: true } })
+LAYER CONTROL:
+Enable/disable layers via the 'layers' option. All layers use map service default symbology.
 
-  → Shows entire Solano County at appropriate zoom
-  → Can overlay county boundary (blue dashed line) and city boundaries (colored, labeled)
-  → Parcel boundaries hidden at county zoom (too cluttered)
+  render_map({ apn: "003-025-1020", layers: { aerial2025: true } })
 
-OPTIONS:
-- width/height: Image dimensions (default: 1200x800)
-- zoom: Map zoom 1-19 (default: 17). Auto-calculated for buffer mode.
-- basemap: 'aerial' (default, recommended) or 'streets'
+Available layers:
+- aerial2025: Solano County 2025 high-resolution aerial imagery (default: false)
+  **IMPORTANT**: Enable this when zoomed in on parcels - it's clearer and more accurate than
+  the generic world imagery basemap, especially when showing parcel boundaries.
+- parcels: Parcel boundaries (default: true when zoom >= 14)
+- addressPoints: Address point markers (default: false)
+- cityBoundary: City boundary outlines (default: false)
+- countyBoundary: County boundary outline (default: false)
+- garbageAreas: Garbage service areas (default: false)
 
-BUFFER MODE - For radius visualization:
+BASEMAP OPTIONS:
+- topographic: (default) Street map with terrain/hillshade
+- imagery: ESRI World satellite imagery
+- imagery-hybrid: Satellite imagery with road/label overlay
+- navigation: Clean navigation-focused street map
+
+BUFFER MODE:
   render_map({ buffer: { apn: "003-025-1020", radius_feet: 300 } })
+  → Source parcel highlighted orange, buffer shown as dashed circle
+  → Use get_parcels_in_buffer separately if you need owner names for notification lists
 
-  → Do NOT call get_parcels_in_buffer first - this tool handles spatial queries internally.
-  → Source parcel highlighted in orange, buffer shown as dashed circle.
-  → Only use get_parcels_in_buffer if you need owner names/addresses for notification lists.
+COUNTY VIEW:
+  render_map({ extent: 'county', layers: { countyBoundary: true, cityBoundary: true } })
+
+OTHER OPTIONS:
+- zoom: 1-19 (default: 17, auto-calculated for buffer/extent modes)
+- width/height: Image dimensions in pixels (default: 1200x800)
 
 REMEMBER: Always include the imageUrl in your response!`,
   schema: {
-    apn: z.string().optional().describe("Assessor's Parcel Number to center map on"),
-    apns: z.array(z.string()).optional().describe('Array of APNs to display (for search results or buffer parcels)'),
+    apn: z.string().optional().describe("Assessor's Parcel Number to center map on and highlight"),
+    apns: z.array(z.string()).optional().describe('Array of APNs to highlight'),
     center: z.object({
       latitude: z.number(),
       longitude: z.number(),
-    }).optional().describe('Center point coordinates'),
+    }).optional().describe('Center point coordinates (shows marker if no APN)'),
     bbox: z.object({
       xmin: z.number(),
       ymin: z.number(),
@@ -73,29 +79,31 @@ REMEMBER: Always include the imageUrl in your response!`,
       longitude: z.number().optional().describe('Source point longitude (if no APN)'),
       radius_feet: z.number().describe('Buffer radius in feet (e.g., 300, 500, 1000)'),
       show_ring: z.boolean().optional().describe('Show buffer circle (default: true)'),
-      highlight_parcels: z.boolean().optional().describe('Highlight parcels in buffer (default: true)'),
-    }).optional().describe('Buffer visualization options'),
-    boundaries: z.object({
-      showCounty: z.boolean().optional().describe('Show county boundary outline (blue dashed line)'),
-      showCities: z.boolean().optional().describe('Show city boundary outlines with labels'),
-      countyFill: z.boolean().optional().describe('Fill county with semi-transparent color'),
-      cityFill: z.boolean().optional().describe('Fill cities with semi-transparent color'),
-    }).optional().describe('County/city boundary visualization options'),
-    extent: z.enum(['county']).optional().describe("Zoom to show full extent: 'county' for county-wide view"),
+    }).optional().describe('Buffer visualization for notification radius maps'),
+    layers: z.object({
+      aerial2025: z.boolean().optional().describe('Solano County 2025 high-res aerial - USE THIS when zoomed in on parcels'),
+      parcels: z.boolean().optional().describe('Parcel boundaries (default: true at zoom >= 14)'),
+      addressPoints: z.boolean().optional().describe('Address point markers'),
+      cityBoundary: z.boolean().optional().describe('City boundary outlines'),
+      countyBoundary: z.boolean().optional().describe('County boundary outline'),
+      garbageAreas: z.boolean().optional().describe('Garbage service areas'),
+    }).optional().describe('Layer visibility - all use map service default symbology'),
+    extent: z.enum(['county']).optional().describe("'county' to show entire Solano County"),
+    basemap: z.enum(['topographic', 'imagery', 'imagery-hybrid', 'navigation']).optional()
+      .describe("Base tiles: 'topographic' (default), 'imagery', 'imagery-hybrid', or 'navigation'"),
+    zoom: z.number().optional().describe('Zoom level 1-19 (default: 17)'),
     width: z.number().optional().describe('Image width in pixels (default: 1200)'),
     height: z.number().optional().describe('Image height in pixels (default: 800)'),
-    zoom: z.number().optional().describe('Map zoom level 1-19 (auto-calculated for buffer mode)'),
     format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
-    basemap: z.enum(['aerial', 'streets']).optional().describe('Basemap type: aerial (default) or streets'),
   },
-  handler: async ({ apn, apns, center, bbox, buffer, boundaries, extent, width, height, zoom, format, basemap }): Promise<ToolResponse> => {
+  handler: async ({ apn, apns, center, bbox, buffer, layers, extent, basemap, zoom, width, height, format }): Promise<ToolResponse> => {
     const result = await renderMap({
       apn,
       apns,
       center,
       bbox,
       buffer,
-      boundaries,
+      layers,
       extent,
       width,
       height,

@@ -4,6 +4,9 @@
  * Generates static map images using ESRI's Export Web Map Task.
  * This mirrors the interactive map viewer by using the same WebMap configuration,
  * sending a single request to ESRI's print service for server-side rendering.
+ *
+ * Operational layers use the map service's default symbology.
+ * Custom symbology is only applied to graphics layers (highlights, buffers, markers).
  */
 
 import { parseAPN } from '@/lib/utils/apn';
@@ -34,6 +37,18 @@ interface BoundaryOptions {
   cityFill?: boolean;
 }
 
+/** Layer visibility options - all default to service behavior if not specified */
+interface LayerOptions {
+  parcels?: boolean;
+  addressPoints?: boolean;
+  cityBoundary?: boolean;
+  countyBoundary?: boolean;
+  aerial2025?: boolean;
+  garbageAreas?: boolean;
+}
+
+type BasemapType = 'topographic' | 'imagery' | 'imagery-hybrid' | 'navigation';
+
 interface MapOptions {
   center?: { latitude: number; longitude: number };
   apn?: string;
@@ -44,11 +59,12 @@ interface MapOptions {
   zoom?: number;
   showParcel?: boolean;
   format?: 'png' | 'jpg';
-  basemap?: 'streets' | 'aerial';
+  basemap?: BasemapType;
   highlightApn?: string;
   buffer?: BufferOptions;
   boundaries?: BoundaryOptions;
   extent?: 'county';
+  layers?: LayerOptions;
 }
 
 interface RenderMapResult {
@@ -76,17 +92,37 @@ const DEFAULT_WIDTH = MAP_DEFAULTS.width;
 const DEFAULT_HEIGHT = MAP_DEFAULTS.height;
 const DEFAULT_ZOOM = MAP_DEFAULTS.zoom;
 
-// Layer URLs from your WebMap
+// Layer URLs - these match the WebMap's configured layers
 const LAYER_URLS = {
   parcels: `${SOLANO_AGOL_BASE}/Parcels_Public_Aumentum/FeatureServer/0`,
+  addressPoints: `${SOLANO_AGOL_BASE}/Address_Points/FeatureServer/0`,
   cityBoundary: SOLANO_SERVICES.cityBoundary,
   countyBoundary: `${SOLANO_AGOL_BASE}/County_Boundary/FeatureServer/1`,
-  aerial: 'https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2025_WGS84/MapServer',
+  garbageAreas: `${SOLANO_AGOL_BASE}/Garbage_Service_Areas/FeatureServer/0`,
+  aerial2025: 'https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2025_WGS84/MapServer',
 };
 
+// Basemap layer configuration type
+interface BasemapLayerConfig {
+  id: string;
+  url?: string;
+  styleUrl?: string;
+  visibility: boolean;
+  opacity: number;
+  layerType: string;
+  type?: string;
+}
+
+interface BasemapConfig {
+  title: string;
+  baseMapLayers: BasemapLayerConfig[];
+}
+
 // Basemap configurations
-const BASEMAPS = {
-  streets: {
+// Names match what users see in ArcGIS Online basemap gallery
+const BASEMAPS: Record<BasemapType, BasemapConfig> = {
+  // World Topographic Map + World Hillshade
+  topographic: {
     title: 'Topographic',
     baseMapLayers: [
       {
@@ -97,40 +133,69 @@ const BASEMAPS = {
         layerType: 'ArcGISTiledMapServiceLayer',
       },
       {
-        id: 'World_Topo',
+        id: 'World_Topo_Map',
+        type: 'VectorTileLayer',
         visibility: true,
         opacity: 1,
         layerType: 'VectorTileLayer',
-        styleUrl: 'https://cdn.arcgis.com/sharing/rest/content/items/27e89eb03c1e4341a1d75e597f0291e6/resources/styles/root.json',
+        styleUrl: 'https://cdn.arcgis.com/sharing/rest/content/items/7dc6cea0b1764a1f9af2e679f642f0f5/resources/styles/root.json',
       },
     ],
   },
-  aerial: {
+  // World Imagery
+  imagery: {
     title: 'Imagery',
     baseMapLayers: [
       {
-        id: 'Solano_Aerial_2025',
-        url: LAYER_URLS.aerial,
+        id: 'World_Imagery',
+        url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
         visibility: true,
         opacity: 1,
         layerType: 'ArcGISTiledMapServiceLayer',
       },
     ],
   },
+  // World Imagery + Hybrid Reference Layer
+  'imagery-hybrid': {
+    title: 'Imagery Hybrid',
+    baseMapLayers: [
+      {
+        id: 'World_Imagery',
+        url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+        visibility: true,
+        opacity: 1,
+        layerType: 'ArcGISTiledMapServiceLayer',
+      },
+      {
+        id: 'Hybrid_Reference_Layer',
+        type: 'VectorTileLayer',
+        visibility: true,
+        opacity: 1,
+        layerType: 'VectorTileLayer',
+        styleUrl: 'https://cdn.arcgis.com/sharing/rest/content/items/30d6b8271e1849cd9c3042060001f425/resources/styles/root.json',
+      },
+    ],
+  },
+  // World Navigation Map
+  navigation: {
+    title: 'Navigation',
+    baseMapLayers: [
+      {
+        id: 'World_Navigation_Map',
+        type: 'VectorTileLayer',
+        visibility: true,
+        opacity: 1,
+        layerType: 'VectorTileLayer',
+        styleUrl: 'https://cdn.arcgis.com/sharing/rest/content/items/63c47b7177f946b49902c24129b87252/resources/styles/root.json',
+      },
+    ],
+  },
 };
 
-// Symbol definitions for consistent styling
+// Symbol definitions - ONLY for graphics layers (highlights, buffers, markers)
+// Operational layers use map service default symbology
 const SYMBOLS = {
-  parcelOutline: {
-    type: 'esriSFS',
-    style: 'esriSFSNull',
-    outline: {
-      type: 'esriSLS',
-      style: 'esriSLSSolid',
-      color: [34, 197, 94, 255], // Green
-      width: 1.5,
-    },
-  },
+  // Highlight symbol for selected/focused parcels
   highlightFill: {
     type: 'esriSFS',
     style: 'esriSFSSolid',
@@ -142,6 +207,7 @@ const SYMBOLS = {
       width: 3,
     },
   },
+  // Buffer source parcel (orange)
   bufferSource: {
     type: 'esriSFS',
     style: 'esriSFSSolid',
@@ -153,32 +219,14 @@ const SYMBOLS = {
       width: 3,
     },
   },
+  // Buffer ring (dashed circle)
   bufferRing: {
     type: 'esriSLS',
     style: 'esriSLSDash',
     color: [249, 115, 22, 230], // Orange
     width: 2.5,
   },
-  cityBoundary: {
-    type: 'esriSFS',
-    style: 'esriSFSNull',
-    outline: {
-      type: 'esriSLS',
-      style: 'esriSLSSolid',
-      color: [220, 38, 38, 200], // Red
-      width: 2,
-    },
-  },
-  countyBoundary: {
-    type: 'esriSFS',
-    style: 'esriSFSNull',
-    outline: {
-      type: 'esriSLS',
-      style: 'esriSLSDash',
-      color: [30, 64, 175, 255], // Blue
-      width: 3,
-    },
-  },
+  // Center marker (for coordinate-based maps without parcel highlight)
   centerMarker: {
     type: 'esriSMS',
     style: 'esriSMSCircle',
@@ -416,6 +464,7 @@ interface WebMapJson {
       visibility: boolean;
       opacity: number;
       layerType: string;
+      type?: string;
     }>;
   };
   exportOptions: {
@@ -428,50 +477,117 @@ function buildWebMapJson(options: {
   bbox: { xmin: number; ymin: number; xmax: number; ymax: number };
   width: number;
   height: number;
-  basemap: 'streets' | 'aerial';
-  showParcels: boolean;
+  basemap: BasemapType;
+  layers: LayerOptions;
   highlightApns?: string[];
   bufferSourceApn?: string;
   bufferRing?: { centerLon: number; centerLat: number; radiusFeet: number };
   centerMarker?: { lon: number; lat: number };
   boundaries?: BoundaryOptions;
+  zoom: number;
 }): WebMapJson {
   const {
     bbox,
     width,
     height,
     basemap,
-    showParcels,
+    layers,
     highlightApns,
     bufferSourceApn,
     bufferRing,
     centerMarker,
     boundaries,
+    zoom,
   } = options;
 
   const operationalLayers: WebMapJson['operationalLayers'] = [];
 
-  // 1. Parcel boundaries (green outlines)
-  if (showParcels) {
+  // ==========================================================================
+  // Operational Layers - use map service default symbology (no drawingInfo)
+  // ==========================================================================
+
+  // 1. 2025 Aerial imagery (as operational layer, on top of basemap)
+  if (layers.aerial2025) {
     operationalLayers.push({
-      id: 'parcels-outline',
-      title: 'Parcel Boundaries',
+      id: 'aerial-2025',
+      title: 'Aerial 2025',
+      url: LAYER_URLS.aerial2025,
+      visibility: true,
+      opacity: 1,
+      layerType: 'ArcGISTiledMapServiceLayer',
+    });
+  }
+
+  // 2. Garbage Service Areas (if enabled)
+  if (layers.garbageAreas) {
+    operationalLayers.push({
+      id: 'garbage-areas',
+      title: 'Garbage Service Areas',
+      url: LAYER_URLS.garbageAreas,
+      visibility: true,
+      opacity: 0.6,
+      layerType: 'ArcGISFeatureLayer',
+      // No layerDefinition.drawingInfo - use service default symbology
+    });
+  }
+
+  // 3. Parcel boundaries (use service default symbology)
+  if (layers.parcels !== false && zoom >= 14) {
+    operationalLayers.push({
+      id: 'parcels',
+      title: 'Parcels',
       url: LAYER_URLS.parcels,
       visibility: true,
       opacity: 1,
       layerType: 'ArcGISFeatureLayer',
-      layerDefinition: {
-        drawingInfo: {
-          renderer: {
-            type: 'simple',
-            symbol: SYMBOLS.parcelOutline,
-          },
-        },
-      },
+      // No layerDefinition.drawingInfo - use service default symbology
     });
   }
 
-  // 2. Highlighted parcels (blue fill)
+  // 4. City boundaries (if enabled via boundaries option)
+  if (boundaries?.showCities || layers.cityBoundary) {
+    operationalLayers.push({
+      id: 'city-boundaries',
+      title: 'City Boundaries',
+      url: LAYER_URLS.cityBoundary,
+      visibility: true,
+      opacity: 0.8,
+      layerType: 'ArcGISFeatureLayer',
+      // No layerDefinition.drawingInfo - use service default symbology
+    });
+  }
+
+  // 5. County boundary (if enabled via boundaries or layers option)
+  if (boundaries?.showCounty || layers.countyBoundary) {
+    operationalLayers.push({
+      id: 'county-boundary',
+      title: 'County Boundary',
+      url: LAYER_URLS.countyBoundary,
+      visibility: true,
+      opacity: 1,
+      layerType: 'ArcGISFeatureLayer',
+      // No layerDefinition.drawingInfo - use service default symbology
+    });
+  }
+
+  // 6. Address points (if enabled)
+  if (layers.addressPoints) {
+    operationalLayers.push({
+      id: 'address-points',
+      title: 'Address Points',
+      url: LAYER_URLS.addressPoints,
+      visibility: true,
+      opacity: 1,
+      layerType: 'ArcGISFeatureLayer',
+      // No layerDefinition.drawingInfo - use service default symbology
+    });
+  }
+
+  // ==========================================================================
+  // Graphics Layers - custom symbology for highlights/buffers/markers
+  // ==========================================================================
+
+  // 7. Highlighted parcels (custom blue fill - this is a graphics overlay)
   if (highlightApns && highlightApns.length > 0) {
     const whereClause = buildApnWhereClause(highlightApns);
     if (whereClause) {
@@ -495,7 +611,7 @@ function buildWebMapJson(options: {
     }
   }
 
-  // 3. Buffer source parcel (orange)
+  // 8. Buffer source parcel (custom orange highlight)
   if (bufferSourceApn) {
     const parcelId = apnToParcelId(bufferSourceApn);
     if (parcelId) {
@@ -519,7 +635,7 @@ function buildWebMapJson(options: {
     }
   }
 
-  // 4. Buffer ring (dashed circle)
+  // 9. Buffer ring (custom dashed circle)
   if (bufferRing) {
     const circleGeom = createCircleGeometry(
       bufferRing.centerLon,
@@ -565,47 +681,7 @@ function buildWebMapJson(options: {
     });
   }
 
-  // 5. City boundaries
-  if (boundaries?.showCities) {
-    operationalLayers.push({
-      id: 'city-boundaries',
-      title: 'City Boundaries',
-      url: LAYER_URLS.cityBoundary,
-      visibility: true,
-      opacity: 0.8,
-      layerType: 'ArcGISFeatureLayer',
-      layerDefinition: {
-        drawingInfo: {
-          renderer: {
-            type: 'simple',
-            symbol: SYMBOLS.cityBoundary,
-          },
-        },
-      },
-    });
-  }
-
-  // 6. County boundary
-  if (boundaries?.showCounty) {
-    operationalLayers.push({
-      id: 'county-boundary',
-      title: 'County Boundary',
-      url: LAYER_URLS.countyBoundary,
-      visibility: true,
-      opacity: 1,
-      layerType: 'ArcGISFeatureLayer',
-      layerDefinition: {
-        drawingInfo: {
-          renderer: {
-            type: 'simple',
-            symbol: SYMBOLS.countyBoundary,
-          },
-        },
-      },
-    });
-  }
-
-  // 7. Center marker (when no parcels highlighted)
+  // 10. Center marker (when no parcels highlighted)
   if (centerMarker) {
     operationalLayers.push({
       id: 'center-marker',
@@ -654,7 +730,7 @@ function buildWebMapJson(options: {
       },
     },
     operationalLayers,
-    baseMap: BASEMAPS[basemap],
+    baseMap: BASEMAPS[basemap] || BASEMAPS.topographic,
     exportOptions: {
       outputSize: [width, height],
       dpi: 96,
@@ -753,13 +829,13 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     width = DEFAULT_WIDTH,
     height = DEFAULT_HEIGHT,
     zoom: requestedZoom,
-    showParcel = true,
     format = 'png',
-    basemap = 'streets',
+    basemap = 'topographic',
     highlightApn,
     buffer,
     boundaries,
     extent,
+    layers = {},
   } = args;
 
   // Determine center and zoom
@@ -879,7 +955,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     width,
     height,
     basemap,
-    showParcels: showParcel && zoom >= 14,
+    layers,
     highlightApns: parcelApns.length > 0 ? parcelApns : undefined,
     bufferSourceApn: buffer ? bufferSourceApn : undefined,
     bufferRing:
@@ -889,6 +965,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     centerMarker:
       !buffer && parcelApns.length === 0 ? { lon, lat } : undefined,
     boundaries,
+    zoom,
   });
 
   // Export the map

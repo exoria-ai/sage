@@ -36,7 +36,7 @@ const testCases: TestCase[] = [
       apn: '008-013-001',
       width: 800,
       height: 600,
-      basemap: 'streets',
+      basemap: 'topographic',
     },
   },
   {
@@ -46,7 +46,7 @@ const testCases: TestCase[] = [
       apn: '008-013-001',
       width: 800,
       height: 600,
-      basemap: 'aerial',
+      basemap: 'imagery',
     },
   },
   {
@@ -57,7 +57,7 @@ const testCases: TestCase[] = [
       zoom: 17,
       width: 800,
       height: 600,
-      basemap: 'streets',
+      basemap: 'topographic',
     },
   },
   {
@@ -72,7 +72,7 @@ const testCases: TestCase[] = [
       },
       width: 1000,
       height: 800,
-      basemap: 'streets',
+      basemap: 'topographic',
     },
   },
   {
@@ -86,7 +86,7 @@ const testCases: TestCase[] = [
       },
       width: 1000,
       height: 800,
-      basemap: 'aerial',
+      basemap: 'imagery',
     },
   },
   {
@@ -97,7 +97,7 @@ const testCases: TestCase[] = [
       boundaries: { showCounty: true, showCities: true },
       width: 1200,
       height: 800,
-      basemap: 'streets',
+      basemap: 'topographic',
     },
   },
   {
@@ -109,7 +109,7 @@ const testCases: TestCase[] = [
       apns: ['008-013-001', '008-013-002', '008-013-003'],
       width: 800,
       height: 600,
-      basemap: 'streets',
+      basemap: 'topographic',
     },
   },
   {
@@ -120,7 +120,7 @@ const testCases: TestCase[] = [
       zoom: 19,
       width: 800,
       height: 600,
-      basemap: 'aerial',
+      basemap: 'imagery',
     },
   },
   {
@@ -131,7 +131,7 @@ const testCases: TestCase[] = [
       zoom: 15,
       width: 800,
       height: 600,
-      basemap: 'streets',
+      basemap: 'topographic',
     },
   },
   {
@@ -142,7 +142,70 @@ const testCases: TestCase[] = [
       zoom: 18,
       width: 1000,
       height: 800,
-      basemap: 'streets',
+      basemap: 'topographic',
+    },
+  },
+  {
+    name: '11-aerial2025-layer',
+    description: 'Parcel with 2025 aerial layer enabled',
+    options: {
+      apn: '008-013-001',
+      width: 800,
+      height: 600,
+      basemap: 'topographic',
+      layers: {
+        aerial2025: true,
+        parcels: true,
+      },
+    },
+  },
+  {
+    name: '12-layers-off',
+    description: 'Parcel with parcels layer disabled',
+    options: {
+      apn: '008-013-001',
+      width: 800,
+      height: 600,
+      basemap: 'topographic',
+      layers: {
+        parcels: false,
+      },
+    },
+  },
+  {
+    name: '13-city-boundary-layer',
+    description: 'City boundary layer via layers option',
+    options: {
+      center: { latitude: 38.2494, longitude: -122.0400 },
+      zoom: 12,
+      width: 1000,
+      height: 800,
+      basemap: 'topographic',
+      layers: {
+        cityBoundary: true,
+        parcels: false,
+      },
+    },
+  },
+  {
+    name: '14-imagery-hybrid',
+    description: 'Imagery Hybrid basemap with labels',
+    options: {
+      apn: '008-013-001',
+      width: 800,
+      height: 600,
+      basemap: 'imagery-hybrid',
+    },
+  },
+  {
+    name: '15-navigation',
+    description: 'Navigation basemap',
+    options: {
+      center: { latitude: 38.2494, longitude: -122.0400 },
+      zoom: 15,
+      width: 800,
+      height: 600,
+      basemap: 'navigation',
     },
   },
 ];
