@@ -18,6 +18,7 @@ import { directionsTools } from './directions';
 import { renderMapTools } from './render-map';
 import { imageGenerationTools } from './image-generation';
 import { interactiveMapTools } from './interactive-map';
+import { gisLayersTools } from './gis-layers';
 
 // Re-export individual tool groups for granular imports
 export * from './gis-core';
@@ -31,6 +32,7 @@ export * from './directions';
 export * from './render-map';
 export * from './image-generation';
 export * from './interactive-map';
+export * from './gis-layers';
 
 /**
  * All tool definitions for MCP registration.
@@ -70,6 +72,9 @@ export const allTools: ToolDefinition<any>[] = [
 
   // Image generation
   ...imageGenerationTools,
+
+  // GIS layers discovery
+  ...gisLayersTools,
 ];
 
 /**
@@ -90,6 +95,7 @@ export function getToolStats() {
       renderMap: renderMapTools.length,
       interactiveMap: interactiveMapTools.length,
       imageGeneration: imageGenerationTools.length,
+      gisLayers: gisLayersTools.length,
     },
   };
 }
