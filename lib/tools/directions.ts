@@ -12,66 +12,11 @@
  */
 
 import { geocodeAddress } from './geocode';
+import { getArcGISToken } from '@/lib/shared/token-cache';
+import { ESRI_ROUTE_SERVICE, env } from '@/lib/config';
 
 // ESRI World Route Service endpoint
-const ROUTE_SERVICE_URL =
-  'https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/solve';
-
-// Token endpoint for OAuth 2.0 app authentication
-const TOKEN_URL = 'https://www.arcgis.com/sharing/rest/oauth2/token';
-
-// Cached token and expiry
-let cachedToken: string | null = null;
-let tokenExpiry: number = 0;
-
-/**
- * Get an access token using OAuth 2.0 client credentials flow
- */
-async function getAccessToken(): Promise<string | null> {
-  const clientId = process.env.ARCGIS_CLIENT_ID;
-  const clientSecret = process.env.ARCGIS_CLIENT_SECRET;
-
-  if (!clientId || !clientSecret) {
-    return null;
-  }
-
-  // Return cached token if still valid (with 5 minute buffer)
-  if (cachedToken && Date.now() < tokenExpiry - 300000) {
-    return cachedToken;
-  }
-
-  try {
-    const params = new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      grant_type: 'client_credentials',
-    });
-
-    const response = await fetch(TOKEN_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params.toString(),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      console.error('OAuth token error:', data.error);
-      return null;
-    }
-
-    cachedToken = data.access_token;
-    // Token expires_in is in seconds, convert to milliseconds
-    tokenExpiry = Date.now() + (data.expires_in * 1000);
-
-    return cachedToken;
-  } catch (error) {
-    console.error('Failed to get access token:', error);
-    return null;
-  }
-}
+const ROUTE_SERVICE_URL = `${ESRI_ROUTE_SERVICE}/solve`;
 
 interface Location {
   address?: string;
@@ -183,7 +128,7 @@ export async function getDirections(args: {
   const { origin, destination, return_geometry = false } = args;
 
   // Get OAuth access token
-  const token = await getAccessToken();
+  const token = await getArcGISToken();
   if (!token) {
     return {
       success: false,
@@ -290,12 +235,12 @@ export async function getDirections(args: {
     const totalMiles = routeAttrs.Total_Miles || routeAttrs.Total_Length || 0;
     const totalMinutes = routeAttrs.Total_TravelTime || routeAttrs.Total_Time || 0;
 
-    // Build map URL with route endpoints
+    // Build map URL with route display parameters
     const mapBaseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    // For now, just link to the map centered between the two points
-    const centerLat = (originResolved.lat + destResolved.lat) / 2;
-    const centerLon = (originResolved.lon + destResolved.lon) / 2;
-    const mapUrl = `${mapBaseUrl}/map?center=${centerLon},${centerLat}&zoom=12`;
+    // Encode addresses for labels if available
+    const originLabel = encodeURIComponent(originResolved.address);
+    const destLabel = encodeURIComponent(destResolved.address);
+    const mapUrl = `${mapBaseUrl}/map?origin=${originResolved.lon},${originResolved.lat},${originLabel}&destination=${destResolved.lon},${destResolved.lat},${destLabel}`;
 
     const result: DirectionsResult = {
       success: true,

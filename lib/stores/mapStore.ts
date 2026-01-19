@@ -168,5 +168,3 @@ export const useMapStore = create<MapStore>((set, get) => ({
   setError: (error) => set({ error }),
 }));
 
-// Re-export from the webmaps config file for convenience
-export { WEB_MAPS as WEB_MAP_PRESETS, getWebMapId } from '../esri/webmaps';

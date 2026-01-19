@@ -5,23 +5,23 @@
  */
 
 import axios, { type AxiosInstance } from 'axios';
+import {
+  SOLANO_AGOL_BASE,
+  FEMA_FLOOD_SERVICE,
+  CALFIRE_FHSZ_SERVICE,
+  TIMEOUTS,
+} from '@/lib/config';
 
-// Solano County ArcGIS endpoints
+// Re-export endpoints for backwards compatibility
+// TODO: Update consumers to import from @/lib/config directly
 export const ENDPOINTS = {
-  // Solano County ArcGIS Online
-  SOLANO_AGOL: 'https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services',
-
-  // Solano County ArcGIS Server
+  SOLANO_AGOL: SOLANO_AGOL_BASE,
   SOLANO_SERVER: 'https://solanocountygis.com/server/rest/services',
-
-  // FEMA National Flood Hazard Layer
-  FEMA_NFHL: 'https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer',
-
-  // CAL FIRE Fire Hazard Severity Zones
-  CALFIRE_FHSZ: 'https://services.gis.ca.gov/arcgis/rest/services/Environment/Fire_Severity_Zones/MapServer',
+  FEMA_NFHL: FEMA_FLOOD_SERVICE,
+  CALFIRE_FHSZ: CALFIRE_FHSZ_SERVICE,
 } as const;
 
-// Layer IDs for Solano County services (from SOLANO_GIS_LAYERS.md)
+// Layer paths for Solano County services
 export const LAYERS = {
   ADDRESS_POINTS: 'Address_Points/FeatureServer/0',
   PARCELS: 'Parcels_Public_Aumentum/FeatureServer/0',
@@ -67,7 +67,7 @@ export class ArcGISClient {
   constructor(baseUrl: string) {
     this.client = axios.create({
       baseURL: baseUrl,
-      timeout: 30000,
+      timeout: TIMEOUTS.default,
       headers: {
         'Accept': 'application/json',
       },

@@ -7,6 +7,7 @@
 
 import { solanoClient, ENDPOINTS, LAYERS } from '@/lib/services/arcgis';
 import { parseAPN } from '@/lib/utils/apn';
+import { getCoordinatesFromAPN } from '@/lib/utils/parcel-lookup';
 
 // Additional district layers from SOLANO_GIS_LAYERS.md
 const DISTRICT_LAYERS = {
@@ -48,43 +49,6 @@ interface SpecialDistrictsResult {
   error_type?: string;
   message?: string;
   suggestion?: string;
-}
-
-/**
- * Get coordinates from APN
- */
-async function getCoordinatesFromAPN(apn: string): Promise<{ lat: number; lon: number } | null> {
-  const parsed = parseAPN(apn);
-  if (!parsed) return null;
-
-  const features = await solanoClient.queryByAttribute(
-    LAYERS.PARCELS,
-    `APN = '${parsed.raw}' OR APN = '${parsed.formatted}'`,
-    '*'
-  );
-
-  if (features.length === 0) return null;
-
-  const feature = features[0];
-  if (!feature) return null;
-
-  const geometry = feature.geometry;
-  if (!geometry?.rings) return null;
-
-  // Calculate centroid
-  let sumX = 0, sumY = 0, count = 0;
-  for (const ring of geometry.rings) {
-    for (const coord of ring) {
-      sumX += coord[0] ?? 0;
-      sumY += coord[1] ?? 0;
-      count++;
-    }
-  }
-
-  return {
-    lat: sumY / count,
-    lon: sumX / count,
-  };
 }
 
 /**
@@ -208,8 +172,8 @@ export async function getSpecialDistricts(args: {
         suggestion: 'Verify the APN format (XXX-XXX-XXX) or use coordinates instead',
       };
     }
-    lat = coords.lat;
-    lon = coords.lon;
+    lat = coords.latitude;
+    lon = coords.longitude;
     resolvedAPN = apn;
   } else {
     lat = latitude!;

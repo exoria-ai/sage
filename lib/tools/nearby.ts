@@ -4,8 +4,9 @@
  * Find nearby points of interest: schools, parks, fire stations, etc.
  */
 
-import { solanoClient, ENDPOINTS, LAYERS } from '@/lib/services/arcgis';
-import { parseAPN } from '@/lib/utils/apn';
+import { ENDPOINTS } from '@/lib/services/arcgis';
+import { getCoordinatesFromAPN } from '@/lib/utils/parcel-lookup';
+import { EARTH_RADIUS_FEET, LIMITS } from '@/lib/config';
 
 // Point of interest layers from SOLANO_GIS_LAYERS.md
 const POI_LAYERS: Record<string, { path: string; nameField: string; typeField?: string }> = {
@@ -69,8 +70,7 @@ interface NearbyResult {
   suggestion?: string;
 }
 
-// Earth radius in feet for distance calculations
-const EARTH_RADIUS_FEET = 20902231;
+// Note: EARTH_RADIUS_FEET imported from @/lib/config
 
 /**
  * Calculate distance between two points in feet using Haversine formula
@@ -88,45 +88,6 @@ function calculateDistanceFeet(lat1: number, lon1: number, lat2: number, lon2: n
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return EARTH_RADIUS_FEET * c;
-}
-
-/**
- * Get coordinates from APN
- */
-async function getCoordinatesFromAPN(apn: string): Promise<{ lat: number; lon: number } | null> {
-  const parsed = parseAPN(apn);
-  if (!parsed) return null;
-
-  const features = await solanoClient.queryByAttribute(
-    LAYERS.PARCELS,
-    `APN = '${parsed.raw}' OR APN = '${parsed.formatted}'`,
-    '*'
-  );
-
-  if (features.length === 0) return null;
-
-  const feature = features[0];
-  if (!feature) return null;
-
-  const geometry = feature.geometry;
-  if (!geometry?.rings) return null;
-
-  // Calculate centroid
-  let sumX = 0,
-    sumY = 0,
-    count = 0;
-  for (const ring of geometry.rings) {
-    for (const coord of ring) {
-      sumX += coord[0] ?? 0;
-      sumY += coord[1] ?? 0;
-      count++;
-    }
-  }
-
-  return {
-    lat: sumY / count,
-    lon: sumX / count,
-  };
 }
 
 /**
@@ -280,8 +241,8 @@ export async function getNearby(args: {
         suggestion: 'Verify the APN format (XXX-XXX-XXX) or use coordinates instead',
       };
     }
-    lat = coords.lat;
-    lon = coords.lon;
+    lat = coords.latitude;
+    lon = coords.longitude;
     resolvedAPN = apn;
   } else {
     lat = latitude!;
