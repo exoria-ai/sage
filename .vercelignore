@@ -1,0 +1,18 @@
+# Documentation (reference material, not needed at runtime)
+docs/
+
+# Scripts (development tools only)
+scripts/
+
+# Test output
+test-output/
+
+# Data files not needed in production
+data/budget/*.pdf
+data/general_plan_2008/
+data/hr/
+
+# Development configuration
+.claude/
+*.md
+!README.md
