@@ -229,6 +229,11 @@ function getCategoryFromUrl(urlPath: string): string {
 
   // Skip 'rest' and 'services-reference'
   if (parts.length >= 3 && parts[0] === 'rest' && parts[1] === 'services-reference') {
+    // Check for nested paths first (routing, spatial-analysis, geoanalytics)
+    if (parts.includes('routing')) return 'routing';
+    if (parts.includes('spatial-analysis')) return 'spatial-analysis';
+    if (parts.includes('geoanalytics')) return 'geoanalytics';
+
     // Group by service type based on the page name
     const pageName = parts[parts.length - 1] || parts[parts.length - 2];
 
@@ -237,11 +242,22 @@ function getCategoryFromUrl(urlPath: string): string {
       return 'feature-service';
     if (pageName.includes('map-service')) return 'map-service';
     if (pageName.includes('image-service')) return 'image-service';
-    if (pageName.includes('geometry')) return 'geometry-service';
-    if (pageName.includes('geocode')) return 'geocode-service';
-    if (pageName.includes('geoanalytics')) return 'geoanalytics';
-    if (pageName.includes('routing') || pageName.includes('route')) return 'routing';
-    if (pageName.includes('spatial-analysis')) return 'spatial-analysis';
+    if (pageName.includes('geometry') || pageName === 'buffer' || pageName === 'project' ||
+        pageName === 'intersect' || pageName === 'union' || pageName === 'simplify' ||
+        pageName === 'convex-hull' || pageName === 'distance' || pageName === 'areas-and-lengths')
+      return 'geometry-service';
+    if (pageName.includes('geocode') || pageName === 'suggest' || pageName === 'find-address-candidates' ||
+        pageName === 'reverse-geocode' || pageName === 'batch-geocode' || pageName === 'analyze-geocode-input')
+      return 'geocode-service';
+    if (pageName.startsWith('gp-') || pageName === 'submit-gp-job' || pageName === 'execute-gp-task')
+      return 'geoprocessing';
+    if (pageName.includes('vector-tile')) return 'vector-tile-service';
+    if (pageName.includes('scene-service') || pageName === 'layer-scene-service' ||
+        pageName === 'feature-scene-service' || pageName === 'geometry-scene-service')
+      return 'scene-service';
+    if (pageName === 'uploads' || pageName === 'upload' || pageName === 'commit' ||
+        pageName === 'register' || pageName === 'item' || pageName === 'parts')
+      return 'uploads';
     if (
       pageName.includes('object') ||
       pageName.includes('symbol') ||
@@ -371,6 +387,10 @@ const PRIORITY_PAGES = [
   '/rest/services-reference/enterprise/project/',
   '/rest/services-reference/enterprise/intersect/',
   '/rest/services-reference/enterprise/union/',
+  '/rest/services-reference/enterprise/areas-and-lengths/',
+  '/rest/services-reference/enterprise/convex-hull/',
+  '/rest/services-reference/enterprise/distance/',
+  '/rest/services-reference/enterprise/simplify/',
 
   // Geocode Service
   '/rest/services-reference/enterprise/geocode-service/',
@@ -378,9 +398,68 @@ const PRIORITY_PAGES = [
   '/rest/services-reference/enterprise/reverse-geocode/',
   '/rest/services-reference/enterprise/suggest/',
 
+  // Geocoding Tools
+  '/rest/services-reference/enterprise/analyze-geocode-input/',
+  '/rest/services-reference/enterprise/batch-geocode/',
+  '/rest/services-reference/enterprise/geocode-enterprise-table/',
+  '/rest/services-reference/enterprise/geocode-file/',
+
+  // Geoprocessing Service
+  '/rest/services-reference/enterprise/gp-overview/',
+  '/rest/services-reference/enterprise/gp-service/',
+  '/rest/services-reference/enterprise/gp-task/',
+  '/rest/services-reference/enterprise/gp-data-types/',
+  '/rest/services-reference/enterprise/submit-gp-job/',
+  '/rest/services-reference/enterprise/gp-job/',
+  '/rest/services-reference/enterprise/execute-gp-task/',
+  '/rest/services-reference/enterprise/gp-result/',
+
+  // Routing Services
+  '/rest/services-reference/enterprise/routing/routing-services/',
+  '/rest/services-reference/enterprise/routing/route-service-direct/',
+  '/rest/services-reference/enterprise/routing/serviceArea-service-direct/',
+  '/rest/services-reference/enterprise/routing/closestFacility-service-direct/',
+  '/rest/services-reference/enterprise/routing/travelCostMatrix-service-direct/',
+  '/rest/services-reference/enterprise/routing/routing-data-types/',
+  '/rest/services-reference/enterprise/network-service/',
+
+  // Vector Tile Service
+  '/rest/services-reference/enterprise/vector-tile-service/',
+  '/rest/services-reference/enterprise/vector-tile/',
+  '/rest/services-reference/enterprise/vector-tile-style/',
+  '/rest/services-reference/enterprise/export-tiles-vector-tile-service/',
+
+  // Scene Service
+  '/rest/services-reference/enterprise/scene-service/',
+  '/rest/services-reference/enterprise/layer-scene-service/',
+  '/rest/services-reference/enterprise/feature-scene-service/',
+  '/rest/services-reference/enterprise/geometry-scene-service/',
+
+  // Spatial Analysis
+  '/rest/services-reference/enterprise/spatial-analysis/overview/spatial-analysis-tools/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/tasks-overview/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/sa-create-buffers/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/sa-dissolve-boundaries/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/sa-find-hot-spots/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/enrich-layer/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/sa-overlay-layers/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/sa-summarize-within/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/create-drivetime/',
+  '/rest/services-reference/enterprise/spatial-analysis/tasks/find-nearest/',
+  '/rest/services-reference/enterprise/spatial-analysis/reference/feature-input-1/',
+  '/rest/services-reference/enterprise/spatial-analysis/reference/feature-output-1/',
+
+  // Uploads
+  '/rest/services-reference/enterprise/uploads/',
+  '/rest/services-reference/enterprise/upload/',
+  '/rest/services-reference/enterprise/commit/',
+  '/rest/services-reference/enterprise/register/',
+  '/rest/services-reference/enterprise/item/',
+
   // Utilities (for printing/exporting)
   '/rest/services-reference/enterprise/export-web-map-task/',
   '/rest/services-reference/enterprise/exportwebmap-specification/',
+  '/rest/services-reference/enterprise/get-layout-templates-info-task/',
 
   // Overview/Getting Started
   '/rest/services-reference/enterprise/get-started-with-the-services-directory/',
