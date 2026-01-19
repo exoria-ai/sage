@@ -177,8 +177,8 @@ export default function Home() {
       <section style={{ marginBottom: '3.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>GIS Layer Catalog</h2>
         <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
-          Discover and query 67 GIS layers across 11 categories from Solano County, FEMA, CAL FIRE, and CGS.
-          The AI can find the right layers to answer your questions.
+          Discover and query 83 GIS layers across 11 categories from Solano County, FEMA, CAL FIRE, and CGS.
+          Includes 10 years of historical aerial imagery (2004-2025).
         </p>
         <div
           style={{
@@ -188,14 +188,14 @@ export default function Home() {
             marginBottom: '1.5rem',
           }}
         >
-          <CategoryCard name="Property" count={3} examples="Parcels, addresses" />
-          <CategoryCard name="Zoning" count={16} examples="County + 7 cities" />
-          <CategoryCard name="Hazards" count={7} examples="Flood, fire, faults" />
-          <CategoryCard name="Districts" count={6} examples="BOS, school, fire" />
-          <CategoryCard name="Services" count={3} examples="Garbage, water" />
-          <CategoryCard name="POI" count={10} examples="Schools, parks" />
-          <CategoryCard name="Infrastructure" count={5} examples="Roads, bridges" />
-          <CategoryCard name="Emergency" count={4} examples="OES incidents" />
+          <CategoryCard name="Basemap" count={10} examples="Aerials 2004-2025" />
+          <CategoryCard name="Zoning" count={18} examples="County + 7 cities" />
+          <CategoryCard name="Districts" count={11} examples="BOS, voting, school" />
+          <CategoryCard name="Hazards" count={9} examples="Flood, fire, airport" />
+          <CategoryCard name="Environmental" count={8} examples="Habitat, marsh, CPAD" />
+          <CategoryCard name="POI" count={9} examples="Schools, parks" />
+          <CategoryCard name="Services" count={5} examples="Garbage, water, SRA" />
+          <CategoryCard name="Property" count={4} examples="Parcels, PLSS" />
         </div>
         <p style={{ fontSize: '0.9rem', color: '#64748b' }}>
           Each layer includes service URLs, field definitions, and example questions it can answer.
@@ -377,7 +377,7 @@ export default function Home() {
           tools={[
             { name: 'list_gis_categories', desc: 'Browse 11 layer categories' },
             { name: 'list_gis_layers', desc: 'List layers by category or priority' },
-            { name: 'search_gis_layers', desc: 'Keyword search across 67 layers' },
+            { name: 'search_gis_layers', desc: 'Keyword search across 83 layers' },
             { name: 'get_gis_layer_details', desc: 'Service URL, fields, metadata' },
             { name: 'find_layers_for_question', desc: 'Match questions to relevant layers' },
           ]}

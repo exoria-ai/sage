@@ -1573,24 +1573,383 @@
     {
       "id": "solano-aerial-2025",
       "name": "Aerial Imagery 2025",
-      "description": "High-resolution aerial imagery for Solano County captured in 2025.",
+      "description": "High-resolution aerial imagery for Solano County captured in 2025. Most current available.",
       "sourceId": "solano-agol",
       "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2025_WGS84/MapServer",
       "layerType": "TileServer",
       "category": "basemap",
-      "tags": ["aerial", "imagery", "satellite", "basemap", "2025"],
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2025", "current"],
       "userQuestions": [
         "Show me aerial imagery of this area",
-        "What does this property look like from above?"
+        "What does this property look like from above?",
+        "Show me the current aerial photo"
       ],
       "geometryType": "Polygon",
-      "spatialReference": 4326,
+      "spatialReference": 3857,
       "fields": [],
       "lookupMethod": "spatial",
       "priority": "high",
       "coverage": "countywide",
       "updateFrequency": "annual",
-      "notes": "Use this for detailed property views instead of generic world imagery."
+      "notes": "Use this for detailed property views instead of generic world imagery. Web Mercator projection."
+    },
+    {
+      "id": "solano-aerial-2024",
+      "name": "Aerial Imagery 2024",
+      "description": "High-resolution aerial imagery for Solano County captured in 2024.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2024_WGS84/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2024", "historical"],
+      "userQuestions": [
+        "Show me aerial imagery from 2024",
+        "What did this area look like in 2024?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-aerial-2023",
+      "name": "Aerial Imagery 2023",
+      "description": "High-resolution aerial imagery for Solano County captured in 2023.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2023_WGS84_ESRI_Aux/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2023", "historical"],
+      "userQuestions": [
+        "Show me aerial imagery from 2023",
+        "What did this area look like in 2023?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-aerial-2022",
+      "name": "Aerial Imagery 2022",
+      "description": "High-resolution aerial imagery for Solano County captured in 2022.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2022_WGS84_ESRI_Aux/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2022", "historical"],
+      "userQuestions": [
+        "Show me aerial imagery from 2022",
+        "What did this area look like in 2022?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-aerial-2021",
+      "name": "Aerial Imagery 2021",
+      "description": "Aerial imagery flown by Sanborn in March 2021 at 3-foot resolution.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2021_WGS84_ESRI_Aux/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2021", "historical"],
+      "userQuestions": [
+        "Show me aerial imagery from 2021",
+        "What did this area look like in 2021?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-aerial-2019",
+      "name": "Aerial Imagery 2019",
+      "description": "Aerial imagery for Solano County captured in 2019.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2019_WGS84_ESRI_Aux/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2019", "historical"],
+      "userQuestions": [
+        "Show me aerial imagery from 2019",
+        "What did this area look like 5 years ago?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-aerial-2017",
+      "name": "Aerial Imagery 2017",
+      "description": "Aerial imagery for Solano County captured in 2017.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2017_WGS84_ESRI_Aux/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2017", "historical"],
+      "userQuestions": [
+        "Show me aerial imagery from 2017"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-aerial-2015",
+      "name": "Aerial Imagery 2015",
+      "description": "Aerial imagery for Solano County captured in 2015.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2015_WGS84_ESRI_Aux/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2015", "historical"],
+      "userQuestions": [
+        "Show me aerial imagery from 2015",
+        "What did this area look like 10 years ago?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-aerial-2008",
+      "name": "Aerial Imagery 2008",
+      "description": "Aerial imagery for Solano County captured in 2008.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2008_WGS84_ESRI_Aux/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2008", "historical"],
+      "userQuestions": [
+        "Show me aerial imagery from 2008",
+        "What did this area look like 15+ years ago?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-aerial-2004",
+      "name": "Aerial Imagery 2004",
+      "description": "Aerial imagery for Solano County captured in 2004. Oldest available aerial.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2004_WGS84_ESRI_Aux/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2004", "historical", "oldest"],
+      "userQuestions": [
+        "Show me aerial imagery from 2004",
+        "What did this area look like 20 years ago?",
+        "Show me the oldest aerial photo"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "usfws-critical-habitat",
+      "name": "USFWS Critical Habitat Areas",
+      "description": "U.S. Fish and Wildlife Service critical habitat polygons for federally listed species. Important for environmental review and CEQA/NEPA compliance.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/USFWS_Critical_Habitat_Area/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["endangered species", "critical habitat", "wildlife", "USFWS", "environmental review", "CEQA"],
+      "userQuestions": [
+        "Is this property in critical habitat?",
+        "Are there endangered species concerns here?",
+        "What species habitat is protected here?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "comname", "alias": "Common Name", "type": "String", "description": "Species common name", "isPrimary": true},
+        {"name": "sciname", "alias": "Scientific Name", "type": "String", "description": "Species scientific name"},
+        {"name": "status", "alias": "Status", "type": "String", "description": "Listing status"},
+        {"name": "effectdate", "alias": "Effective Date", "type": "String", "description": "Date habitat was designated"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial",
+      "notes": "Source: California Open Data Portal. Important for development projects requiring environmental review."
+    },
+    {
+      "id": "suisun-marsh-management",
+      "name": "Suisun Marsh Protection Plan Areas",
+      "description": "Primary and Secondary Management Areas of the Suisun Marsh as defined by BCDC's Suisun Marsh Protection Plan.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Suisun_Marsh_Protection_Plan_Management_Areas/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["suisun marsh", "wetland", "BCDC", "marsh management", "conservation"],
+      "userQuestions": [
+        "Is this property in the Suisun Marsh?",
+        "What marsh management area is this in?",
+        "Is BCDC jurisdiction involved here?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "type", "alias": "Management Area Type", "type": "String", "description": "Primary or Secondary Management Area", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial",
+      "notes": "For cartographic purposes only - not for jurisdictional determinations. Contact BCDC for official boundaries."
+    },
+    {
+      "id": "groundwater-basins",
+      "name": "Groundwater Basins",
+      "description": "DWR Bulletin 118 groundwater basin boundaries. Important for SGMA compliance and well permits.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Groundwater_Basins/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["groundwater", "well", "aquifer", "SGMA", "water", "DWR"],
+      "userQuestions": [
+        "What groundwater basin is this property in?",
+        "Is this in a SGMA basin?",
+        "What aquifer underlies this area?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Basin_Name", "alias": "Basin Name", "type": "String", "description": "Groundwater basin name", "isPrimary": true},
+        {"name": "Basin_Subbasin_Name", "alias": "Subbasin Name", "type": "String", "description": "Subbasin name if applicable"},
+        {"name": "Basin_Number", "alias": "Basin Number", "type": "String", "description": "DWR basin number"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "notes": "Basins include Napa-Sonoma Valley, Sacramento Valley, and Suisun-Fairfield Valley."
+    },
+    {
+      "id": "cpad-protected-areas",
+      "name": "Protected Areas (CPAD)",
+      "description": "California Protected Areas Database - lands owned by government and nonprofits protected for open space purposes.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CPAD_Holdings/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["protected areas", "conservation", "open space", "parks", "CPAD"],
+      "userQuestions": [
+        "Is this protected open space?",
+        "Who owns this conservation land?",
+        "Is this property publicly accessible?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "unit_name", "alias": "Site Name", "type": "String", "description": "Protected area name", "isPrimary": true},
+        {"name": "agncy_name", "alias": "Agency", "type": "String", "description": "Owning agency"},
+        {"name": "access_typ", "alias": "Access Type", "type": "String", "description": "Public access level (Open, Restricted, No Public, Unknown)"},
+        {"name": "acres", "alias": "Acres", "type": "Double", "description": "Property acreage"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "partial",
+      "notes": "Data from January 2024 CPAD release. Boundaries typically aligned to assessor parcel lines."
+    },
+    {
+      "id": "bird-strike-hazard",
+      "name": "Bird Strike Hazard Zone",
+      "description": "Wildlife hazard zone around Travis Air Force Base - 14,500-foot radius from runway centerlines with development restrictions.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/BirdStrikeHazardZone/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "hazards",
+      "tags": ["travis afb", "airport", "bird strike", "wildlife hazard", "development restriction"],
+      "userQuestions": [
+        "Is this property in the Travis AFB bird strike zone?",
+        "Are there airport-related development restrictions here?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "name", "alias": "Zone Name", "type": "String", "description": "Hazard zone designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial",
+      "notes": "Developments attracting hazardous wildlife are restricted. Consult Resource Management for requirements."
+    },
+    {
+      "id": "plss-sections",
+      "name": "PLSS Sections",
+      "description": "Public Land Survey System section boundaries. Used for legal descriptions and land surveys.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/PLSS_Section/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "property",
+      "tags": ["PLSS", "section", "township", "range", "survey", "legal description"],
+      "userQuestions": [
+        "What section/township/range is this property in?",
+        "What's the PLSS description for this location?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "MTRS", "alias": "MTRS", "type": "String", "description": "Meridian-Township-Range-Section identifier", "isPrimary": true},
+        {"name": "Township", "alias": "Township", "type": "String", "description": "Township designation"},
+        {"name": "Range", "alias": "Range", "type": "String", "description": "Range designation"},
+        {"name": "Section", "alias": "Section", "type": "Integer", "description": "Section number"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide",
+      "notes": "Combines BLM data with additions for Ranchos and offshore areas."
+    },
+    {
+      "id": "voting-precincts",
+      "name": "Voting Precincts",
+      "description": "Current election precinct boundaries. Updated January 2025.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Current_Precincts/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["voting", "precinct", "election", "polling"],
+      "userQuestions": [
+        "What voting precinct is this address in?",
+        "What precinct do I vote in?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "pctname", "alias": "Precinct Name", "type": "String", "description": "Precinct name", "isPrimary": true},
+        {"name": "precinct", "alias": "Precinct ID", "type": "String", "description": "Precinct identifier"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide",
+      "updateFrequency": "as-needed",
+      "notes": "Updated as of January 2025. Contact Registrar of Voters for polling place information."
     },
     {
       "id": "solano-sra",
