@@ -1,0 +1,1618 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-19",
+  "sources": [
+    {
+      "id": "solano-agol",
+      "name": "Solano County ArcGIS Online",
+      "baseUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services",
+      "type": "county",
+      "maintainer": "Solano County GIS Division",
+      "contact": "Geographic Technologies Group"
+    },
+    {
+      "id": "solano-hosted",
+      "name": "Solano County GIS Server (Hosted)",
+      "baseUrl": "https://solanocountygis.com/server/rest/services/Hosted",
+      "type": "county",
+      "maintainer": "Solano County GIS Division"
+    },
+    {
+      "id": "fema",
+      "name": "FEMA National Flood Hazard Layer",
+      "baseUrl": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL",
+      "type": "federal",
+      "maintainer": "Federal Emergency Management Agency"
+    },
+    {
+      "id": "calfire",
+      "name": "CAL FIRE Fire Hazard Severity Zones",
+      "baseUrl": "https://services.gis.ca.gov/arcgis/rest/services/Environment/Fire_Severity_Zones",
+      "type": "state",
+      "maintainer": "California Department of Forestry and Fire Protection"
+    },
+    {
+      "id": "cgs",
+      "name": "California Geological Survey",
+      "baseUrl": "https://services2.arcgis.com/zr3KAIbsRSUyARHG/arcgis/rest/services",
+      "type": "state",
+      "maintainer": "California Department of Conservation"
+    }
+  ],
+  "layers": [
+    {
+      "id": "solano-parcels",
+      "name": "Parcels (Public Assessment Data)",
+      "description": "Property parcels with assessment data including APN, acreage, assessed values, building characteristics, use codes, and district information. Primary layer for property research.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Parcels_Public_Aumentum/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "property",
+      "tags": ["parcel", "apn", "property", "assessment", "tax", "land value", "building"],
+      "userQuestions": [
+        "What's the APN for this address?",
+        "How big is this property?",
+        "What's the assessed value?",
+        "When was this house built?",
+        "How many bedrooms does this property have?",
+        "Is this property under Williamson Act?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "parcelid", "alias": "APN", "type": "String", "description": "Assessor's Parcel Number (10-digit format)", "isPrimary": true},
+        {"name": "p_address", "alias": "Site Address", "type": "String", "description": "Property street address"},
+        {"name": "sitecity", "alias": "Site City", "type": "String", "description": "City name for property location"},
+        {"name": "acres", "alias": "Acreage", "type": "Double", "description": "Recorded parcel acreage"},
+        {"name": "valland", "alias": "Land Value", "type": "Double", "description": "Assessed land value"},
+        {"name": "valimp", "alias": "Improvement Value", "type": "Double", "description": "Assessed improvement value"},
+        {"name": "use_desc", "alias": "Use Description", "type": "String", "description": "Property use code description"},
+        {"name": "yrbuilt", "alias": "Year Built", "type": "Integer", "description": "Year primary structure was built"},
+        {"name": "bedroom", "alias": "Bedrooms", "type": "Integer", "description": "Number of bedrooms"},
+        {"name": "bathroom", "alias": "Bathrooms", "type": "Double", "description": "Number of bathrooms"},
+        {"name": "total_area", "alias": "Total Area", "type": "Double", "description": "Total building square footage"}
+      ],
+      "lookupMethod": "both",
+      "priority": "high",
+      "coverage": "countywide",
+      "updateFrequency": "quarterly",
+      "notes": "Assessed value differs from market value due to Prop 13 limits. Tax maps are authoritative source for boundary discrepancies."
+    },
+    {
+      "id": "solano-address-points",
+      "name": "Address Points",
+      "description": "Point locations for all addresses in Solano County. Used for geocoding addresses to coordinates and linking to parcels via APN.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Address_Points/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "property",
+      "tags": ["address", "geocode", "location", "apn"],
+      "userQuestions": [
+        "What are the coordinates for this address?",
+        "What's the APN for this address?",
+        "Is this address valid?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "fulladdress", "alias": "Full Address", "type": "String", "description": "Complete street address", "isPrimary": true},
+        {"name": "apn", "alias": "APN", "type": "String", "description": "Linked Assessor's Parcel Number"},
+        {"name": "add_number", "alias": "Street Number", "type": "Integer", "description": "House/building number"},
+        {"name": "st_name", "alias": "Street Name", "type": "String", "description": "Street name without type"},
+        {"name": "post_comm", "alias": "City", "type": "String", "description": "Postal community (city name)"},
+        {"name": "post_code", "alias": "ZIP Code", "type": "String", "description": "5-digit ZIP code"},
+        {"name": "lat", "alias": "Latitude", "type": "Double", "description": "WGS84 latitude"},
+        {"name": "long", "alias": "Longitude", "type": "Double", "description": "WGS84 longitude"}
+      ],
+      "lookupMethod": "attribute",
+      "priority": "high",
+      "coverage": "countywide",
+      "notes": "Multiple address points can share the same APN (multi-unit buildings)."
+    },
+    {
+      "id": "solano-city-boundary",
+      "name": "City Boundaries",
+      "description": "Boundaries of all seven incorporated cities in Solano County. Used to determine if a location is in city limits or unincorporated county area.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CityBoundary/FeatureServer/2",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["city", "boundary", "incorporated", "jurisdiction"],
+      "userQuestions": [
+        "Is this address in city limits?",
+        "Which city is this property in?",
+        "Is this location in unincorporated county?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "name", "alias": "City Name", "type": "String", "description": "Name of incorporated city", "isPrimary": true},
+        {"name": "agency", "alias": "Agency", "type": "String", "description": "Agency identifier"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide",
+      "notes": "Returns no feature if location is in unincorporated area. Cities: Benicia, Dixon, Fairfield, Rio Vista, Suisun City, Vacaville, Vallejo."
+    },
+    {
+      "id": "solano-county-boundary",
+      "name": "County Boundary",
+      "description": "Solano County external boundary polygon.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/County_Boundary/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["county", "boundary", "extent"],
+      "userQuestions": [
+        "Is this location in Solano County?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "NAME", "alias": "County Name", "type": "String", "description": "County name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-county-zoning",
+      "name": "Solano County Zoning",
+      "description": "Zoning designations for unincorporated Solano County. Does NOT include areas within city limits - use city-specific zoning layers for incorporated areas.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/SolanoCountyZoning_092322/FeatureServer/4",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["zoning", "land use", "county", "unincorporated", "agriculture", "residential", "commercial"],
+      "userQuestions": [
+        "What's the zoning for this property?",
+        "Can I build a house here?",
+        "Is this agricultural land?",
+        "What can I do with this property?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "zone_abrev", "alias": "Zone Code", "type": "String", "description": "Zoning abbreviation (e.g., A-40, R-1)", "isPrimary": true},
+        {"name": "zone_name", "alias": "Zone Name", "type": "String", "description": "Full zoning designation name"},
+        {"name": "LU_Category", "alias": "Land Use Category", "type": "String", "description": "General land use category"},
+        {"name": "Acres", "alias": "Acres", "type": "Double", "description": "Zone polygon acreage"},
+        {"name": "map_number", "alias": "Map Number", "type": "String", "description": "Zoning map reference"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "unincorporated",
+      "notes": "Returns empty for addresses within city limits. Check city boundary first, then use appropriate city zoning layer.",
+      "relatedLayers": ["benicia-zoning", "dixon-zoning", "fairfield-zoning", "rio-vista-zoning", "suisun-city-zoning", "vacaville-zoning", "vallejo-zoning"]
+    },
+    {
+      "id": "solano-county-general-plan",
+      "name": "Solano County General Plan",
+      "description": "General Plan land use designations for unincorporated Solano County (2008 plan with updates). Shows long-term land use vision.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/SolanoCountyUnincorporated_GeneralPlan2008_updated0923/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["general plan", "land use", "planning", "county", "unincorporated"],
+      "userQuestions": [
+        "What's the General Plan designation?",
+        "What's the long-term land use plan for this area?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "gplu", "alias": "GP Land Use", "type": "String", "description": "General Plan land use code", "isPrimary": true},
+        {"name": "gp_desc", "alias": "Description", "type": "String", "description": "Land use description"},
+        {"name": "LU_Category", "alias": "Category", "type": "String", "description": "Land use category"},
+        {"name": "Acres", "alias": "Acres", "type": "Double", "description": "Polygon acreage"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "unincorporated",
+      "notes": "Returns 'INC' for incorporated (city) areas. Updated September 2023."
+    },
+    {
+      "id": "solano-bos-districts",
+      "name": "Board of Supervisors Districts",
+      "description": "Solano County Board of Supervisors district boundaries (2021 redistricting).",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/BOS_District_Boundaries_2021/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["supervisor", "district", "political", "representation", "county"],
+      "userQuestions": [
+        "Who is my supervisor?",
+        "What district am I in?",
+        "How do I contact my county representative?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "district", "alias": "District", "type": "String", "description": "District number (1-5)", "isPrimary": true},
+        {"name": "name", "alias": "Supervisor Name", "type": "String", "description": "Current supervisor name"},
+        {"name": "ppa_popula", "alias": "Population", "type": "Double", "description": "District population"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-fire-hazard-zone",
+      "name": "Fire Hazard Severity Zone (Solano Local)",
+      "description": "Current local Fire Hazard Severity Zone designations for Solano County, maintained by County GIS.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/FireHazardSeverityZone/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "hazards",
+      "tags": ["fire", "hazard", "wildfire", "safety", "defensible space"],
+      "userQuestions": [
+        "Is this property in a fire hazard zone?",
+        "What fire safety requirements apply here?",
+        "Do I need defensible space?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "HAZ_CODE", "alias": "Hazard Code", "type": "Integer", "description": "1=Moderate, 2=High, 3=Very High", "isPrimary": true},
+        {"name": "HAZ_CLASS", "alias": "Hazard Class", "type": "String", "description": "Hazard severity classification"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide",
+      "notes": "Urban areas typically have no FHSZ designation.",
+      "relatedLayers": ["solano-fire-hazard-phase2", "calfire-fhsz-sra", "calfire-fhsz-lra"]
+    },
+    {
+      "id": "solano-fire-hazard-phase2",
+      "name": "Fire Hazard Severity Zone - Phase 2 (2025)",
+      "description": "Upcoming 2025 Fire Hazard Severity Zone reclassifications (Phase 2 update).",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/FireHazardSeverityZone_Phase2_2025/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "hazards",
+      "tags": ["fire", "hazard", "wildfire", "future", "2025"],
+      "userQuestions": [
+        "Will my fire hazard zone change in 2025?",
+        "What are the upcoming fire zone changes?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "HAZ_CODE", "alias": "Hazard Code", "type": "Integer", "description": "Proposed hazard code", "isPrimary": true},
+        {"name": "HAZ_CLASS", "alias": "Hazard Class", "type": "String", "description": "Proposed hazard classification"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "notes": "Shows proposed 2025 reclassifications. Not yet in effect."
+    },
+    {
+      "id": "fema-flood-zones",
+      "name": "FEMA Flood Hazard Zones",
+      "description": "National Flood Hazard Layer (NFHL) flood zone designations. Used for insurance requirements and disclosure.",
+      "sourceId": "fema",
+      "serviceUrl": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      "layerType": "MapServer",
+      "layerIndex": 28,
+      "category": "hazards",
+      "tags": ["flood", "hazard", "fema", "insurance", "sfha", "floodplain"],
+      "userQuestions": [
+        "Is this property in a flood zone?",
+        "Do I need flood insurance?",
+        "What's the flood risk here?",
+        "What is the base flood elevation?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4269,
+      "fields": [
+        {"name": "FLD_ZONE", "alias": "Flood Zone", "type": "String", "description": "Zone code (A, AE, AH, AO, V, VE, X)", "isPrimary": true},
+        {"name": "ZONE_SUBTY", "alias": "Zone Subtype", "type": "String", "description": "Detailed zone description"},
+        {"name": "SFHA_TF", "alias": "SFHA", "type": "String", "description": "Special Flood Hazard Area (T/F)"},
+        {"name": "STATIC_BFE", "alias": "Base Flood Elevation", "type": "Double", "description": "BFE in feet"},
+        {"name": "DEPTH", "alias": "Depth", "type": "Double", "description": "Flood depth in feet"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide",
+      "dataSource": "Federal Emergency Management Agency",
+      "notes": "Zones A/AE/AH/AO/V/VE = SFHA (high risk). Zone X = minimal risk. No feature typically means Zone X."
+    },
+    {
+      "id": "calfire-fhsz-sra",
+      "name": "CAL FIRE FHSZ - State Responsibility Area",
+      "description": "Fire Hazard Severity Zones in State Responsibility Areas (rural/wildland areas where CAL FIRE has primary responsibility).",
+      "sourceId": "calfire",
+      "serviceUrl": "https://services.gis.ca.gov/arcgis/rest/services/Environment/Fire_Severity_Zones/MapServer/0",
+      "layerType": "MapServer",
+      "layerIndex": 0,
+      "category": "hazards",
+      "tags": ["fire", "hazard", "calfire", "sra", "wildfire", "state"],
+      "userQuestions": [
+        "Is this in a State Responsibility Area?",
+        "What's the official CAL FIRE hazard rating?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "HAZ_CODE", "alias": "Hazard Code", "type": "Integer", "description": "1=Moderate, 2=High, 3=Very High", "isPrimary": true},
+        {"name": "HAZ_CLASS", "alias": "Hazard Class", "type": "String", "description": "Classification text"},
+        {"name": "SRA", "alias": "SRA", "type": "String", "description": "State Responsibility Area code"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial",
+      "dataSource": "California Department of Forestry and Fire Protection",
+      "notes": "SRA covers rural/wildland areas. Query both SRA and LRA layers for complete coverage."
+    },
+    {
+      "id": "calfire-fhsz-lra",
+      "name": "CAL FIRE FHSZ - Local Responsibility Area",
+      "description": "Fire Hazard Severity Zones in Local Responsibility Areas (cities and urbanized areas where local fire departments have primary responsibility).",
+      "sourceId": "calfire",
+      "serviceUrl": "https://services.gis.ca.gov/arcgis/rest/services/Environment/Fire_Severity_Zones/MapServer/1",
+      "layerType": "MapServer",
+      "layerIndex": 1,
+      "category": "hazards",
+      "tags": ["fire", "hazard", "calfire", "lra", "urban", "local"],
+      "userQuestions": [
+        "What's the fire hazard in this urban area?",
+        "Is this in a Local Responsibility Area?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "HAZ_CODE", "alias": "Hazard Code", "type": "Integer", "description": "1=Moderate, 2=High, 3=Very High", "isPrimary": true},
+        {"name": "HAZ_CLASS", "alias": "Hazard Class", "type": "String", "description": "Classification text"},
+        {"name": "VH_REC", "alias": "Very High Recommendation", "type": "String", "description": "Draft Very High designation"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial",
+      "dataSource": "California Department of Forestry and Fire Protection",
+      "notes": "LRA covers cities and urban areas."
+    },
+    {
+      "id": "cgs-fault-zones",
+      "name": "Alquist-Priolo Earthquake Fault Zones",
+      "description": "California Geological Survey Alquist-Priolo Earthquake Fault Zones. Properties in these zones require geologic studies before development.",
+      "sourceId": "cgs",
+      "serviceUrl": "https://services2.arcgis.com/zr3KAIbsRSUyARHG/arcgis/rest/services/CGS_Alquist_Priolo_Fault_Zones/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "hazards",
+      "tags": ["earthquake", "fault", "seismic", "geologic", "hazard"],
+      "userQuestions": [
+        "Is this property on a fault line?",
+        "Do I need a geologic study to build here?",
+        "What's the earthquake risk?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3310,
+      "fields": [
+        {"name": "QUAD_NAME", "alias": "Quadrangle", "type": "String", "description": "USGS quadrangle name", "isPrimary": true},
+        {"name": "MAP_RELEASED", "alias": "Map Released", "type": "String", "description": "Map release date"},
+        {"name": "GEOPDFLINK", "alias": "GeoPDF Link", "type": "String", "description": "Link to GeoPDF map"},
+        {"name": "REPORTLINK", "alias": "Report Link", "type": "String", "description": "Link to technical report"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "partial",
+      "dataSource": "California Geological Survey",
+      "notes": "Structures for human occupancy within these zones require geologic investigation. California Albers projection (EPSG:3310)."
+    },
+    {
+      "id": "cgs-liquefaction",
+      "name": "Seismic Hazard Zones - Liquefaction",
+      "description": "Areas where historic occurrence of liquefaction or local geological conditions indicate potential for permanent ground displacements during earthquakes.",
+      "sourceId": "cgs",
+      "serviceUrl": "https://services2.arcgis.com/zr3KAIbsRSUyARHG/ArcGIS/rest/services/CGS_Liquefaction_Zones/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "hazards",
+      "tags": ["earthquake", "liquefaction", "seismic", "geologic", "hazard", "soil"],
+      "userQuestions": [
+        "Is this area at risk of liquefaction?",
+        "Could the ground fail here during an earthquake?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3310,
+      "fields": [
+        {"name": "QUAD_NAME", "alias": "Quadrangle", "type": "String", "description": "USGS quadrangle name", "isPrimary": true},
+        {"name": "PrimaryHazardType", "alias": "Hazard Type", "type": "String", "description": "Type of seismic hazard"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial",
+      "dataSource": "California Geological Survey"
+    },
+    {
+      "id": "solano-garbage-areas",
+      "name": "Garbage Service Areas",
+      "description": "Garbage and recycling service provider boundaries in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Garbage_Service_Areas/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "services",
+      "tags": ["garbage", "trash", "recycling", "waste", "service"],
+      "userQuestions": [
+        "Who picks up my trash?",
+        "What's my garbage service provider?",
+        "Who do I call about recycling?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "service_pr", "alias": "District Name", "type": "String", "description": "Garbage service provider name", "isPrimary": true},
+        {"name": "straddr", "alias": "Address", "type": "String", "description": "Provider street address"},
+        {"name": "phone", "alias": "Phone", "type": "String", "description": "Provider phone number"},
+        {"name": "website", "alias": "Website", "type": "String", "description": "Provider website URL"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-water-districts",
+      "name": "Water Districts",
+      "description": "Water district boundaries in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Water_Districts/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "services",
+      "tags": ["water", "district", "utility", "service"],
+      "userQuestions": [
+        "Who provides my water?",
+        "What water district am I in?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "District Name", "type": "String", "description": "Water district name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-fire-response",
+      "name": "Fire Response Boundaries",
+      "description": "Fire department/district response area boundaries.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/FireResponse_Boundary/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "services",
+      "tags": ["fire", "response", "district", "emergency", "service"],
+      "userQuestions": [
+        "Which fire department serves my area?",
+        "What fire district am I in?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "NAME", "alias": "Fire District", "type": "String", "description": "Fire district/department name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide"
+    },
+    {
+      "id": "benicia-zoning",
+      "name": "Benicia Zoning",
+      "description": "City of Benicia zoning districts.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Benicia_Zoning/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["zoning", "benicia", "city", "land use"],
+      "userQuestions": [
+        "What's the zoning in Benicia?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "zonedesc", "alias": "Zone Description", "type": "String", "description": "Zoning designation description", "isPrimary": true},
+        {"name": "LU_Category", "alias": "Land Use Category", "type": "String", "description": "Land use category (Commercial, Residential, Industrial, etc.)"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "cities",
+      "notes": "Only covers City of Benicia limits."
+    },
+    {
+      "id": "benicia-general-plan",
+      "name": "Benicia General Plan",
+      "description": "City of Benicia General Plan land use designations.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Benicia_GP/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["general plan", "benicia", "city", "land use", "planning"],
+      "userQuestions": [
+        "What's the General Plan designation in Benicia?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "GP_LU", "alias": "Land Use", "type": "String", "description": "General Plan land use", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities"
+    },
+    {
+      "id": "dixon-zoning",
+      "name": "Dixon Zoning",
+      "description": "City of Dixon zoning districts.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Dixon_Zoning/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["zoning", "dixon", "city", "land use"],
+      "userQuestions": [
+        "What's the zoning in Dixon?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "ZONING", "alias": "Zoning", "type": "String", "description": "Zoning designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "cities"
+    },
+    {
+      "id": "dixon-general-plan",
+      "name": "Dixon General Plan",
+      "description": "City of Dixon General Plan land use designations.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Dixon_GP/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["general plan", "dixon", "city", "land use", "planning"],
+      "userQuestions": [
+        "What's the General Plan designation in Dixon?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "GP_LU", "alias": "Land Use", "type": "String", "description": "General Plan land use", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities"
+    },
+    {
+      "id": "fairfield-zoning",
+      "name": "Fairfield Zoning",
+      "description": "City of Fairfield zoning districts.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Fairfield_Zoning/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["zoning", "fairfield", "city", "land use"],
+      "userQuestions": [
+        "What's the zoning in Fairfield?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "ZONING", "alias": "Zoning", "type": "String", "description": "Zoning designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "cities"
+    },
+    {
+      "id": "fairfield-general-plan",
+      "name": "Fairfield General Plan",
+      "description": "City of Fairfield General Plan land use designations.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Fairfield_General_Plan/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["general plan", "fairfield", "city", "land use", "planning"],
+      "userQuestions": [
+        "What's the General Plan designation in Fairfield?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "GP_LU", "alias": "Land Use", "type": "String", "description": "General Plan land use", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities"
+    },
+    {
+      "id": "rio-vista-zoning",
+      "name": "Rio Vista Zoning",
+      "description": "City of Rio Vista zoning districts.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Rio_Vista_Zoning/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["zoning", "rio vista", "city", "land use"],
+      "userQuestions": [
+        "What's the zoning in Rio Vista?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "ZONING", "alias": "Zoning", "type": "String", "description": "Zoning designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "cities"
+    },
+    {
+      "id": "rio-vista-general-plan",
+      "name": "Rio Vista General Plan",
+      "description": "City of Rio Vista General Plan land use designations.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Rio_Vista_General_Plan/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["general plan", "rio vista", "city", "land use", "planning"],
+      "userQuestions": [
+        "What's the General Plan designation in Rio Vista?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "GP_LU", "alias": "Land Use", "type": "String", "description": "General Plan land use", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities"
+    },
+    {
+      "id": "suisun-city-zoning",
+      "name": "Suisun City Zoning",
+      "description": "City of Suisun City zoning districts.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Suisun_City_Zoning/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["zoning", "suisun city", "city", "land use"],
+      "userQuestions": [
+        "What's the zoning in Suisun City?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "ZONING", "alias": "Zoning", "type": "String", "description": "Zoning designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "cities"
+    },
+    {
+      "id": "suisun-city-general-plan",
+      "name": "Suisun City General Plan",
+      "description": "City of Suisun City General Plan land use designations.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Suisun_City_General_Plan/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["general plan", "suisun city", "city", "land use", "planning"],
+      "userQuestions": [
+        "What's the General Plan designation in Suisun City?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "GP_LU", "alias": "Land Use", "type": "String", "description": "General Plan land use", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities"
+    },
+    {
+      "id": "vacaville-zoning",
+      "name": "Vacaville Zoning",
+      "description": "City of Vacaville zoning districts.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Vacaville_Zoning/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["zoning", "vacaville", "city", "land use"],
+      "userQuestions": [
+        "What's the zoning in Vacaville?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "ZONING", "alias": "Zoning", "type": "String", "description": "Zoning designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "cities"
+    },
+    {
+      "id": "vacaville-general-plan",
+      "name": "Vacaville General Plan",
+      "description": "City of Vacaville General Plan land use designations.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Vacaville_General_Plan/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["general plan", "vacaville", "city", "land use", "planning"],
+      "userQuestions": [
+        "What's the General Plan designation in Vacaville?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "GP_LU", "alias": "Land Use", "type": "String", "description": "General Plan land use", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities"
+    },
+    {
+      "id": "vallejo-zoning",
+      "name": "Vallejo Zoning",
+      "description": "City of Vallejo zoning districts.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Vallejo_Zoning/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["zoning", "vallejo", "city", "land use"],
+      "userQuestions": [
+        "What's the zoning in Vallejo?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "ZONING", "alias": "Zoning", "type": "String", "description": "Zoning designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "cities"
+    },
+    {
+      "id": "vallejo-general-plan",
+      "name": "Vallejo General Plan",
+      "description": "City of Vallejo General Plan land use designations.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Vallejo_General_Plan/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["general plan", "vallejo", "city", "land use", "planning"],
+      "userQuestions": [
+        "What's the General Plan designation in Vallejo?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "GP_LU", "alias": "Land Use", "type": "String", "description": "General Plan land use", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities"
+    },
+    {
+      "id": "solano-congressional-districts",
+      "name": "Congressional Districts",
+      "description": "US Congressional district boundaries in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CA_Congressional_Districts_in_Solano_County_portal/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["congress", "congressional", "federal", "district", "representative"],
+      "userQuestions": [
+        "Who is my US Representative?",
+        "What congressional district am I in?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "DISTRICT", "alias": "District", "type": "String", "description": "Congressional district number", "isPrimary": true},
+        {"name": "NAME", "alias": "Representative", "type": "String", "description": "Representative name"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-state-assembly",
+      "name": "State Assembly Districts",
+      "description": "California State Assembly district boundaries in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CA_State_Assembly_Districts/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["assembly", "state", "district", "representative", "california"],
+      "userQuestions": [
+        "Who is my State Assembly member?",
+        "What Assembly district am I in?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "DISTRICT", "alias": "District", "type": "String", "description": "Assembly district number", "isPrimary": true},
+        {"name": "NAME", "alias": "Assembly Member", "type": "String", "description": "Assembly member name"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-state-senate",
+      "name": "State Senate Districts",
+      "description": "California State Senate district boundaries in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CA_State_Senate_Districts_portal/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["senate", "state", "district", "senator", "california"],
+      "userQuestions": [
+        "Who is my State Senator?",
+        "What Senate district am I in?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "DISTRICT", "alias": "District", "type": "String", "description": "Senate district number", "isPrimary": true},
+        {"name": "NAME", "alias": "Senator", "type": "String", "description": "Senator name"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-schools",
+      "name": "Schools",
+      "description": "School locations in Solano County including elementary, middle, and high schools.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Schools/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["school", "education", "elementary", "middle", "high school"],
+      "userQuestions": [
+        "What schools are nearby?",
+        "Where is the nearest school?",
+        "What schools serve this address?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "School Name", "type": "String", "description": "Name of school", "isPrimary": true},
+        {"name": "type", "alias": "Type", "type": "String", "description": "School type (Public/Private)"},
+        {"name": "level_", "alias": "Level", "type": "String", "description": "Grade level (Elementary/Middle/High)"},
+        {"name": "address", "alias": "Address", "type": "String", "description": "Street address"},
+        {"name": "phone", "alias": "Phone", "type": "String", "description": "Phone number"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-parks",
+      "name": "Parks",
+      "description": "Parks and recreation areas in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/ParksInSolanoCounty/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["park", "recreation", "open space", "nature"],
+      "userQuestions": [
+        "What parks are nearby?",
+        "Where can I go hiking?",
+        "Where is the nearest park?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "Park Name", "type": "String", "description": "Name of park", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-libraries",
+      "name": "Libraries",
+      "description": "Public library locations in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Libraries/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["library", "books", "public", "community"],
+      "userQuestions": [
+        "Where is the nearest library?",
+        "What libraries are in my area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "Library Name", "type": "String", "description": "Name of library", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-fire-stations",
+      "name": "Fire Stations",
+      "description": "Fire station locations in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Fire_Stations/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["fire", "station", "emergency", "safety"],
+      "userQuestions": [
+        "Where is the nearest fire station?",
+        "What fire stations serve this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "Station Name", "type": "String", "description": "Fire station name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-hospitals",
+      "name": "Hospitals",
+      "description": "Hospital and medical center locations in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Hospitals/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["hospital", "medical", "health", "emergency"],
+      "userQuestions": [
+        "Where is the nearest hospital?",
+        "What hospitals are in Solano County?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "Hospital Name", "type": "String", "description": "Hospital name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-police-stations",
+      "name": "Police Stations",
+      "description": "Police station locations in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Police_Stations/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["police", "law enforcement", "safety", "emergency"],
+      "userQuestions": [
+        "Where is the nearest police station?",
+        "What police departments serve this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "Station Name", "type": "String", "description": "Police station name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-transit-stops",
+      "name": "Public Transit Stops",
+      "description": "Public transit stop locations including bus stops.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Public_Transit_Stops/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["transit", "bus", "stop", "transportation", "public"],
+      "userQuestions": [
+        "Where is the nearest bus stop?",
+        "What transit options are nearby?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "StopName", "alias": "Stop Name", "type": "String", "description": "Transit stop name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-community-centers",
+      "name": "Community Centers",
+      "description": "Community center locations in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Community_Centers/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["community", "center", "recreation", "public"],
+      "userQuestions": [
+        "Where is the nearest community center?",
+        "What community resources are available?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "Center Name", "type": "String", "description": "Community center name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-road-closures",
+      "name": "Road Closures",
+      "description": "Real-time road closure information in Solano County.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/Solano_County_Road_Closures_View/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["road", "closure", "traffic", "real-time", "construction"],
+      "userQuestions": [
+        "Are there any road closures?",
+        "Is this road closed?",
+        "What roads are closed for construction?"
+      ],
+      "geometryType": "Polyline",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "RoadName", "alias": "Road Name", "type": "String", "description": "Name of closed road", "isPrimary": true},
+        {"name": "ClosureType", "alias": "Closure Type", "type": "String", "description": "Type of closure"},
+        {"name": "StartDate", "alias": "Start Date", "type": "Date", "description": "Closure start date"},
+        {"name": "EndDate", "alias": "End Date", "type": "Date", "description": "Expected reopening date"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "updateFrequency": "daily",
+      "notes": "Real-time data updated as closures occur."
+    },
+    {
+      "id": "solano-road-restrictions-points",
+      "name": "Road Restrictions (Points)",
+      "description": "Point locations of road restrictions including height, weight, and length limits.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/Road_Restrictions_Point_View_Layer/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["road", "restriction", "height", "weight", "truck", "limit"],
+      "userQuestions": [
+        "Are there height restrictions on this road?",
+        "Can a truck pass through here?",
+        "What are the weight limits?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "RestrictionType", "alias": "Type", "type": "String", "description": "Type of restriction", "isPrimary": true},
+        {"name": "RestrictionValue", "alias": "Value", "type": "String", "description": "Restriction limit value"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-bridges",
+      "name": "Bridges",
+      "description": "Bridge locations and conditions in Solano County.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/Bridges_View_Layer/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["bridge", "infrastructure", "road", "condition"],
+      "userQuestions": [
+        "What is the condition of this bridge?",
+        "Where are the bridges in the county?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "BridgeName", "alias": "Bridge Name", "type": "String", "description": "Name of bridge", "isPrimary": true},
+        {"name": "Condition", "alias": "Condition", "type": "String", "description": "Bridge condition rating"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-culverts",
+      "name": "Culverts",
+      "description": "Culvert inventory for Solano County.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/Culverts_County_of_Solano_(Read_Only)/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["culvert", "drainage", "infrastructure", "stormwater"],
+      "userQuestions": [
+        "Where are the culverts in this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "CulvertID", "alias": "Culvert ID", "type": "String", "description": "Culvert identifier", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-oes-flooding",
+      "name": "OES Flooding Incidents",
+      "description": "Active flooding incidents reported through Office of Emergency Services.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/Flooding_OES/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "emergency",
+      "tags": ["flood", "emergency", "incident", "real-time", "oes"],
+      "userQuestions": [
+        "Are there any active flood incidents?",
+        "Is there flooding in this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "IncidentType", "alias": "Type", "type": "String", "description": "Type of flooding incident", "isPrimary": true},
+        {"name": "Status", "alias": "Status", "type": "String", "description": "Incident status"},
+        {"name": "ReportedDate", "alias": "Reported", "type": "Date", "description": "Date reported"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "updateFrequency": "as-needed",
+      "notes": "Real-time emergency incident data."
+    },
+    {
+      "id": "solano-oes-landslides",
+      "name": "OES Landslide Incidents",
+      "description": "Active landslide incidents reported through Office of Emergency Services.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/Landslides_OES/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "emergency",
+      "tags": ["landslide", "emergency", "incident", "real-time", "oes"],
+      "userQuestions": [
+        "Are there any active landslides?",
+        "Is there landslide danger in this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "IncidentType", "alias": "Type", "type": "String", "description": "Type of incident", "isPrimary": true},
+        {"name": "Status", "alias": "Status", "type": "String", "description": "Incident status"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "updateFrequency": "as-needed"
+    },
+    {
+      "id": "solano-oes-downed-power",
+      "name": "OES Downed Power Lines",
+      "description": "Active downed power line incidents reported through Office of Emergency Services.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/Downed_Power_Lines_OES/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "emergency",
+      "tags": ["power", "downed", "emergency", "incident", "real-time", "utility"],
+      "userQuestions": [
+        "Are there downed power lines nearby?",
+        "Is there a power outage in this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "Status", "alias": "Status", "type": "String", "description": "Incident status", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "updateFrequency": "as-needed"
+    },
+    {
+      "id": "solano-oes-downed-trees",
+      "name": "OES Downed Trees",
+      "description": "Active downed tree incidents reported through Office of Emergency Services.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/Downed_Trees_OES/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "emergency",
+      "tags": ["tree", "downed", "emergency", "incident", "real-time"],
+      "userQuestions": [
+        "Are there downed trees blocking roads?",
+        "Is there storm damage in this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "Status", "alias": "Status", "type": "String", "description": "Incident status", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide",
+      "updateFrequency": "as-needed"
+    },
+    {
+      "id": "solano-important-farmland",
+      "name": "Important Farmland",
+      "description": "Farmland classification from the California Department of Conservation (2020 data).",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Important_Farmland_2020/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["farmland", "agriculture", "soil", "conservation", "prime"],
+      "userQuestions": [
+        "Is this prime farmland?",
+        "What type of agricultural land is this?",
+        "Is this land classified as important farmland?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Type", "alias": "Farmland Type", "type": "String", "description": "Farmland classification", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "dataSource": "California Department of Conservation"
+    },
+    {
+      "id": "solano-conservation-easements",
+      "name": "Conservation Easements",
+      "description": "Conservation easements from California Conservation Easement Database (CCED).",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/ConservationEasement_CCED/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["conservation", "easement", "protected", "land", "open space"],
+      "userQuestions": [
+        "Is this land under conservation easement?",
+        "Is this protected land?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "sitename", "alias": "Site Name", "type": "String", "description": "Conservation site name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial"
+    },
+    {
+      "id": "solano-soils",
+      "name": "Soils",
+      "description": "Soil types and classifications in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Soils/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["soil", "geology", "agriculture", "land"],
+      "userQuestions": [
+        "What type of soil is here?",
+        "Is this good soil for farming?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "MUSYM", "alias": "Soil Symbol", "type": "String", "description": "Map unit symbol", "isPrimary": true},
+        {"name": "MUNAME", "alias": "Soil Name", "type": "String", "description": "Map unit name"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-historic-landmarks",
+      "name": "Historic Landmarks",
+      "description": "Historic landmark locations in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/HistoricLandmarks/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["historic", "landmark", "heritage", "history"],
+      "userQuestions": [
+        "What historic landmarks are nearby?",
+        "Is this a historic property?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "Landmark Name", "type": "String", "description": "Name of landmark", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-building-footprints",
+      "name": "Building Footprints (2024)",
+      "description": "Building footprint outlines derived from 2024 imagery.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Building_Footprints_2024/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "property",
+      "tags": ["building", "footprint", "structure", "construction"],
+      "userQuestions": [
+        "What buildings are on this property?",
+        "What is the building footprint?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "OBJECTID", "alias": "ID", "type": "Integer", "description": "Building ID", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide",
+      "updateFrequency": "annual"
+    },
+    {
+      "id": "solano-census-tracts",
+      "name": "Census Tracts",
+      "description": "US Census tract boundaries for Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Census_Tracts/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "tract", "demographics", "population"],
+      "userQuestions": [
+        "What census tract is this?",
+        "What are the demographics of this area?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "TRACTCE", "alias": "Tract", "type": "String", "description": "Census tract number", "isPrimary": true},
+        {"name": "NAMELSAD", "alias": "Name", "type": "String", "description": "Tract name"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-zip-codes",
+      "name": "ZIP Codes",
+      "description": "ZIP code boundaries in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Zip_Codes/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["zip", "postal", "mail", "boundary"],
+      "userQuestions": [
+        "What ZIP code is this?",
+        "What area does this ZIP code cover?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "ZIP", "alias": "ZIP Code", "type": "String", "description": "5-digit ZIP code", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-adu-eligibility",
+      "name": "ADU Eligibility Checker",
+      "description": "ADU (Accessory Dwelling Unit) eligibility areas for 'Can You Build It?' tool.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/ADU_CanYouBuildIt_NearMeSelector/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["adu", "accessory dwelling unit", "housing", "eligibility", "build"],
+      "userQuestions": [
+        "Can I build an ADU here?",
+        "Is my property eligible for an ADU?",
+        "What are the ADU requirements?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "Eligible", "alias": "Eligible", "type": "String", "description": "ADU eligibility status", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "notes": "Countywide ADU eligibility checker. Also see city-specific ADU layers."
+    },
+    {
+      "id": "solano-uninc-adu",
+      "name": "ADU Buildable Areas (Unincorporated)",
+      "description": "ADU-eligible areas in unincorporated Solano County.",
+      "sourceId": "solano-hosted",
+      "serviceUrl": "https://solanocountygis.com/server/rest/services/Hosted/SolanoUninc_ADU_BuildableAreas/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "zoning",
+      "tags": ["adu", "accessory dwelling unit", "housing", "unincorporated", "county"],
+      "userQuestions": [
+        "Can I build an ADU in unincorporated county?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "Eligible", "alias": "Eligible", "type": "String", "description": "ADU eligibility", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "unincorporated"
+    },
+    {
+      "id": "solano-calenviroscren",
+      "name": "CalEnviroScreen",
+      "description": "CalEnviroScreen environmental burden scores by census tract.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CalEnviroScreen/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["environmental", "pollution", "health", "equity", "burden"],
+      "userQuestions": [
+        "What's the environmental burden in this area?",
+        "Is this a disadvantaged community?",
+        "What pollution affects this neighborhood?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "CIscoreP", "alias": "CES Score Percentile", "type": "Double", "description": "CalEnviroScreen percentile score", "isPrimary": true},
+        {"name": "Tract", "alias": "Census Tract", "type": "String", "description": "Census tract ID"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "dataSource": "California Office of Environmental Health Hazard Assessment"
+    },
+    {
+      "id": "solano-floodplains",
+      "name": "Floodplains (Local)",
+      "description": "Local floodplain data for Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Floodplains/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "hazards",
+      "tags": ["flood", "floodplain", "local", "hazard"],
+      "userQuestions": [
+        "Is this in a local floodplain?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "FloodZone", "alias": "Flood Zone", "type": "String", "description": "Local flood zone designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "relatedLayers": ["fema-flood-zones"]
+    },
+    {
+      "id": "solano-hazmat-districts",
+      "name": "Hazmat Districts",
+      "description": "Hazardous materials response district boundaries.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/HazmatDistricts/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "services",
+      "tags": ["hazmat", "hazardous", "emergency", "response", "district"],
+      "userQuestions": [
+        "What hazmat district is this?",
+        "Who responds to chemical spills here?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "District Name", "type": "String", "description": "Hazmat district name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-cemetery-districts",
+      "name": "Cemetery Districts",
+      "description": "Cemetery district boundaries in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Cemetery_Districts/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["cemetery", "district", "special district"],
+      "userQuestions": [
+        "What cemetery district is this?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "District Name", "type": "String", "description": "Cemetery district name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-reclamation-districts",
+      "name": "Reclamation Districts",
+      "description": "Reclamation/flood protection district boundaries (LMA).",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Reclamation_Districts_LMA_Flood_Protection/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["reclamation", "flood protection", "levee", "district"],
+      "userQuestions": [
+        "What reclamation district is this?",
+        "Is this area protected by levees?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "Name", "alias": "District Name", "type": "String", "description": "Reclamation district name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "partial"
+    },
+    {
+      "id": "solano-gsa-boundaries",
+      "name": "Groundwater Sustainability Agencies",
+      "description": "Groundwater Sustainability Agency (GSA) boundaries for SGMA compliance.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/GSA_Boundaries_Solano/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["groundwater", "gsa", "sgma", "water", "sustainability"],
+      "userQuestions": [
+        "What GSA manages groundwater here?",
+        "Is this property in a groundwater sustainability area?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "GSA_Name", "alias": "GSA Name", "type": "String", "description": "Groundwater Sustainability Agency name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "partial"
+    },
+    {
+      "id": "solano-aerial-2025",
+      "name": "Aerial Imagery 2025",
+      "description": "High-resolution aerial imagery for Solano County captured in 2025.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2025_WGS84/MapServer",
+      "layerType": "TileServer",
+      "category": "basemap",
+      "tags": ["aerial", "imagery", "satellite", "basemap", "2025"],
+      "userQuestions": [
+        "Show me aerial imagery of this area",
+        "What does this property look like from above?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide",
+      "updateFrequency": "annual",
+      "notes": "Use this for detailed property views instead of generic world imagery."
+    },
+    {
+      "id": "solano-sra",
+      "name": "California State Responsibility Area",
+      "description": "State Responsibility Area (SRA) boundaries where CAL FIRE has primary firefighting responsibility.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CaliforniaStateResponsibilityArea/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "services",
+      "tags": ["sra", "state responsibility", "fire", "calfire", "wildland"],
+      "userQuestions": [
+        "Is this in a State Responsibility Area?",
+        "Does CAL FIRE protect this area?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 103004,
+      "fields": [
+        {"name": "SRA", "alias": "SRA Code", "type": "String", "description": "State Responsibility Area designation", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial"
+    }
+  ]
+}
