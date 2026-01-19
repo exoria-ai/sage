@@ -1,154 +1,310 @@
 export default function Home() {
   return (
-    <main style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif', maxWidth: '900px' }}>
-      <h1>SAGE - Solano Agent for Geographic Enquiry</h1>
-      <p>AI-powered GIS assistant for Solano County, California.</p>
+    <main
+      style={{
+        padding: '2rem',
+        fontFamily: 'system-ui, sans-serif',
+        maxWidth: '1100px',
+        margin: '0 auto',
+        lineHeight: 1.6,
+      }}
+    >
+      {/* Header */}
+      <header style={{ marginBottom: '2.5rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '1.5rem' }}>
+        <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem', color: '#1e293b' }}>
+          SAGE
+        </h1>
+        <p style={{ fontSize: '1.25rem', color: '#64748b', margin: 0 }}>
+          Solano Agent for Geographic Enquiry
+        </p>
+        <p style={{ marginTop: '0.75rem', color: '#475569' }}>
+          AI-powered GIS assistant for Solano County, California. Access property data, zoning, hazards,
+          county code, budget, staffing, and more through natural language.
+        </p>
+      </header>
 
-      <h2>MCP Endpoint</h2>
-      <p>
-        Connect your MCP client to: <code>/api/mcp</code>
-      </p>
+      {/* Quick Links */}
+      <section style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem', flexWrap: 'wrap' }}>
+        <a
+          href="/map"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            background: '#3b82f6',
+            color: 'white',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            fontWeight: 500,
+          }}
+        >
+          Interactive Map
+        </a>
+        <a
+          href="#mcp-setup"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1.25rem',
+            background: '#f1f5f9',
+            color: '#334155',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            fontWeight: 500,
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          MCP Setup
+        </a>
+      </section>
 
-      <h2>Available Tools</h2>
+      {/* Tool Sections Grid */}
+      <section style={{ marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', color: '#1e293b' }}>Available Tools</h2>
 
-      <h3>Geocoding &amp; Property</h3>
-      <ul>
-        <li><strong>geocode_address</strong> - Convert street address to coordinates and APN</li>
-        <li><strong>get_parcel_details</strong> - Get comprehensive property information</li>
-        <li><strong>search_parcels</strong> - Search parcels by criteria with aggregations</li>
-        <li><strong>get_parcels_in_buffer</strong> - Find parcels within radius for notification lists</li>
-      </ul>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '1.5rem',
+          }}
+        >
+          {/* Property & Parcels */}
+          <ToolSection
+            title="Property & Parcels"
+            color="#059669"
+            tools={[
+              { name: 'geocode_address', desc: 'Address to coordinates and APN' },
+              { name: 'get_parcel_details', desc: 'Property info, assessment, owner' },
+              { name: 'search_parcels', desc: 'Search by criteria with stats' },
+              { name: 'get_parcels_in_buffer', desc: 'Find parcels within radius' },
+            ]}
+          />
 
-      <h3>Zoning &amp; Land Use</h3>
-      <ul>
-        <li><strong>get_zoning</strong> - Query zoning designation with automatic jurisdiction routing</li>
-      </ul>
+          {/* Zoning & Land Use */}
+          <ToolSection
+            title="Zoning & Land Use"
+            color="#7c3aed"
+            tools={[
+              { name: 'get_zoning', desc: 'Zoning with auto jurisdiction routing' },
+              { name: 'get_special_districts', desc: 'Water, fire, school districts' },
+              { name: 'get_supervisor_district', desc: 'Board of Supervisors district' },
+            ]}
+          />
 
-      <h3>Hazards</h3>
-      <ul>
-        <li><strong>get_flood_zone</strong> - Query FEMA flood zone designation</li>
-        <li><strong>get_fire_hazard_zone</strong> - Query CAL FIRE Fire Hazard Severity Zone</li>
-      </ul>
+          {/* Hazards */}
+          <ToolSection
+            title="Hazards"
+            color="#dc2626"
+            tools={[
+              { name: 'get_flood_zone', desc: 'FEMA flood zone & insurance' },
+              { name: 'get_fire_hazard_zone', desc: 'CAL FIRE severity zone' },
+            ]}
+          />
 
-      <h3>Districts &amp; Jurisdictions</h3>
-      <ul>
-        <li><strong>get_supervisor_district</strong> - Get Board of Supervisors district info</li>
-        <li><strong>get_special_districts</strong> - Query special districts (water, fire, schools, etc.)</li>
-      </ul>
+          {/* County Code */}
+          <ToolSection
+            title="County Code"
+            color="#0891b2"
+            tools={[
+              { name: 'search_county_code', desc: 'Search by keyword' },
+              { name: 'get_county_code_sections', desc: 'Get section full text' },
+              { name: 'list_county_code_chapters', desc: 'Available chapters' },
+              { name: 'list_county_code_sections', desc: 'Sections in a chapter' },
+            ]}
+          />
 
-      <h3>Nearby &amp; Reference</h3>
-      <ul>
-        <li><strong>get_nearby</strong> - Find nearby places and services</li>
-        <li><strong>get_solano_context</strong> - Get contextual knowledge about GIS topics</li>
-      </ul>
+          {/* General Plan */}
+          <ToolSection
+            title="General Plan (2008)"
+            color="#ca8a04"
+            tools={[
+              { name: 'search_general_plan', desc: 'Search 1,345 chunks' },
+              { name: 'search_general_plan_policies', desc: 'Goals & policies only' },
+              { name: 'get_general_plan_chapter', desc: 'Full chapter content' },
+              { name: 'get_general_plan_overview', desc: 'Stats & metadata' },
+            ]}
+          />
 
-      <h3>County Code</h3>
-      <ul>
-        <li><strong>list_county_code_chapters</strong> - List available county code chapters</li>
-        <li><strong>list_county_code_sections</strong> - List sections within a chapter</li>
-        <li><strong>search_county_code</strong> - Search county code by keyword</li>
-        <li><strong>get_county_code_sections</strong> - Get full text of specific sections</li>
-      </ul>
+          {/* Budget */}
+          <ToolSection
+            title="Budget (FY2025-26)"
+            color="#ea580c"
+            tools={[
+              { name: 'search_budget', desc: 'Search budget document' },
+              { name: 'get_department_budget', desc: 'Department budget info' },
+              { name: 'list_budget_departments', desc: 'All departments' },
+              { name: 'get_budget_overview', desc: 'Stats & metadata' },
+            ]}
+          />
 
-      <h3>Budget</h3>
-      <ul>
-        <li><strong>search_budget</strong> - Search FY2025-26 Recommended Budget document</li>
-        <li><strong>get_budget_chunk</strong> - Retrieve full text of a budget section</li>
-        <li><strong>list_budget_departments</strong> - List all departments in budget</li>
-        <li><strong>list_budget_sections</strong> - List major budget sections (A-N)</li>
-        <li><strong>get_department_budget</strong> - Get all budget info for a department</li>
-        <li><strong>get_budget_overview</strong> - Budget document stats and metadata</li>
-      </ul>
+          {/* Org Chart & Staffing */}
+          <ToolSection
+            title="Org Chart & Staffing"
+            color="#be185d"
+            tools={[
+              { name: 'get_org_overview', desc: '21 depts, 3,284 FTE' },
+              { name: 'get_department', desc: 'Divisions & top positions' },
+              { name: 'search_positions', desc: 'Find positions by title' },
+              { name: 'compare_departments', desc: 'Side-by-side comparison' },
+            ]}
+          />
 
-      <h3>General Plan (2008)</h3>
-      <ul>
-        <li><strong>search_general_plan</strong> - Search all General Plan documents (1,345 chunks)</li>
-        <li><strong>get_general_plan_chunk</strong> - Retrieve full text of a specific chunk</li>
-        <li><strong>list_general_plan_chapters</strong> - List all 13 chapters</li>
-        <li><strong>list_general_plan_documents</strong> - List document types (chapters, EIR, resolutions)</li>
-        <li><strong>get_general_plan_chapter</strong> - Get all content from a chapter</li>
-        <li><strong>get_general_plan_overview</strong> - Collection stats and metadata</li>
-        <li><strong>search_general_plan_policies</strong> - Search policies and goals specifically</li>
-      </ul>
+          {/* Mapping & Routing */}
+          <ToolSection
+            title="Mapping & Routing"
+            color="#2563eb"
+            tools={[
+              { name: 'render_map', desc: 'Static maps with overlays' },
+              { name: 'get_directions', desc: 'Turn-by-turn directions' },
+              { name: 'get_travel_time', desc: 'Distance & drive time' },
+              { name: 'get_nearby', desc: 'Schools, parks, stations' },
+            ]}
+          />
 
-      <h3>Org Chart &amp; Staffing</h3>
-      <ul>
-        <li><strong>get_org_overview</strong> - County org chart with 21 departments, 3,284 FTE</li>
-        <li><strong>get_department</strong> - Department details with divisions and top positions</li>
-        <li><strong>search_positions</strong> - Search position titles across all departments</li>
-        <li><strong>get_position_distribution</strong> - Where a job class is allocated county-wide</li>
-        <li><strong>get_division</strong> - Division details by code</li>
-        <li><strong>list_job_classes</strong> - Search job classifications (399 classes)</li>
-        <li><strong>compare_departments</strong> - Side-by-side department staffing comparison</li>
-      </ul>
+          {/* AI Image Generation */}
+          <ToolSection
+            title="AI Image Generation"
+            color="#6366f1"
+            tools={[
+              { name: 'generate_infographic', desc: 'Create diagrams & visuals' },
+              { name: 'edit_image', desc: 'Edit or combine images' },
+            ]}
+          />
 
-      <h3>Mapping</h3>
-      <ul>
-        <li><strong>render_map</strong> - Generate static map images with parcel overlays</li>
-        <ul style={{ marginTop: '0.5rem', fontSize: '0.9em' }}>
-          <li>Center on APN or coordinates</li>
-          <li>Buffer visualization with radius rings</li>
-          <li>County and city boundary overlays</li>
-          <li>County-wide extent view</li>
-          <li>Aerial or streets basemap</li>
-        </ul>
-      </ul>
+          {/* Reference */}
+          <ToolSection
+            title="Reference"
+            color="#64748b"
+            tools={[{ name: 'get_solano_context', desc: 'GIS topic knowledge' }]}
+          />
+        </div>
+      </section>
 
-      <h3>Image Generation</h3>
-      <ul>
-        <li><strong>generate_infographic</strong> - Create infographics, diagrams, and visualizations</li>
-        <li><strong>edit_image</strong> - Edit or combine images using AI</li>
-      </ul>
-
-      <h2>Usage</h2>
-      <p>Add this server to your MCP client configuration:</p>
-      <pre style={{ background: '#f4f4f4', padding: '1rem', borderRadius: '4px', overflow: 'auto' }}>
-{`{
+      {/* MCP Setup */}
+      <section id="mcp-setup" style={{ marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#1e293b' }}>MCP Setup</h2>
+        <p style={{ marginBottom: '1rem', color: '#475569' }}>
+          Add this server to your MCP client (Claude Desktop, etc.):
+        </p>
+        <pre
+          style={{
+            background: '#1e293b',
+            color: '#e2e8f0',
+            padding: '1.25rem',
+            borderRadius: '8px',
+            overflow: 'auto',
+            fontSize: '0.9rem',
+          }}
+        >
+          {`{
   "mcpServers": {
-    "sage-gis": {
+    "sage": {
       "url": "https://sage-three-theta.vercel.app/api/mcp"
     }
   }
 }`}
-      </pre>
+        </pre>
+      </section>
 
-      <h2>Example Queries</h2>
-      <pre style={{ background: '#f4f4f4', padding: '1rem', borderRadius: '4px', overflow: 'auto', fontSize: '0.85em' }}>
-{`// Get property info for an address
+      {/* Examples */}
+      <section style={{ marginBottom: '2.5rem' }}>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#1e293b' }}>Example Queries</h2>
+        <pre
+          style={{
+            background: '#f8fafc',
+            border: '1px solid #e2e8f0',
+            padding: '1.25rem',
+            borderRadius: '8px',
+            overflow: 'auto',
+            fontSize: '0.85rem',
+            color: '#334155',
+          }}
+        >
+          {`// Property lookup
 geocode_address({ address: "675 Texas St, Fairfield, CA" })
 
 // Generate a parcel map
 render_map({ apn: "003-025-1020" })
 
-// Search county code for ADU regulations
+// Driving directions
+get_directions({
+  origin: { address: "675 Texas St, Fairfield, CA" },
+  destination: { address: "580 Texas St, Fairfield, CA" }
+})
+
+// County code search
 search_county_code({ query: "accessory dwelling unit" })
 
-// Get Sheriff's department staffing
+// Department staffing
 get_department({ code_or_name: "sheriff" })
 
-// Find all social worker positions county-wide
+// Position search
 search_positions({ query: "social worker" })
 
-// Compare public safety departments
-compare_departments({ departments: ["sheriff", "probation", "district attorney"] })
+// Budget search
+search_budget({ query: "behavioral health" })
 
-// Search budget for mental health funding
-search_budget({ query: "behavioral health", department: "H&SS" })
+// General Plan policies
+search_general_plan_policies({ query: "housing density" })`}
+        </pre>
+      </section>
 
-// Search General Plan for housing policies
-search_general_plan({ query: "housing density", chapter: "9" })
-
-// Find agricultural preservation policies
-search_general_plan_policies({ query: "agricultural preservation" })`}
-      </pre>
-
-      <h2>Data Sources</h2>
-      <p style={{ fontSize: '0.9em', color: '#666' }}>
-        GIS data from Solano County ArcGIS services. County Code from official ordinances.
-        Budget data from FY2025-26 Recommended Budget. Staffing data from Position Allocation
-        Report (April 2025) and Salary Listing (January 2026). General Plan from 2008 Solano
-        County General Plan including all chapters, appendices, amendments, and EIR documents.
-      </p>
+      {/* Data Sources */}
+      <footer style={{ borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem', color: '#64748b', fontSize: '0.875rem' }}>
+        <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', color: '#475569' }}>Data Sources</h3>
+        <ul style={{ margin: 0, paddingLeft: '1.25rem' }}>
+          <li>GIS data from Solano County ArcGIS services</li>
+          <li>County Code from official ordinances (Chapters 19, 23-24, 26, 28, 30-31)</li>
+          <li>FY2025-26 Recommended Budget document</li>
+          <li>Position Allocation Report (April 2025) &amp; Salary Listing (January 2026)</li>
+          <li>2008 Solano County General Plan with amendments, appendices, and EIR</li>
+        </ul>
+      </footer>
     </main>
+  );
+}
+
+function ToolSection({
+  title,
+  color,
+  tools,
+}: {
+  title: string;
+  color: string;
+  tools: Array<{ name: string; desc: string }>;
+}) {
+  return (
+    <div
+      style={{
+        background: 'white',
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
+        padding: '1.25rem',
+        borderTop: `4px solid ${color}`,
+      }}
+    >
+      <h3 style={{ fontSize: '1rem', marginBottom: '0.75rem', color: '#1e293b' }}>{title}</h3>
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+        {tools.map((tool) => (
+          <li key={tool.name} style={{ marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+            <code
+              style={{
+                background: '#f1f5f9',
+                padding: '0.125rem 0.375rem',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+                color: color,
+              }}
+            >
+              {tool.name}
+            </code>
+            <span style={{ color: '#64748b', marginLeft: '0.5rem' }}>{tool.desc}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
