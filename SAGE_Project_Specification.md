@@ -1,6 +1,6 @@
 # SAGE: Solano Agent for Geographic Enquiry
 
-## Project Specification v1.0
+## Project Specification v2.0
 
 ---
 
@@ -22,15 +22,17 @@ A competent GIS Analyst performs these functions:
 | **Query Construction** | Spatial and attribute queries, SQL-like logic | ✓ Full |
 | **Spatial Analysis** | Buffers, intersections, overlays, aggregations | ✓ Full |
 | **Result Interpretation** | What do these results mean in context? | ✓ Full |
-| **Visualization** | Maps, charts, summary tables | ◐ Partial |
+| **Visualization** | Maps, charts, infographics, route display | ✓ Full |
 | **Communication** | Explaining findings to non-technical users | ✓ Full |
 | **Process Knowledge** | Workflows, regulations, contacts, next steps | ✓ Full |
-| **Cross-System Navigation** | GIS + Permits + Assessor + Planning | ◐ Partial (linked) |
+| **Cross-System Navigation** | GIS + Budget + General Plan + Org Chart | ✓ Full |
 | **Quality Assurance** | Data validation, uncertainty communication | ✓ Full |
-| **Institutional Memory** | Historical context, "we tried that before" | ○ Future |
+| **Routing & Directions** | Driving directions, travel time calculations | ✓ Full |
+| **Document Search** | County Code, Budget, General Plan | ✓ Full |
+| **Institutional Memory** | Historical context, "we tried that before" | ◐ Partial |
 | **Stakeholder Relationships** | Knowing who to call, political context | ○ Human domain |
 
-SAGE targets full capability in 7 of 11 functions, with partial capability in 2 more. The remaining 2 are inherently human domains that SAGE supports but cannot replace.
+SAGE now has full capability in 11 of 13 functions, with partial capability in 1 more. The remaining function is an inherently human domain that SAGE supports but cannot replace.
 
 ---
 
@@ -42,54 +44,50 @@ SAGE targets full capability in 7 of 11 functions, with partial capability in 2 
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                         SKILL LAYER                                  │   │
-│  │                  "The Organizational Brain"                          │   │
+│  │                       INTERACTIVE MAP (Next.js)                      │   │
+│  │                    https://sage-three-theta.vercel.app/map           │   │
 │  │                                                                      │   │
-│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐                 │   │
-│  │  │ SKILL.md     │ │ references/  │ │ scripts/     │                 │   │
-│  │  │              │ │              │ │              │                 │   │
-│  │  │ • When to    │ │ • Zoning     │ │ • Validation │                 │   │
-│  │  │   use tools  │ │   codes      │ │ • Formatting │                 │   │
-│  │  │ • How to     │ │ • Prop 13    │ │ • Geocoding  │                 │   │
-│  │  │   interpret  │ │ • Flood/Fire │ │   helpers    │                 │   │
-│  │  │ • Caveats    │ │ • Districts  │ │              │                 │   │
-│  │  │ • Contacts   │ │ • ADU rules  │ │              │                 │   │
-│  │  └──────────────┘ └──────────────┘ └──────────────┘                 │   │
-│  │                                                                      │   │
-│  │  Loaded on-demand via progressive disclosure                         │   │
+│  │  • Full ESRI ArcGIS JS SDK integration with WebMap support           │   │
+│  │  • Parcel highlighting by APN or address via URL parameters          │   │
+│  │  • Route visualization with driving directions display               │   │
+│  │  • Layer controls, basemap gallery, legend, scale bar                │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                    │                                        │
 │                                    ▼                                        │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                          MCP SERVER                                  │   │
-│  │                     "The Operational Hands"                          │   │
+│  │                          MCP SERVER (45+ Tools)                      │   │
+│  │                     Hosted on Vercel via mcp-handler                 │   │
 │  │                                                                      │   │
-│  │  DISCOVERY          QUERY              ANALYSIS         OUTPUT       │   │
-│  │  ────────────       ─────────────      ──────────       ──────────   │   │
-│  │  list_services      query_parcels      buffer           render_map   │   │
-│  │  describe_layer     query_location     intersect        export_csv   │   │
-│  │  sample_records     get_zoning         aggregate        format_report│   │
-│  │                     get_flood_zone     calculate_area                │   │
-│  │                     get_fire_hazard                                  │   │
-│  │                     get_parcel_details                               │   │
-│  │                     get_supervisor                                   │   │
-│  │                     get_special_districts                            │   │
-│  │                     search_parcels                                   │   │
-│  │                     get_nearby                                       │   │
+│  │  GIS CORE           DOCUMENTS           ANALYSIS        VISUALIZATION│   │
+│  │  ─────────────      ─────────────       ──────────      ──────────── │   │
+│  │  geocode_address    search_county_code  search_parcels  render_map   │   │
+│  │  get_parcel_details get_code_sections   get_parcels_in  generate_    │   │
+│  │  get_zoning         search_budget         _buffer         infographic│   │
+│  │  get_flood_zone     get_dept_budget     get_nearby      edit_image   │   │
+│  │  get_fire_hazard    search_general_plan                              │   │
+│  │  get_supervisor     get_gp_policies                                  │   │
+│  │  get_special_dists  get_gp_chapter      ROUTING         ORG CHART    │   │
+│  │  get_solano_context                     ──────────      ──────────── │   │
+│  │                     ORG DATA            get_directions  get_org_     │   │
+│  │                     ──────────────      get_travel_time   overview   │   │
+│  │                     get_department                      get_department│   │
+│  │                     search_positions                    search_       │   │
+│  │                     compare_depts                         positions  │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                    │                                        │
 │                                    ▼                                        │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │                      EXTERNAL DATA SOURCES                           │   │
+│  │                         DATA SOURCES                                 │   │
 │  │                                                                      │   │
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌────────────┐  │   │
-│  │  │ Solano      │  │ Solano      │  │ State/Fed   │  │ Linked     │  │   │
-│  │  │ County GIS  │  │ ReGIS       │  │ Services    │  │ Systems    │  │   │
-│  │  │             │  │ Portal      │  │             │  │            │  │   │
-│  │  │ • Parcels   │  │ • Downloads │  │ • FEMA NFHL │  │ • Accela   │  │   │
-│  │  │ • Zoning    │  │ • Metadata  │  │ • CAL FIRE  │  │   (portal) │  │   │
-│  │  │ • Districts │  │             │  │ • Census    │  │ • Assessor │  │   │
-│  │  │ • Addresses │  │             │  │             │  │   (portal) │  │   │
+│  │  │ Solano GIS  │  │ ESRI Cloud  │  │ Local DBs   │  │ External   │  │   │
+│  │  │ REST APIs   │  │ Services    │  │             │  │ APIs       │  │   │
+│  │  │             │  │             │  │             │  │            │  │   │
+│  │  │ • Parcels   │  │ • Routing   │  │ • County    │  │ • FEMA     │  │   │
+│  │  │ • Zoning    │  │ • Geocoding │  │   Code DB   │  │ • CAL FIRE │  │   │
+│  │  │ • Districts │  │ • Basemaps  │  │ • Budget DB │  │ • FAL.ai   │  │   │
+│  │  │ • Addresses │  │ • WebMaps   │  │ • GenPlan DB│  │   (images) │  │   │
+│  │  │ • Hazards   │  │             │  │ • Org Chart │  │            │  │   │
 │  │  └─────────────┘  └─────────────┘  └─────────────┘  └────────────┘  │   │
 │  │                                                                      │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
@@ -162,39 +160,88 @@ Level 3: On-Demand Reference (Skill)
 
 ## MCP Server Specification
 
-### Tool Inventory
+### Tool Inventory (45+ Tools Implemented)
 
-#### Tier 1: Core Tools (Demo-Ready)
+#### GIS Core Tools
 
-| Tool | Input | Output | Notes |
-|------|-------|--------|-------|
-| `geocode_address` | address string | lat, lon, APN, confidence | Foundation for everything |
-| `get_parcel_details` | APN or lat/lon | Comprehensive parcel report | Single call for "tell me about this property" |
-| `get_zoning` | lat, lon | zone_code, description, jurisdiction, interpretation | Auto-routes city vs county |
-| `get_flood_zone` | lat, lon | FEMA zone, SFHA status, plain-English explanation | Includes insurance implications |
-| `get_fire_hazard_zone` | lat, lon | FHSZ class, SRA/LRA, requirements triggered | Includes defensible space, WUI info |
-| `get_supervisor` | lat, lon or district | Supervisor name, district, contact, meeting schedule | Civic engagement |
-| `get_solano_context` | topic string | Detailed reference material | Knowledge retrieval from skill |
+| Tool | Input | Output | Status |
+|------|-------|--------|--------|
+| `geocode_address` | address string | lat, lon, APN, confidence | ✓ Live |
+| `get_parcel_details` | APN or lat/lon | Comprehensive parcel report | ✓ Live |
+| `get_zoning` | APN or lat/lon | zone_code, jurisdiction, auto-routes city vs county | ✓ Live |
+| `get_flood_zone` | APN or lat/lon | FEMA zone, SFHA status, insurance implications | ✓ Live |
+| `get_fire_hazard_zone` | APN or lat/lon | FHSZ class, SRA/LRA, defensible space reqs | ✓ Live |
+| `get_supervisor_district` | APN or lat/lon | Supervisor name, district, contact info | ✓ Live |
+| `get_special_districts` | APN or lat/lon | Fire, water, sewer, school districts | ✓ Live |
+| `get_solano_context` | topic string | Reference material for interpretation | ✓ Live |
 
-#### Tier 2: Analysis Tools (Makes Demo Impressive)
+#### Spatial Analysis Tools
 
-| Tool | Input | Output | Notes |
-|------|-------|--------|-------|
-| `search_parcels` | criteria object | count, aggregates, sample APNs | Enables "all ag parcels in District 3" |
-| `buffer_intersect` | layer, geometry, distance | features within buffer | Enables "parcels within 500ft of parks" |
-| `get_special_districts` | lat, lon | all districts covering location | Fire, water, sewer, school, etc. |
-| `get_nearby` | layer, lat, lon, radius, limit | nearby features with distances | Schools, parks, fire stations |
-| `render_map` | layers, bbox, highlights | PNG or URL | Visual output |
+| Tool | Input | Output | Status |
+|------|-------|--------|--------|
+| `search_parcels` | criteria object | count, aggregates, sample parcels | ✓ Live |
+| `get_parcels_in_buffer` | APN + radius | parcels within buffer for notifications | ✓ Live |
+| `get_nearby` | layer type, location, radius | nearby features with distances | ✓ Live |
+| `render_map` | APN, buffer, or bbox | Static map PNG with parcel highlighting | ✓ Live |
 
-#### Tier 3: Extended Tools (Production)
+#### County Code Tools (Chapter 26, 28, etc.)
 
-| Tool | Input | Output | Notes |
-|------|-------|--------|-------|
-| `get_general_plan` | lat, lon | GP designation, description | Planning context |
-| `get_hazard_overlays` | lat, lon | All hazards in one call | Flood, fire, fault, dam, airport |
-| `get_permit_link` | APN | Accela search URL | Bridge to permit system |
-| `compare_parcels` | APN array, fields | Side-by-side comparison | Analyst workflow |
-| `export_analysis` | query results, format | CSV, GeoJSON, or report | Data export |
+| Tool | Input | Output | Status |
+|------|-------|--------|--------|
+| `search_county_code` | query string | matching sections with snippets | ✓ Live |
+| `get_county_code_sections` | section IDs array | full text of code sections | ✓ Live |
+| `list_county_code_chapters` | none | available chapters | ✓ Live |
+| `list_county_code_sections` | chapter number | sections in chapter | ✓ Live |
+
+#### Budget Tools (FY2025-26)
+
+| Tool | Input | Output | Status |
+|------|-------|--------|--------|
+| `search_budget` | query, filters | matching budget chunks | ✓ Live |
+| `get_budget_chunk` | chunk ID | full text of budget section | ✓ Live |
+| `get_department_budget` | department name | all budget info for dept | ✓ Live |
+| `list_budget_departments` | none | all departments | ✓ Live |
+| `list_budget_sections` | none | budget sections A-N | ✓ Live |
+| `get_budget_overview` | none | summary statistics | ✓ Live |
+
+#### General Plan Tools (2008 GP + Amendments)
+
+| Tool | Input | Output | Status |
+|------|-------|--------|--------|
+| `search_general_plan` | query, filters | matching GP chunks | ✓ Live |
+| `get_general_plan_chunk` | chunk ID | full text | ✓ Live |
+| `get_general_plan_chapter` | chapter number | full chapter content | ✓ Live |
+| `search_general_plan_policies` | query | matching policies/goals | ✓ Live |
+| `list_general_plan_chapters` | none | available chapters | ✓ Live |
+| `list_general_plan_documents` | none | all document types | ✓ Live |
+| `get_general_plan_overview` | none | summary statistics | ✓ Live |
+
+#### Org Chart Tools (April 2025 Position Allocation)
+
+| Tool | Input | Output | Status |
+|------|-------|--------|--------|
+| `get_org_overview` | none | all departments with FTE | ✓ Live |
+| `get_department` | code or name | divisions, positions | ✓ Live |
+| `get_division` | division code | positions and FTE | ✓ Live |
+| `search_positions` | title query | matching positions county-wide | ✓ Live |
+| `get_position_distribution` | title | position across departments | ✓ Live |
+| `list_job_classes` | optional filters | job classifications | ✓ Live |
+| `compare_departments` | dept array | side-by-side comparison | ✓ Live |
+
+#### Routing & Directions Tools (ESRI World Route Service)
+
+| Tool | Input | Output | Status |
+|------|-------|--------|--------|
+| `get_directions` | origin, destination | turn-by-turn directions, map URL | ✓ Live |
+| `get_travel_time` | origin, destination | distance and duration only | ✓ Live |
+
+#### Visualization Tools
+
+| Tool | Input | Output | Status |
+|------|-------|--------|--------|
+| `render_map` | APN, buffer, bbox, extent | static map PNG with highlights | ✓ Live |
+| `generate_infographic` | prompt, aspect ratio | AI-generated infographic | ✓ Live |
+| `edit_image` | image URLs, prompt | edited/combined images | ✓ Live |
 
 ### Tool Design Principles
 
@@ -418,121 +465,133 @@ The Cayman model (real-time transactional integration between land registry and 
 
 ## Development Phases
 
-### Phase 1: Interview Demo (Current)
-**Timeline**: 5 days  
+### Phase 1: Interview Demo ✓ COMPLETED
+**Timeline**: January 2025
 **Goal**: Working demonstration for video submission
 
 **Deliverables**:
-- [ ] MCP server with Tier 1 tools (6-7 tools)
-- [ ] Basic skill with core knowledge domains
-- [ ] 4 demo scenarios working end-to-end
-- [ ] **Raindrop observability integration** (see Observability Addendum)
-- [ ] 10-12 minute video demonstrating capabilities
+- [x] MCP server with core GIS tools (8 tools)
+- [x] Basic skill with core knowledge domains
+- [x] Demo scenarios working end-to-end
+- [x] Video demonstrating capabilities
 
-**Demo Scenarios**:
-1. Simple lookup with jurisdiction routing
-2. Spatial analysis (parcels near parks)
-3. Aggregation by district
-4. Hazard overlay query
-
-**Observability for Demo**:
-- [ ] Basic interaction tracking with `begin()` / `finish()`
-- [ ] Properties: query_type, jurisdiction, tools_used, success
-- [ ] 2-3 custom signals defined (jurisdiction_confusion, missing_disclaimer)
-- [ ] Dashboard screenshots/screenshare in video
-
-### Phase 2: Functional Prototype
-**Timeline**: 2-4 weeks post-interview  
+### Phase 2: Functional Prototype ✓ COMPLETED
+**Timeline**: January 2025
 **Goal**: Usable tool for internal testing
 
-**Additions**:
-- [ ] Tier 2 tools (analysis, special districts)
-- [ ] Complete knowledge reference files
-- [ ] Error handling and edge cases
-- [ ] Map rendering capability
-- [ ] Hosted MCP server (Cloudflare Workers)
-- [ ] Full tool tracing with `withTool()`
-- [ ] Skill reference tracing with `withSpan()`
+**Delivered**:
+- [x] 45+ MCP tools across all categories
+- [x] Complete knowledge reference files
+- [x] Error handling and edge cases
+- [x] Static map rendering capability
+- [x] Hosted MCP server on Vercel
+- [x] Interactive map with ESRI JS SDK
+- [x] County Code database (Chapters 19, 23, 24, 26, 26.5, 28, 30, 31)
+- [x] Budget document search (FY2025-26)
+- [x] General Plan search (2008 GP + amendments)
+- [x] Org Chart data (April 2025 positions)
+- [x] Driving directions & routing
+- [x] AI image generation for infographics
 
-### Phase 3: Production Pilot
-**Timeline**: 2-3 months  
-**Goal**: Limited deployment for staff testing
+### Phase 3: Production Pilot (Current)
+**Timeline**: Q1-Q2 2025
+**Goal**: Expanded deployment and testing
 
-**Additions**:
-- [ ] Tier 3 tools (extended analysis)
-- [ ] Integration with county authentication
-- [ ] Complete Raindrop signal library
-- [ ] A/B experiments framework
-- [ ] Alert configuration (Slack integration)
-- [ ] User feedback instrumentation
+**In Progress / Planned**:
+- [ ] Additional county code chapters
+- [ ] Historical budget comparisons
+- [ ] Permit system integration (Accela)
+- [ ] User authentication
+- [ ] Usage analytics and monitoring
+- [ ] Mobile-responsive map interface
 - [ ] Documentation and training materials
 
 ### Phase 4: Public-Facing Capability
-**Timeline**: 6+ months  
+**Timeline**: Q3-Q4 2025
 **Goal**: Public access to property information
 
-**Additions**:
-- [ ] Public interface (web or chatbot)
+**Planned**:
+- [ ] Public web interface
 - [ ] Rate limiting and abuse prevention
-- [ ] Accessibility compliance
-- [ ] Multi-language support consideration
+- [ ] Accessibility compliance (WCAG 2.1)
+- [ ] Multi-language support
 - [ ] Integration with county website
+- [ ] Chatbot widget for embedding
 
 ---
 
 ## Technical Implementation
 
-### MCP Server Stack
+### Technology Stack
 
 ```
-TypeScript / Node.js
-├── @modelcontextprotocol/sdk     # MCP server framework
-├── axios                          # HTTP client for ArcGIS REST
-├── @turf/turf                     # Client-side spatial operations
-├── proj4                          # Coordinate transformations
-├── raindrop-ai                    # Agent observability (see Observability Addendum)
-└── sharp (optional)               # Map image processing
+Next.js 15.5 Application
+├── TypeScript                     # Type-safe development
+├── mcp-handler                    # MCP server via HTTP transport
+├── @arcgis/core (4.34)            # ESRI JS SDK for interactive maps
+├── better-sqlite3                 # Local SQLite for document search
+├── @vercel/blob                   # Image storage for map renders
+├── fal-ai                         # AI image generation
+└── zod                            # Runtime type validation
+
+Client Libraries:
+├── React 19                       # UI framework
+├── Zustand                        # State management
+├── Tailwind CSS                   # Styling
+└── ESRI Calcite Components        # Map UI components
 ```
 
-### Deployment Options
+### Architecture
 
-| Option | Pros | Cons | Recommended For |
-|--------|------|------|-----------------|
-| **Local (stdio)** | Simple, no hosting | User must install | Development, demo |
-| **Cloudflare Workers** | Fast, free tier, easy deploy | V8 runtime limits | Production pilot |
-| **Vercel** | Full Node.js, familiar | Slower cold starts | Complex processing |
-| **County Infrastructure** | Full control, internal | IT overhead | Long-term production |
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Vercel Edge                              │
+├─────────────────────────────────────────────────────────────────┤
+│  /api/mcp          → MCP Server (Streamable HTTP)               │
+│  /api/arcgis-token → OAuth token proxy                          │
+│  /api/arcgis-route → Routing API proxy                          │
+│  /map              → Interactive ESRI Map (Next.js SSR)         │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┼───────────────┐
+              ▼               ▼               ▼
+    ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+    │ SQLite DBs  │  │ Solano GIS  │  │ ESRI Cloud  │
+    │             │  │ REST APIs   │  │ Services    │
+    │ • county.db │  │             │  │             │
+    │ • budget.db │  │ • Parcels   │  │ • Routing   │
+    │ • gp.db     │  │ • Zoning    │  │ • Basemaps  │
+    │ • org.json  │  │ • Hazards   │  │ • WebMaps   │
+    └─────────────┘  └─────────────┘  └─────────────┘
+```
 
 ### Data Sources
 
-**Primary (Query via REST)**:
+**GIS REST APIs (Live Queries)**:
 ```
 Solano County ArcGIS Server:
   https://solanocountygis.com/server/rest/services
+  • Parcels, Zoning, Districts, Hazards, Addresses
 
-Solano ArcGIS Online:
-  https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services
+ESRI World Route Service (OAuth):
+  https://route-api.arcgis.com/arcgis/rest/services/World/Route
+  • Driving directions, travel time calculations
+  • Cost: 0.005 credits/route (~$0.0005)
 ```
 
-**Federal/State (Query via REST)**:
+**Local SQLite Databases**:
 ```
-FEMA NFHL:
-  https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer
+data/county_code.db    - Chapters 19, 23, 24, 26, 26.5, 28, 30, 31
+data/budget.db         - FY2025-26 Recommended Budget (chunked)
+data/general_plan.db   - 2008 GP + Housing Element + EIR (chunked)
+data/org_chart.json    - April 2025 Position Allocation Report
+```
 
-CAL FIRE FHSZ:
-  https://services.gis.ca.gov/.../Fire_Severity_Zones/MapServer
+**External APIs**:
 ```
-
-**Downloadable (For Analysis)**:
-```
-ReGIS Data Downloads:
-  https://regis.solanocounty.com/apps/
-  
-  - Parcels (with assessed values)
-  - Address Points
-  - City/County Boundaries
-  - Zoning
-  - BOS Districts
+Vercel Blob Storage    - Map image renders
+FAL.ai                 - AI infographic generation
+ArcGIS Online          - WebMaps, basemaps, OAuth tokens
 ```
 
 ---
@@ -572,17 +631,27 @@ ReGIS Data Downloads:
 
 ## Differentiation
 
-| What Others Might Build | What SAGE Demonstrates |
+| What Others Might Build | What SAGE Delivers |
 |------------------------|------------------------|
-| ChatGPT summarizing GIS concepts | Claude executing real spatial queries |
-| Slideshow about AI potential | Working agent against live county data |
-| Python script with hardcoded queries | Agent that discovers and adapts |
-| Demo against generic/sample data | Demo against Solano's actual infrastructure |
-| Query tool that returns raw data | Assistant that interprets and explains |
-| Tool that ignores jurisdiction | Tool that routes correctly every time |
-| "It works on my machine" demo | Production observability with failure mode detection |
+| ChatGPT summarizing GIS concepts | Claude executing real spatial queries against live data |
+| Slideshow about AI potential | 45+ production tools querying actual county systems |
+| Python script with hardcoded queries | Agent that discovers, adapts, and interprets results |
+| Demo against generic/sample data | Demo against Solano's actual GIS infrastructure |
+| Query tool that returns raw data | Assistant that interprets and explains with context |
+| Tool that ignores jurisdiction | Tool that routes city vs county correctly every time |
+| Static map exports | Interactive web map with parcel highlighting & routing |
+| Separate disconnected tools | Unified system: GIS + Code + Budget + Org + Routing |
+| Text-only responses | Visual outputs: maps, infographics, route displays |
 
-**The message**: "I understand both the AI and the GIS deeply enough to make them work together on your actual systems—and I understand the organizational knowledge that makes the difference between a demo and a useful tool."
+**Key Technical Achievements**:
+- Full ESRI ArcGIS JS SDK integration in Next.js
+- OAuth 2.0 authentication for ESRI premium services
+- Vector-based SQLite search for county documents (FTS5)
+- Server-side map rendering with Vercel Blob storage
+- URL-driven map state for shareable links
+- Client-side route visualization without login prompts
+
+**The message**: "I understand both the AI and the GIS deeply enough to make them work together on your actual systems—and I've built the infrastructure to make it production-ready."
 
 ---
 
@@ -610,11 +679,56 @@ ReGIS Data Downloads:
 
 ---
 
+## Interactive Map Features
+
+### URL Parameters
+
+The interactive map at `/map` supports the following URL parameters:
+
+| Parameter | Format | Example | Description |
+|-----------|--------|---------|-------------|
+| `preset` | string | `hazards` | Map preset (base, hazards, zoning, environmental, districts) |
+| `apn` | XXX-XXX-XXX | `0046-101-050` | Highlight and zoom to parcel |
+| `address` | URL-encoded | `123+Main+St` | Geocode and highlight address |
+| `center` | lng,lat | `-122.04,38.25` | Center map on coordinates |
+| `zoom` | 1-19 | `15` | Set zoom level |
+| `origin` | lng,lat,label | `-122.04,38.25,Fairfield` | Route start point |
+| `destination` | lng,lat,label | `-121.99,38.36,Vacaville` | Route end point |
+
+**Example URLs**:
+```
+# View a parcel
+/map?apn=0046-101-050
+
+# Show driving route
+/map?origin=-122.04,38.25,Fairfield&destination=-121.99,38.36,Vacaville
+
+# Hazard assessment view
+/map?preset=hazards&address=675+Texas+St,+Fairfield
+```
+
+### Route Display
+
+When `origin` and `destination` are provided:
+- Blue route line showing driving path
+- Green marker at origin, red marker at destination
+- Info overlay showing distance and duration
+- Map auto-zooms to fit entire route
+
+---
+
 ## Document History
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | January 2026 | Initial specification |
+| 1.0 | January 2025 | Initial specification |
+| 2.0 | January 2025 | Major update reflecting production capabilities |
+|     |              | • 45+ MCP tools implemented |
+|     |              | • Interactive map with ESRI JS SDK |
+|     |              | • County Code, Budget, General Plan search |
+|     |              | • Org Chart data integration |
+|     |              | • Driving directions with route display |
+|     |              | • AI infographic generation |
 
 ---
 

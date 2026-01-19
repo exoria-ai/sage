@@ -1,13 +1,27 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
   "entry": [
-    "scripts/mcp-dev-server.ts",
-    "scripts/parse-chapter-28.ts",
-    "scripts/test-*.ts",
-    "lib/tools/*.ts",
-    "lib/budget-search.ts"
+    "app/**/*.{ts,tsx}",
+    "lib/**/*.ts",
+    "scripts/mcp-dev-server.ts"
   ],
-  "project": ["lib/**/*.ts", "scripts/**/*.ts"],
-  "ignore": ["**/*.test.ts", "**/*.spec.ts"],
-  "ignoreDependencies": ["eslint", "eslint-config-next"]
+  "project": [
+    "app/**/*.{ts,tsx}",
+    "lib/**/*.ts"
+  ],
+  "ignore": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "scripts/parse-*.ts",
+    "scripts/scrape-*.ts",
+    "scripts/test-*.ts",
+    "docs/**"
+  ],
+  "ignoreDependencies": [
+    "eslint",
+    "eslint-config-next",
+    "tailwindcss",
+    "cheerio",
+    "@types/cheerio"
+  ]
 }

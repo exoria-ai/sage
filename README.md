@@ -15,10 +15,14 @@ SAGE helps county staff and the public interact with geographic and property inf
 - **Spatial Analysis**: Buffer queries, nearby POI search, parcel aggregations
 - **Map Rendering**: Static maps with parcel overlays, buffer visualization, county/city boundaries
 - **Special Districts**: Fire, water, school, and other service district lookups
+- **Routing & Directions**: Turn-by-turn driving directions and travel time estimates
+- **Interactive Map**: Browser-based ESRI map at `/map` with layer controls
 
 ### Extended Capabilities
-- **County Code Lookup**: Search and retrieve Solano County Code sections (Subdivisions, Zoning)
+- **County Code Lookup**: Search and retrieve Solano County Code sections (multiple chapters)
+- **General Plan**: Search 2008 General Plan including chapters, EIR, and amendments
 - **Budget Intelligence**: Semantic search of FY2025-26 budget document with RAG
+- **Org Chart & Staffing**: Department structure, position allocation, job classifications
 - **Infographic Generation**: AI-powered visualization and diagram creation
 
 ## Architecture
@@ -26,9 +30,9 @@ SAGE helps county staff and the public interact with geographic and property inf
 SAGE consists of two main components:
 
 ### MCP Server (`scripts/mcp-dev-server.ts`)
-Provides Claude with 25 tools across five categories:
+Provides Claude with 40+ tools across multiple categories:
 
-**GIS Tools (12 tools)**
+**GIS Tools (14 tools)**
 - `geocode_address` - Convert address to coordinates and APN
 - `get_parcel_details` - Comprehensive property information
 - `get_zoning` - Zoning with automatic jurisdiction routing
@@ -41,12 +45,23 @@ Provides Claude with 25 tools across five categories:
 - `get_parcels_in_buffer` - Parcels within radius (notification lists)
 - `render_map` - Generate static map images
 - `get_solano_context` - Retrieve reference materials
+- `get_directions` - Turn-by-turn driving directions
+- `get_travel_time` - Distance and travel time between locations
 
 **County Code Tools (4 tools)**
 - `get_county_code_sections` - Retrieve full text of code sections
 - `list_county_code_chapters` - List available chapters
 - `list_county_code_sections` - List sections in a chapter
 - `search_county_code` - Keyword search across code
+
+**General Plan Tools (7 tools)**
+- `search_general_plan` - Search all General Plan documents
+- `get_general_plan_chunk` - Retrieve full text of a chunk
+- `list_general_plan_chapters` - List all chapters
+- `list_general_plan_documents` - List document types
+- `get_general_plan_chapter` - Get all content from a chapter
+- `get_general_plan_overview` - Collection stats and metadata
+- `search_general_plan_policies` - Search policies and goals
 
 **Budget Tools (6 tools)**
 - `search_budget` - Semantic search of budget document
@@ -56,10 +71,18 @@ Provides Claude with 25 tools across five categories:
 - `get_department_budget` - All budget info for a department
 - `get_budget_overview` - Document metadata and statistics
 
-**Image Tools (3 tools)**
+**Org Chart Tools (7 tools)**
+- `get_org_overview` - County org chart with departments and FTE
+- `get_department` - Department details with divisions and positions
+- `search_positions` - Search position titles across departments
+- `get_position_distribution` - Where a job class is allocated
+- `get_division` - Division details by code
+- `list_job_classes` - Search job classifications
+- `compare_departments` - Side-by-side staffing comparison
+
+**Image Tools (2 tools)**
 - `generate_infographic` - AI image generation for visualizations
 - `edit_image` - AI image editing and combining
-- `get_infographic_rate_limit` - Check daily quota
 
 ### Skill (`sage-skill/`)
 Provides domain expertise and organizational knowledge:
@@ -99,8 +122,10 @@ npm install
 
 Create `.env.local` with:
 ```
-OPENAI_API_KEY=sk-...      # For budget semantic search
-FAL_API_KEY=...            # For infographic generation (optional)
+OPENAI_API_KEY=sk-...          # For budget semantic search
+FAL_API_KEY=...                # For infographic generation (optional)
+ARCGIS_CLIENT_ID=...           # For routing/directions (optional)
+ARCGIS_CLIENT_SECRET=...       # For routing/directions (optional)
 ```
 
 ### Development
@@ -143,41 +168,43 @@ Or add to `~/.claude/claude_desktop_config.json`:
 
 ```
 sage/
-├── scripts/
-│   └── mcp-dev-server.ts        # MCP server entry point
+├── app/
+│   ├── api/mcp/                 # MCP HTTP endpoint
+│   ├── components/map/          # Interactive map component
+│   ├── map/                     # /map page
+│   └── page.tsx                 # Home page
 ├── lib/
-│   └── tools/                   # Tool implementations
-│       ├── geocode.ts
-│       ├── parcel.ts
-│       ├── zoning.ts
-│       ├── flood.ts
-│       ├── fire.ts
-│       ├── supervisor.ts
-│       ├── special-districts.ts
-│       ├── nearby.ts
-│       ├── search-parcels.ts
-│       ├── parcels-in-buffer.ts
-│       ├── render-map.ts
-│       ├── context.ts
-│       ├── county-code.ts
-│       ├── budget.ts
-│       └── image-generation.ts
+│   ├── config/                  # Centralized configuration
+│   │   ├── endpoints.ts         # All external service URLs
+│   │   ├── defaults.ts          # Numeric constants
+│   │   └── env.ts               # Environment validation
+│   ├── tools/                   # MCP tool implementations
+│   │   ├── geocode.ts
+│   │   ├── parcel.ts
+│   │   ├── zoning.ts
+│   │   ├── directions.ts        # Routing & directions
+│   │   ├── render-map.ts
+│   │   ├── county-code.ts
+│   │   ├── general-plan.ts
+│   │   ├── budget.ts
+│   │   ├── org-chart.ts
+│   │   └── ...
+│   ├── esri/                    # ESRI/ArcGIS integration
+│   └── services/                # ArcGIS REST client
 ├── sage-skill/
 │   ├── SKILL.md                 # Main skill file
 │   └── references/              # Domain knowledge files
-│       ├── jurisdiction.md
-│       ├── prop13.md
-│       ├── flood-zones.md
-│       ├── fire-hazard.md
-│       ├── disclaimers.md
-│       ├── spatial-grounding.md
-│       ├── solano-county-encyclopedia.md
-│       └── org-structure.md
 ├── data/
 │   ├── county-code.db           # County code SQLite database
-│   └── budget-embeddings.db     # Budget RAG embeddings
-├── docs/                        # Reference documentation
-└── package.json
+│   ├── budget.db                # Budget RAG embeddings
+│   └── general_plan.db          # General Plan embeddings
+├── docs/
+│   ├── sage/                    # Project documentation
+│   ├── claude-code/             # Claude Code reference
+│   ├── esri-js-sdk/             # ESRI JS SDK docs (976 pages)
+│   └── external-apis/           # Third-party API docs
+└── scripts/
+    └── mcp-dev-server.ts        # Development MCP server
 ```
 
 ## Key Concepts

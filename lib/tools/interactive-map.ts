@@ -10,12 +10,11 @@
  */
 
 import { WEB_MAPS, getWebMapConfig, isPresetConfigured, getConfiguredPresets } from '../esri/webmaps';
+import { env } from '@/lib/config';
 
-// Base URL for the map page (will be set from environment or default)
+// Base URL for the map page
 const getMapBaseUrl = () => {
-  // In production, use the deployed URL
-  // In development, use localhost
-  return process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  return env.baseUrl || 'http://localhost:3000';
 };
 
 export interface OpenInteractiveMapInput {
