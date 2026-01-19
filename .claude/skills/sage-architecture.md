@@ -119,7 +119,44 @@ FAL_KEY=               # FAL.ai image generation
 
 ## Deployment
 
+### Vercel Configuration
 - Platform: Vercel
 - Framework: Next.js 15 with App Router
 - MCP endpoint: `/api/mcp` (via mcp-handler package)
 - Production URL: `https://sage-three-theta.vercel.app`
+- Dashboard: `https://vercel.com/ai-machine-dream/sage/deployments`
+
+### Auto-Deploy
+Vercel auto-deploys on every push to `main` branch (via GitHub integration).
+Check deployment status at the dashboard if builds fail.
+
+### Pre-commit Build Verification
+**IMPORTANT**: Always verify the build passes locally before pushing:
+```bash
+npm run build
+```
+
+This runs TypeScript type checking and catches errors like:
+- Type mismatches between tool definitions and implementations
+- Missing imports after refactoring
+- Schema/handler signature mismatches
+
+If `npm run build` passes locally, the Vercel deploy should succeed.
+
+### Common Build Failures
+1. **Type mismatches**: e.g., basemap type `'aerial'` vs `'imagery'` after renaming
+2. **Missing exports**: Forgot to export new tool from `lib/tools/definitions/index.ts`
+3. **Import errors**: File moved but imports not updated
+
+### Environment Variables
+Set these in Vercel Dashboard → Settings → Environment Variables:
+- `ARCGIS_API_KEY` - ESRI Developer API key
+- `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage (auto-configured)
+- `FAL_KEY` - FAL.ai image generation
+
+### Homepage Documentation
+**IMPORTANT**: When adding/modifying MCP tools, update the homepage (`app/page.tsx`):
+- The homepage displays example usage for all tools
+- Organized by category cards (GIS Core, Documents, Visualization, etc.)
+- Serves as user-facing documentation at `https://sage-three-theta.vercel.app`
+- Keep examples in sync with tool schemas and descriptions
