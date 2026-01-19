@@ -37,6 +37,20 @@
       "baseUrl": "https://services2.arcgis.com/zr3KAIbsRSUyARHG/arcgis/rest/services",
       "type": "state",
       "maintainer": "California Department of Conservation"
+    },
+    {
+      "id": "benicia",
+      "name": "City of Benicia GIS",
+      "baseUrl": "https://services5.arcgis.com/eclQh1J6mUFYeV4m/arcgis/rest/services",
+      "type": "city",
+      "maintainer": "City of Benicia Community Development"
+    },
+    {
+      "id": "vallejo",
+      "name": "City of Vallejo GIS",
+      "baseUrl": "https://services7.arcgis.com/MyTOuXKXZoizwPz9/arcgis/rest/services",
+      "type": "city",
+      "maintainer": "City of Vallejo IT Department"
     }
   ],
   "layers": [
@@ -1972,6 +1986,123 @@
       "lookupMethod": "spatial",
       "priority": "medium",
       "coverage": "partial"
+    },
+    {
+      "id": "benicia-flood-hazard",
+      "name": "Benicia Flood Hazard Areas",
+      "description": "City of Benicia flood hazard areas derived from FEMA DFIRM data. Includes flood zones, base flood elevations, and zone subtypes specific to Benicia.",
+      "sourceId": "benicia",
+      "serviceUrl": "https://services5.arcgis.com/eclQh1J6mUFYeV4m/arcgis/rest/services/Flood_Hazard_Areas/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "hazards",
+      "tags": ["flood", "fema", "hazard", "benicia", "dfirm"],
+      "userQuestions": [
+        "What's the flood zone in Benicia?",
+        "Is this Benicia property in a flood hazard area?",
+        "What's the base flood elevation here?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "FLD_ZONE", "alias": "Flood Zone", "type": "String", "description": "FEMA flood zone designation (A, AE, X, etc.)", "isPrimary": true},
+        {"name": "ZONE_SUBTY", "alias": "Zone Subtype", "type": "String", "description": "Flood zone subtype classification"},
+        {"name": "STATIC_BFE", "alias": "Base Flood Elevation", "type": "Double", "description": "Base flood elevation in feet"},
+        {"name": "DEPTH", "alias": "Flood Depth", "type": "Double", "description": "Expected flood depth"},
+        {"name": "VELOCITY", "alias": "Flow Velocity", "type": "Double", "description": "Expected flow velocity"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "cities",
+      "notes": "Specific to Benicia city limits. For countywide flood zones use FEMA NFHL layer."
+    },
+    {
+      "id": "benicia-ev-charging",
+      "name": "Benicia EV Charging Stations",
+      "description": "Electric vehicle charging station locations in Benicia including availability, connector types, power output, and network information.",
+      "sourceId": "benicia",
+      "serviceUrl": "https://services5.arcgis.com/eclQh1J6mUFYeV4m/arcgis/rest/services/EV_Charging_Locations/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["ev", "electric vehicle", "charging", "benicia", "sustainability"],
+      "userQuestions": [
+        "Where can I charge my EV in Benicia?",
+        "Are there electric vehicle charging stations nearby?",
+        "What charging networks are available in Benicia?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "Address", "alias": "Address", "type": "String", "description": "Station street address", "isPrimary": true},
+        {"name": "Type", "alias": "Charger Type", "type": "String", "description": "Type of charging station (Level 2, DC Fast, etc.)"},
+        {"name": "EVSE_Ports", "alias": "Number of Ports", "type": "Integer", "description": "Number of charging ports available"},
+        {"name": "Connectors", "alias": "Connector Types", "type": "String", "description": "Available connector types (J1772, CCS, etc.)"},
+        {"name": "PWR_Out", "alias": "Power Output", "type": "String", "description": "Power output specification"},
+        {"name": "Ch_Net", "alias": "Network", "type": "String", "description": "Charging network operator"},
+        {"name": "Hours", "alias": "Hours", "type": "String", "description": "Operating hours"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities",
+      "notes": "Benicia city only. Check ChargePoint or PlugShare for real-time availability."
+    },
+    {
+      "id": "vallejo-pci",
+      "name": "Vallejo Pavement Condition Index",
+      "description": "Pavement Condition Index (PCI) ratings for streets in Vallejo. Shows road condition from 0-100, surface type, and last assessment date. Useful for understanding road maintenance priorities.",
+      "sourceId": "vallejo",
+      "serviceUrl": "https://services7.arcgis.com/MyTOuXKXZoizwPz9/arcgis/rest/services/Pavement_Condition_Index_(PCI)_2025/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["pavement", "roads", "pci", "condition", "vallejo", "streets", "maintenance"],
+      "userQuestions": [
+        "What's the road condition in Vallejo?",
+        "What's the pavement rating for this street?",
+        "Which Vallejo streets need repair?"
+      ],
+      "geometryType": "Polyline",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "STREETNAME", "alias": "Street Name", "type": "String", "description": "Name of the street segment", "isPrimary": true},
+        {"name": "CurrentPCI", "alias": "Current PCI", "type": "Double", "description": "Current Pavement Condition Index (0-100)"},
+        {"name": "PCICONDITI", "alias": "PCI Condition", "type": "String", "description": "Condition category (Excellent, Good, Fair, Poor, Failed)"},
+        {"name": "SURFACETYP", "alias": "Surface Type", "type": "String", "description": "Pavement surface type"},
+        {"name": "FUNCTIONAL", "alias": "Functional Class", "type": "String", "description": "Road functional classification"},
+        {"name": "PCIDate", "alias": "Assessment Date", "type": "Date", "description": "Date of last PCI assessment"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities",
+      "updateFrequency": "annual",
+      "notes": "Vallejo city only. PCI scale: 0-25 Failed, 25-50 Poor, 50-70 Fair, 70-85 Good, 85-100 Excellent."
+    },
+    {
+      "id": "vallejo-bike-network",
+      "name": "Vallejo Bike Network",
+      "description": "Bicycle infrastructure in Vallejo including existing bike lanes, planned routes, regional trails, and recommended bicycle corridors.",
+      "sourceId": "vallejo",
+      "serviceUrl": "https://services7.arcgis.com/MyTOuXKXZoizwPz9/arcgis/rest/services/Vallejo_BikeNetwork/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["bike", "bicycle", "trails", "transportation", "vallejo", "cycling"],
+      "userQuestions": [
+        "Where are the bike lanes in Vallejo?",
+        "Is there a bike path near this location?",
+        "What's the bike route from here to there in Vallejo?"
+      ],
+      "geometryType": "Polyline",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "fullname", "alias": "Street Name", "type": "String", "description": "Full street name", "isPrimary": true},
+        {"name": "existing", "alias": "Existing", "type": "String", "description": "Whether the facility currently exists"},
+        {"name": "rec", "alias": "Recommended", "type": "String", "description": "Recommended facility type"},
+        {"name": "corridor", "alias": "Corridor", "type": "String", "description": "Named bicycle corridor"},
+        {"name": "backbone", "alias": "Backbone Route", "type": "String", "description": "Part of backbone bike network"},
+        {"name": "reg_trl", "alias": "Regional Trail", "type": "String", "description": "Regional trail indicator"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "cities",
+      "notes": "Vallejo city only. Includes both existing infrastructure and planned improvements."
     }
   ]
 }

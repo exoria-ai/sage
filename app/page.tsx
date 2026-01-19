@@ -177,8 +177,8 @@ export default function Home() {
       <section style={{ marginBottom: '3.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>GIS Layer Catalog</h2>
         <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
-          Discover and query 83 GIS layers across 11 categories from Solano County, FEMA, CAL FIRE, and CGS.
-          Includes 10 years of historical aerial imagery (2004-2025).
+          Discover and query 87 GIS layers across 11 categories from Solano County, cities, FEMA, CAL FIRE, and CGS.
+          Includes 10 years of historical aerial imagery (2004-2025) plus city-specific data from Benicia and Vallejo.
         </p>
         <div
           style={{
@@ -191,11 +191,11 @@ export default function Home() {
           <CategoryCard name="Basemap" count={10} examples="Aerials 2004-2025" />
           <CategoryCard name="Zoning" count={18} examples="County + 7 cities" />
           <CategoryCard name="Districts" count={11} examples="BOS, voting, school" />
-          <CategoryCard name="Hazards" count={9} examples="Flood, fire, airport" />
+          <CategoryCard name="Hazards" count={10} examples="Flood, fire, airport" />
           <CategoryCard name="Environmental" count={8} examples="Habitat, marsh, CPAD" />
-          <CategoryCard name="POI" count={9} examples="Schools, parks" />
+          <CategoryCard name="POI" count={10} examples="Schools, parks, EV" />
+          <CategoryCard name="Infrastructure" count={6} examples="Roads, PCI, bike" />
           <CategoryCard name="Services" count={5} examples="Garbage, water, SRA" />
-          <CategoryCard name="Property" count={4} examples="Parcels, PLSS" />
         </div>
         <p style={{ fontSize: '0.9rem', color: '#64748b' }}>
           Each layer includes service URLs, field definitions, and example questions it can answer.
@@ -377,7 +377,7 @@ export default function Home() {
           tools={[
             { name: 'list_gis_categories', desc: 'Browse 11 layer categories' },
             { name: 'list_gis_layers', desc: 'List layers by category or priority' },
-            { name: 'search_gis_layers', desc: 'Keyword search across 83 layers' },
+            { name: 'search_gis_layers', desc: 'Keyword search across 87 layers' },
             { name: 'get_gis_layer_details', desc: 'Service URL, fields, metadata' },
             { name: 'find_layers_for_question', desc: 'Match questions to relevant layers' },
           ]}
@@ -400,7 +400,7 @@ export default function Home() {
       >
         <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem', color: '#475569' }}>Data Sources</h3>
         <ul style={{ margin: 0, paddingLeft: '1.25rem', display: 'grid', gap: '0.5rem' }}>
-          <li>GIS data from Solano County ArcGIS services</li>
+          <li>GIS data from Solano County and city ArcGIS services</li>
           <li>County Code: Chapters 19, 23-24, 26, 26.5, 28, 30-31 (323 sections)</li>
           <li>2008 Solano County General Plan with amendments and EIR</li>
           <li>FY2025-26 Recommended Budget document</li>
