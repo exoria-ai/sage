@@ -173,6 +173,35 @@ export default function Home() {
         </div>
       </section>
 
+      {/* GIS Layer Catalog */}
+      <section style={{ marginBottom: '3.5rem' }}>
+        <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>GIS Layer Catalog</h2>
+        <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
+          Discover and query 67 GIS layers across 11 categories from Solano County, FEMA, CAL FIRE, and CGS.
+          The AI can find the right layers to answer your questions.
+        </p>
+        <div
+          style={{
+            display: 'grid',
+            gap: '1rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <CategoryCard name="Property" count={3} examples="Parcels, addresses" />
+          <CategoryCard name="Zoning" count={16} examples="County + 7 cities" />
+          <CategoryCard name="Hazards" count={7} examples="Flood, fire, faults" />
+          <CategoryCard name="Districts" count={6} examples="BOS, school, fire" />
+          <CategoryCard name="Services" count={3} examples="Garbage, water" />
+          <CategoryCard name="POI" count={10} examples="Schools, parks" />
+          <CategoryCard name="Infrastructure" count={5} examples="Roads, bridges" />
+          <CategoryCard name="Emergency" count={4} examples="OES incidents" />
+        </div>
+        <p style={{ fontSize: '0.9rem', color: '#64748b' }}>
+          Each layer includes service URLs, field definitions, and example questions it can answer.
+        </p>
+      </section>
+
       {/* Map Capabilities */}
       <section style={{ marginBottom: '3.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>Map Generation</h2>
@@ -344,6 +373,17 @@ export default function Home() {
         />
 
         <ToolGroup
+          title="GIS Layer Discovery"
+          tools={[
+            { name: 'list_gis_categories', desc: 'Browse 11 layer categories' },
+            { name: 'list_gis_layers', desc: 'List layers by category or priority' },
+            { name: 'search_gis_layers', desc: 'Keyword search across 67 layers' },
+            { name: 'get_gis_layer_details', desc: 'Service URL, fields, metadata' },
+            { name: 'find_layers_for_question', desc: 'Match questions to relevant layers' },
+          ]}
+        />
+
+        <ToolGroup
           title="Reference"
           tools={[{ name: 'get_solano_context', desc: 'Detailed topic guides (ADU, flood, fire, etc.)' }]}
         />
@@ -430,6 +470,24 @@ function PresetCard({ name, desc }: { name: string; desc: string }) {
     >
       <p style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem', color: '#1e293b' }}>{name}</p>
       <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>{desc}</p>
+    </div>
+  );
+}
+
+function CategoryCard({ name, count, examples }: { name: string; count: number; examples: string }) {
+  return (
+    <div
+      style={{
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '8px',
+        padding: '0.875rem',
+        textAlign: 'center',
+      }}
+    >
+      <p style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.125rem', color: '#1e293b' }}>{name}</p>
+      <p style={{ fontSize: '0.75rem', color: '#3b82f6', marginBottom: '0.25rem' }}>{count} layers</p>
+      <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>{examples}</p>
     </div>
   );
 }
