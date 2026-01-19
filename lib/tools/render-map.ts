@@ -47,6 +47,30 @@ interface LayerOptions {
   garbageAreas?: boolean;
 }
 
+/** Additional map service layer configuration */
+export interface AdditionalMapService {
+  /** URL to the map service (MapServer or FeatureServer) */
+  url: string;
+  /** Display title for the layer */
+  title?: string;
+  /** Layer opacity (0-1, default: 1) */
+  opacity?: number;
+  /** Layer type - auto-detected if not specified */
+  layerType?: 'ArcGISTiledMapServiceLayer' | 'ArcGISMapServiceLayer' | 'ArcGISFeatureLayer';
+  /** Optional definition expression to filter features */
+  where?: string;
+}
+
+/** Configuration for using a layer's extent as the map extent */
+export interface ExtentLayerConfig {
+  /** URL to the layer (FeatureServer or MapServer) */
+  url: string;
+  /** Optional where clause to filter features for extent calculation */
+  where?: string;
+  /** Padding around the extent as a percentage (0-1, default: 0.1 = 10%) */
+  padding?: number;
+}
+
 type BasemapType = 'topographic' | 'imagery' | 'imagery-hybrid' | 'navigation';
 
 interface MapOptions {
@@ -65,6 +89,10 @@ interface MapOptions {
   boundaries?: BoundaryOptions;
   extent?: 'county';
   layers?: LayerOptions;
+  /** Additional map services to overlay (rendered in order provided) */
+  additionalLayers?: AdditionalMapService[];
+  /** Use a layer's extent as the map extent */
+  extentLayer?: ExtentLayerConfig;
 }
 
 interface RenderMapResult {
@@ -382,6 +410,108 @@ function buildApnWhereClause(apns: string[]): string {
 }
 
 /**
+ * Query the extent of a layer from its service
+ */
+async function getLayerExtent(
+  url: string,
+  where?: string
+): Promise<{
+  xmin: number;
+  ymin: number;
+  xmax: number;
+  ymax: number;
+  centerLat: number;
+  centerLon: number;
+} | null> {
+  try {
+    // Determine if this is a FeatureServer or MapServer
+    const isFeatureServer = url.includes('/FeatureServer');
+
+    if (isFeatureServer) {
+      // For FeatureServer, use query with returnExtentOnly
+      const params = new URLSearchParams({
+        where: where || '1=1',
+        returnExtentOnly: 'true',
+        outSR: '4326',
+        f: 'json',
+      });
+
+      const response = await fetch(`${url}/query?${params}`);
+      const data = await response.json();
+
+      if (data.extent) {
+        return {
+          xmin: data.extent.xmin,
+          ymin: data.extent.ymin,
+          xmax: data.extent.xmax,
+          ymax: data.extent.ymax,
+          centerLat: (data.extent.ymin + data.extent.ymax) / 2,
+          centerLon: (data.extent.xmin + data.extent.xmax) / 2,
+        };
+      }
+    } else {
+      // For MapServer, get the full extent from the service info
+      const response = await fetch(`${url}?f=json`);
+      const data = await response.json();
+
+      // MapServer returns fullExtent
+      if (data.fullExtent) {
+        // If extent is not in WGS84, we need to get it in 4326
+        if (data.fullExtent.spatialReference?.wkid !== 4326) {
+          // Query with outSR to get extent in WGS84
+          const extentParams = new URLSearchParams({
+            f: 'json',
+            outSR: '4326',
+          });
+
+          // Try to get extent from first layer if available
+          const layerResponse = await fetch(`${url}/0?f=json`);
+          const layerData = await layerResponse.json();
+
+          if (layerData.extent) {
+            return {
+              xmin: layerData.extent.xmin,
+              ymin: layerData.extent.ymin,
+              xmax: layerData.extent.xmax,
+              ymax: layerData.extent.ymax,
+              centerLat: (layerData.extent.ymin + layerData.extent.ymax) / 2,
+              centerLon: (layerData.extent.xmin + layerData.extent.xmax) / 2,
+            };
+          }
+        } else {
+          return {
+            xmin: data.fullExtent.xmin,
+            ymin: data.fullExtent.ymin,
+            xmax: data.fullExtent.xmax,
+            ymax: data.fullExtent.ymax,
+            centerLat: (data.fullExtent.ymin + data.fullExtent.ymax) / 2,
+            centerLon: (data.fullExtent.xmin + data.fullExtent.xmax) / 2,
+          };
+        }
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error fetching layer extent:', error);
+    return null;
+  }
+}
+
+/**
+ * Auto-detect layer type from URL
+ */
+function detectLayerType(url: string): 'ArcGISTiledMapServiceLayer' | 'ArcGISMapServiceLayer' | 'ArcGISFeatureLayer' {
+  if (url.includes('/FeatureServer')) {
+    return 'ArcGISFeatureLayer';
+  } else if (url.includes('/tiles/') || url.includes('Tile')) {
+    return 'ArcGISTiledMapServiceLayer';
+  } else {
+    return 'ArcGISMapServiceLayer';
+  }
+}
+
+/**
  * Create a circle geometry for buffer ring
  */
 function createCircleGeometry(
@@ -485,6 +615,7 @@ function buildWebMapJson(options: {
   centerMarker?: { lon: number; lat: number };
   boundaries?: BoundaryOptions;
   zoom: number;
+  additionalLayers?: AdditionalMapService[];
 }): WebMapJson {
   const {
     bbox,
@@ -498,6 +629,7 @@ function buildWebMapJson(options: {
     centerMarker,
     boundaries,
     zoom,
+    additionalLayers,
   } = options;
 
   const operationalLayers: WebMapJson['operationalLayers'] = [];
@@ -580,6 +712,33 @@ function buildWebMapJson(options: {
       opacity: 1,
       layerType: 'ArcGISFeatureLayer',
       // No layerDefinition.drawingInfo - use service default symbology
+    });
+  }
+
+  // ==========================================================================
+  // Additional Map Services - user-specified layers (rendered in order)
+  // ==========================================================================
+
+  if (additionalLayers && additionalLayers.length > 0) {
+    additionalLayers.forEach((layer, index) => {
+      const layerType = layer.layerType || detectLayerType(layer.url);
+      const layerConfig: WebMapJson['operationalLayers'][0] = {
+        id: `additional-layer-${index}`,
+        title: layer.title || `Layer ${index + 1}`,
+        url: layer.url,
+        visibility: true,
+        opacity: layer.opacity ?? 1,
+        layerType,
+      };
+
+      // Add definition expression if provided
+      if (layer.where) {
+        layerConfig.layerDefinition = {
+          definitionExpression: layer.where,
+        };
+      }
+
+      operationalLayers.push(layerConfig);
     });
   }
 
@@ -836,6 +995,8 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     boundaries,
     extent,
     layers = {},
+    additionalLayers,
+    extentLayer,
   } = args;
 
   // Determine center and zoom
@@ -843,9 +1004,42 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
   let lon: number | undefined;
   let zoom = requestedZoom || DEFAULT_ZOOM;
   let parcelApns: string[] = [];
+  let extentLayerBbox: { xmin: number; ymin: number; xmax: number; ymax: number } | undefined;
+
+  // Handle extentLayer option - use a layer's extent to set the map extent
+  if (extentLayer) {
+    const layerExtent = await getLayerExtent(extentLayer.url, extentLayer.where);
+    if (!layerExtent) {
+      return {
+        success: false,
+        error_type: 'LAYER_EXTENT_ERROR',
+        message: `Could not get extent from layer "${extentLayer.url}"`,
+        suggestion: 'Verify the layer URL is accessible and valid',
+      };
+    }
+
+    // Apply padding if specified
+    const padding = extentLayer.padding ?? 0.1;
+    const xSpan = layerExtent.xmax - layerExtent.xmin;
+    const ySpan = layerExtent.ymax - layerExtent.ymin;
+
+    extentLayerBbox = {
+      xmin: layerExtent.xmin - xSpan * padding,
+      ymin: layerExtent.ymin - ySpan * padding,
+      xmax: layerExtent.xmax + xSpan * padding,
+      ymax: layerExtent.ymax + ySpan * padding,
+    };
+
+    lat = layerExtent.centerLat;
+    lon = layerExtent.centerLon;
+
+    if (!requestedZoom) {
+      zoom = calculateZoomForBbox(extentLayerBbox, width, height, 0);
+    }
+  }
 
   // Handle extent option - zoom to full county
-  if (extent === 'county') {
+  if (extent === 'county' && !extentLayer) {
     lat = (SOLANO_COUNTY_EXTENT.ymin + SOLANO_COUNTY_EXTENT.ymax) / 2;
     lon = (SOLANO_COUNTY_EXTENT.xmin + SOLANO_COUNTY_EXTENT.xmax) / 2;
     if (!requestedZoom) {
@@ -905,7 +1099,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
   }
 
   // Determine map center
-  if (!buffer && !extent) {
+  if (!buffer && !extent && !extentLayer) {
     if (apn) {
       const parcelExtent = await getParcelExtent(apn);
       if (!parcelExtent) {
@@ -947,7 +1141,8 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
   }
 
   // Calculate bounding box from center and zoom
-  const bbox = inputBbox || calculateBboxFromCenter(lat, lon, zoom, width, height);
+  // Priority: extentLayerBbox > inputBbox > calculated from center
+  const bbox = extentLayerBbox || inputBbox || calculateBboxFromCenter(lat, lon, zoom, width, height);
 
   // Build WebMap JSON
   const webMapJson = buildWebMapJson({
@@ -963,9 +1158,10 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
         ? { centerLon: bufferCenterLon, centerLat: bufferCenterLat, radiusFeet: bufferRadiusFeet }
         : undefined,
     centerMarker:
-      !buffer && parcelApns.length === 0 ? { lon, lat } : undefined,
+      !buffer && !extentLayer && parcelApns.length === 0 ? { lon, lat } : undefined,
     boundaries,
     zoom,
+    additionalLayers,
   });
 
   // Export the map

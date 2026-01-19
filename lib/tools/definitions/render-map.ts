@@ -55,6 +55,28 @@ BUFFER MODE:
 COUNTY VIEW:
   render_map({ extent: 'county', layers: { countyBoundary: true, cityBoundary: true } })
 
+ADDITIONAL MAP SERVICES:
+Add custom map services as overlays rendered in order (first = bottom, last = top):
+  render_map({
+    apn: "003-025-1020",
+    additionalLayers: [
+      { url: "https://services2.arcgis.com/.../Zoning/FeatureServer/0", title: "Zoning", opacity: 0.7 },
+      { url: "https://hazards.fema.gov/.../NFHL/MapServer/28", title: "Flood Zones" }
+    ]
+  })
+
+EXTENT FROM LAYER:
+Set the map extent to match a layer's extent:
+  render_map({
+    extentLayer: {
+      url: "https://services2.arcgis.com/.../Fire_Stations/FeatureServer/0",
+      padding: 0.15
+    },
+    additionalLayers: [
+      { url: "https://services2.arcgis.com/.../Fire_Stations/FeatureServer/0", title: "Fire Stations" }
+    ]
+  })
+
 OTHER OPTIONS:
 - zoom: 1-19 (default: 17, auto-calculated for buffer/extent modes)
 - width/height: Image dimensions in pixels (default: 1200x800)
@@ -95,8 +117,21 @@ REMEMBER: Always include the imageUrl in your response!`,
     width: z.number().optional().describe('Image width in pixels (default: 1200)'),
     height: z.number().optional().describe('Image height in pixels (default: 800)'),
     format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
+    additionalLayers: z.array(z.object({
+      url: z.string().describe('URL to the map service (MapServer or FeatureServer)'),
+      title: z.string().optional().describe('Display title for the layer'),
+      opacity: z.number().min(0).max(1).optional().describe('Layer opacity (0-1, default: 1)'),
+      layerType: z.enum(['ArcGISTiledMapServiceLayer', 'ArcGISMapServiceLayer', 'ArcGISFeatureLayer']).optional()
+        .describe('Layer type - auto-detected if not specified'),
+      where: z.string().optional().describe('Optional definition expression to filter features'),
+    })).optional().describe('Additional map services to overlay (rendered in order: first = bottom, last = top)'),
+    extentLayer: z.object({
+      url: z.string().describe('URL to the layer (FeatureServer or MapServer)'),
+      where: z.string().optional().describe('Optional where clause to filter features for extent calculation'),
+      padding: z.number().min(0).max(1).optional().describe('Padding around the extent as a percentage (0-1, default: 0.1 = 10%)'),
+    }).optional().describe("Use a layer's extent as the map extent"),
   },
-  handler: async ({ apn, apns, center, bbox, buffer, layers, extent, basemap, zoom, width, height, format }): Promise<ToolResponse> => {
+  handler: async ({ apn, apns, center, bbox, buffer, layers, extent, basemap, zoom, width, height, format, additionalLayers, extentLayer }): Promise<ToolResponse> => {
     const result = await renderMap({
       apn,
       apns,
@@ -110,6 +145,8 @@ REMEMBER: Always include the imageUrl in your response!`,
       zoom,
       format,
       basemap,
+      additionalLayers,
+      extentLayer,
     });
 
     // If successful, upload to Vercel Blob and return URL
