@@ -7,12 +7,14 @@ scripts/
 # Test output
 test-output/
 
-# Data files not needed in production
+# PDF files (source documents, not needed at runtime - JSON extracts are used)
 data/budget/*.pdf
-data/general_plan_2008/
-data/hr/
+data/general_plan_2008/*.pdf
+data/hr/*.pdf
 
 # Development configuration
 .claude/
+
+# Markdown files except README
 *.md
 !README.md
