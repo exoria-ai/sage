@@ -7,6 +7,33 @@ import {
   type LayerInfo,
 } from '@/lib/stores/mapStore';
 import { WEB_MAPS, getWebMapId } from '@/lib/esri/webmaps';
+import { SOLANO_SERVICES } from '@/lib/esri/webmaps';
+
+// Note: Config imports not available client-side, use inline constants
+// These values should match lib/config/endpoints.ts and lib/config/defaults.ts
+const ESRI_JS_ASSETS = 'https://js.arcgis.com/4.34/@arcgis/core/assets';
+const ESRI_ROUTE_SERVICE = 'https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World';
+
+// Map styling constants (should match lib/config/defaults.ts)
+const MAP_COLORS = {
+  highlightFill: [255, 255, 0, 0.3] as [number, number, number, number],
+  highlightOutline: [255, 165, 0] as [number, number, number],
+  routeLine: [0, 100, 255, 0.9] as [number, number, number, number],
+  originMarker: [34, 197, 94] as [number, number, number],
+  destinationMarker: [239, 68, 68] as [number, number, number],
+  markerOutline: [255, 255, 255] as [number, number, number],
+};
+
+const MAP_DEFAULTS = {
+  highlightZoom: 18,
+  centerOnlyZoom: 15,
+  highlightOutlineWidth: 3,
+  routeLineWidth: 5,
+  markerSize: 14,
+  markerOutlineWidth: 2,
+};
+
+const MAP_VIEW_PADDING = { top: 80, bottom: 50, left: 50, right: 50 };
 
 // ESRI imports - these are loaded dynamically client-side only
 import esriConfig from '@arcgis/core/config';
@@ -20,16 +47,25 @@ import Expand from '@arcgis/core/widgets/Expand';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import Graphic from '@arcgis/core/Graphic';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
+import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
+import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import * as query from '@arcgis/core/rest/query';
 import Query from '@arcgis/core/rest/support/Query';
-import { SOLANO_SERVICES } from '@/lib/esri/webmaps';
+import Point from '@arcgis/core/geometry/Point';
+import Polyline from '@arcgis/core/geometry/Polyline';
 
 // ESRI CSS - must be imported for proper styling
 import '@arcgis/core/assets/esri/themes/light/main.css';
 
 // Configure ESRI assets path - use CDN for reliable asset loading
-// Must match the @arcgis/core version in package.json (4.34.x)
-esriConfig.assetsPath = 'https://js.arcgis.com/4.34/@arcgis/core/assets';
+esriConfig.assetsPath = ESRI_JS_ASSETS;
+
+// Route endpoint coordinates
+interface RouteStop {
+  latitude: number;
+  longitude: number;
+  label?: string;
+}
 
 interface MapContainerProps {
   webMapId?: string;
@@ -41,6 +77,9 @@ interface MapContainerProps {
   // Feature to highlight on load
   highlightApn?: string;
   highlightAddress?: string;
+  // Route display options
+  routeOrigin?: RouteStop;
+  routeDestination?: RouteStop;
 }
 
 export function MapContainer({
@@ -51,12 +90,16 @@ export function MapContainer({
   initialZoom,
   highlightApn,
   highlightAddress,
+  routeOrigin,
+  routeDestination,
 }: MapContainerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<MapView | null>(null);
   const highlightLayerRef = useRef<GraphicsLayer | null>(null);
+  const routeLayerRef = useRef<GraphicsLayer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
 
   const {
     setMapView,
@@ -214,6 +257,143 @@ export function MapContainer({
       }
     };
 
+    /**
+     * Display a route between two points on the map using direct REST API
+     * (bypasses ESRI JS SDK authentication to use our OAuth token)
+     */
+    const displayRoute = async (
+      view: MapView,
+      routeLayer: GraphicsLayer,
+      origin: RouteStop,
+      destination: RouteStop
+    ) => {
+      try {
+        console.log('Fetching route from', origin, 'to', destination);
+
+        // Create point objects for display
+        const originPoint = new Point({
+          longitude: origin.longitude,
+          latitude: origin.latitude,
+        });
+
+        const destinationPoint = new Point({
+          longitude: destination.longitude,
+          latitude: destination.latitude,
+        });
+
+        // Call server-side route proxy (handles OAuth token and Referer header)
+        const routeResponse = await fetch('/api/arcgis-route', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ origin, destination }),
+        });
+
+        const routeData = await routeResponse.json();
+
+        if (routeData.error) {
+          console.error('Routing API error:', routeData.error);
+          return;
+        }
+
+        // Display the route
+        if (routeData.routes?.features?.length > 0) {
+          const routeFeature = routeData.routes.features[0];
+          const routePaths = routeFeature.geometry.paths;
+
+          // Create polyline from route paths
+          const routeGeometry = new Polyline({
+            paths: routePaths,
+            spatialReference: { wkid: 4326 },
+          });
+
+          // Route line symbol - blue
+          const routeSymbol = new SimpleLineSymbol({
+            color: [0, 100, 255, 0.9],
+            width: 5,
+            style: 'solid',
+            cap: 'round',
+            join: 'round',
+          });
+
+          // Add route to map
+          const routeGraphic = new Graphic({
+            geometry: routeGeometry,
+            symbol: routeSymbol,
+          });
+          routeLayer.add(routeGraphic);
+
+          // Origin marker - green
+          const originSymbol = new SimpleMarkerSymbol({
+            color: [34, 197, 94],
+            size: 14,
+            outline: {
+              color: [255, 255, 255],
+              width: 2,
+            },
+          });
+          routeLayer.add(
+            new Graphic({
+              geometry: originPoint,
+              symbol: originSymbol,
+              attributes: { type: 'origin', label: origin.label || 'Start' },
+            })
+          );
+
+          // Destination marker - red
+          const destinationSymbol = new SimpleMarkerSymbol({
+            color: [239, 68, 68],
+            size: 14,
+            outline: {
+              color: [255, 255, 255],
+              width: 2,
+            },
+          });
+          routeLayer.add(
+            new Graphic({
+              geometry: destinationPoint,
+              symbol: destinationSymbol,
+              attributes: { type: 'destination', label: destination.label || 'End' },
+            })
+          );
+
+          // Get route info from attributes
+          const attrs = routeFeature.attributes;
+          const totalMiles = attrs?.Total_Miles || attrs?.Total_Length || attrs?.Shape_Length / 1609.34 || 0;
+          const totalMinutes = attrs?.Total_TravelTime || attrs?.Total_Time || 0;
+
+          // Format duration
+          let durationText: string;
+          if (totalMinutes < 60) {
+            durationText = `${Math.round(totalMinutes)} min`;
+          } else {
+            const hours = Math.floor(totalMinutes / 60);
+            const mins = Math.round(totalMinutes % 60);
+            durationText = mins > 0 ? `${hours} hr ${mins} min` : `${hours} hr`;
+          }
+
+          setRouteInfo({
+            distance: `${totalMiles.toFixed(1)} mi`,
+            duration: durationText,
+          });
+
+          // Zoom to show the entire route
+          await view.goTo({
+            target: routeGeometry,
+            padding: { top: 80, bottom: 50, left: 50, right: 50 },
+          });
+
+          console.log('Route displayed:', {
+            distance: totalMiles.toFixed(2) + ' miles',
+            duration: durationText,
+          });
+        }
+      } catch (err) {
+        console.error('Error displaying route:', err);
+      }
+    };
+
     const initializeMap = async () => {
       try {
         setIsLoading(true);
@@ -274,8 +454,22 @@ export function MapContainer({
         view.map?.add(highlightLayer);
         highlightLayerRef.current = highlightLayer;
 
+        // Create route graphics layer
+        const routeLayer = new GraphicsLayer({
+          id: 'route-layer',
+          title: 'Route',
+          listMode: 'hide',
+        });
+        view.map?.add(routeLayer);
+        routeLayerRef.current = routeLayer;
+
         // Handle initial view positioning and feature highlighting
         await handleInitialView(view, highlightLayer);
+
+        // Display route if origin and destination are provided
+        if (routeOrigin && routeDestination) {
+          await displayRoute(view, routeLayer, routeOrigin, routeDestination);
+        }
 
         // Store the view reference for MCP tools
         setMapView(view);
@@ -584,10 +778,30 @@ export function MapContainer({
         </div>
       )}
 
+      {/* Route info overlay */}
+      {routeInfo && (
+        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 z-10">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              <span className="text-sm text-gray-600">Start</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <span className="text-sm text-gray-600">End</span>
+            </div>
+          </div>
+          <div className="mt-2 pt-2 border-t border-gray-200">
+            <div className="flex gap-4 text-sm">
+              <span className="font-medium text-gray-900">{routeInfo.distance}</span>
+              <span className="text-gray-500">{routeInfo.duration}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Map container */}
       <div ref={mapRef} className="absolute inset-0" />
     </div>
   );
 }
-
-export default MapContainer;
