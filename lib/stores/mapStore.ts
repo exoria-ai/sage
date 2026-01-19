@@ -91,6 +91,11 @@ interface MapStore {
   // Error state
   error: string | null;
   setError: (error: string | null) => void;
+
+  // Identify mode
+  identifyModeActive: boolean;
+  setIdentifyModeActive: (active: boolean) => void;
+  toggleIdentifyMode: () => void;
 }
 
 export const useMapStore = create<MapStore>((set, get) => ({
@@ -166,5 +171,10 @@ export const useMapStore = create<MapStore>((set, get) => ({
   // Error
   error: null,
   setError: (error) => set({ error }),
+
+  // Identify mode
+  identifyModeActive: false,
+  setIdentifyModeActive: (active) => set({ identifyModeActive: active }),
+  toggleIdentifyMode: () => set((state) => ({ identifyModeActive: !state.identifyModeActive })),
 }));
 

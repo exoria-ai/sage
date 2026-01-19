@@ -45,7 +45,10 @@ import ScaleBar from '@arcgis/core/widgets/ScaleBar';
 import BasemapGallery from '@arcgis/core/widgets/BasemapGallery';
 import Expand from '@arcgis/core/widgets/Expand';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import Graphic from '@arcgis/core/Graphic';
+import Search from '@arcgis/core/widgets/Search';
+import LayerSearchSource from '@arcgis/core/widgets/Search/LayerSearchSource';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
@@ -97,6 +100,7 @@ export function MapContainer({
   const viewRef = useRef<MapView | null>(null);
   const highlightLayerRef = useRef<GraphicsLayer | null>(null);
   const routeLayerRef = useRef<GraphicsLayer | null>(null);
+  const identifyButtonRef = useRef<HTMLDivElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
@@ -109,6 +113,8 @@ export function MapContainer({
     setIsReady,
     setError,
     setSelectedFeatures,
+    identifyModeActive,
+    toggleIdentifyMode,
   } = useMapStore();
 
   // Determine which Web Map ID to use
@@ -419,6 +425,15 @@ export function MapContainer({
           ui: {
             components: ['zoom', 'compass', 'attribution'],
           },
+          popup: {
+            dockEnabled: true,
+            dockOptions: {
+              buttonEnabled: true,
+              breakpoint: false,
+              position: 'bottom-right',
+            },
+            defaultPopupTemplateEnabled: true, // Show attributes even without configured template
+          },
         });
 
         // Wait for the view to be ready
@@ -611,6 +626,131 @@ export function MapContainer({
         group: 'top-right',
       });
       view.ui.add(basemapExpand, 'top-right');
+
+      // Search widget with multiple sources (address + parcel)
+      // Create parcel search layer
+      const parcelSearchLayer = new FeatureLayer({
+        url: SOLANO_SERVICES.parcels,
+      });
+
+      // Create address search layer
+      const addressSearchLayer = new FeatureLayer({
+        url: SOLANO_SERVICES.addressPoints,
+      });
+
+      const searchWidget = new Search({
+        view,
+        includeDefaultSources: false, // Don't include ArcGIS World Geocoder
+        popupEnabled: true,
+        resultGraphicEnabled: true,
+        minSuggestCharacters: 2,
+        maxSuggestions: 6,
+        searchAllEnabled: true, // Allow "All" option to search both sources
+        allPlaceholder: 'Search address or APN...',
+        sources: [
+          new LayerSearchSource({
+            // Address search source
+            layer: addressSearchLayer,
+            searchFields: ['fulladdress', 'st_name'],
+            displayField: 'fulladdress',
+            exactMatch: false,
+            outFields: ['*'],
+            name: 'Addresses',
+            placeholder: 'Enter address...',
+            maxResults: 6,
+            maxSuggestions: 6,
+            suggestionsEnabled: true,
+            minSuggestCharacters: 3,
+          }),
+          new LayerSearchSource({
+            // Parcel (APN) search source
+            layer: parcelSearchLayer,
+            searchFields: ['parcelid'],
+            displayField: 'parcelid',
+            exactMatch: false,
+            outFields: ['*'],
+            name: 'Parcels (APN)',
+            placeholder: 'Enter APN (e.g., 0027010010)...',
+            maxResults: 6,
+            maxSuggestions: 6,
+            suggestionsEnabled: true,
+            minSuggestCharacters: 4,
+          }),
+        ],
+      });
+
+      // Handle search result selection to highlight the feature
+      searchWidget.on('select-result', (event) => {
+        if (event.result?.feature?.geometry && highlightLayerRef.current) {
+          // Clear previous highlights
+          highlightLayerRef.current.removeAll();
+
+          // Add new highlight
+          const highlightGraphic = new Graphic({
+            geometry: event.result.feature.geometry,
+            symbol: new SimpleFillSymbol({
+              color: MAP_COLORS.highlightFill,
+              outline: {
+                color: MAP_COLORS.highlightOutline,
+                width: MAP_DEFAULTS.highlightOutlineWidth,
+              },
+            }),
+          });
+          highlightLayerRef.current.add(highlightGraphic);
+        }
+      });
+
+      // Clear highlight when search is cleared
+      searchWidget.on('search-clear', () => {
+        if (highlightLayerRef.current) {
+          highlightLayerRef.current.removeAll();
+        }
+      });
+
+      // Add search widget to manual position (right of zoom/compass/identify)
+      // Position it manually to be next to the left-side controls
+      view.ui.add(searchWidget, {
+        position: 'manual',
+      });
+
+      // Style the search widget container for positioning and width
+      const searchContainer = searchWidget.container as HTMLElement;
+      if (searchContainer) {
+        searchContainer.style.position = 'absolute';
+        searchContainer.style.top = '15px';
+        searchContainer.style.left = '60px'; // Right of the zoom/compass/identify buttons
+        searchContainer.style.width = '315px'; // 50% wider than default ~210px
+      }
+
+      // Identify button - toggle to enable feature identification on click
+      const identifyButton = document.createElement('div');
+      identifyButton.id = 'identify-button';
+      identifyButton.className = 'esri-widget esri-widget--button esri-interactive';
+      identifyButton.setAttribute('role', 'button');
+      identifyButton.setAttribute('tabindex', '0');
+      identifyButton.setAttribute('title', 'Identify Features');
+      identifyButton.innerHTML = `
+        <span aria-hidden="true" class="esri-icon esri-icon-description"></span>
+        <span class="esri-icon-font-fallback-text">Identify</span>
+      `;
+
+      // Store ref for state updates
+      identifyButtonRef.current = identifyButton;
+
+      // Click handler for toggle
+      identifyButton.addEventListener('click', () => {
+        toggleIdentifyMode();
+      });
+
+      // Keyboard accessibility
+      identifyButton.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleIdentifyMode();
+        }
+      });
+
+      view.ui.add(identifyButton, 'top-left');
     };
 
     const syncViewState = (view: MapView) => {
@@ -653,6 +793,14 @@ export function MapContainer({
 
       // Handle click for feature identification
       view.on('click', async (event) => {
+        // Check identify mode from store (use getState for current value)
+        const { identifyModeActive: isIdentifyActive } = useMapStore.getState();
+
+        // Only identify when identify mode is active
+        if (!isIdentifyActive) {
+          return;
+        }
+
         try {
           const response = await view.hitTest(event, {
             include: view.map?.allLayers?.filter(
@@ -661,6 +809,12 @@ export function MapContainer({
           });
 
           if (response.results.length > 0) {
+            // Extract graphics for popup
+            const graphics = response.results
+              .filter((result) => result.type === 'graphic')
+              .map((result) => (result as __esri.GraphicHit).graphic);
+
+            // Also store in Zustand for external access
             const features = response.results
               .filter((result) => result.type === 'graphic')
               .map((result) => {
@@ -674,11 +828,20 @@ export function MapContainer({
               });
 
             setSelectedFeatures(features);
+
+            // Open popup with identified features
+            if (graphics.length > 0) {
+              view.openPopup({
+                location: event.mapPoint,
+                features: graphics,
+              });
+            }
           } else {
             setSelectedFeatures([]);
+            view.closePopup();
           }
         } catch (error) {
-          console.error('Error during hit test:', error);
+          console.error('Error during identify:', error);
         }
       });
 
@@ -709,7 +872,34 @@ export function MapContainer({
     setIsReady,
     setError,
     setSelectedFeatures,
+    toggleIdentifyMode,
   ]);
+
+  // Update identify button state and cursor when identify mode changes
+  useEffect(() => {
+    const button = identifyButtonRef.current;
+    const view = viewRef.current;
+
+    // Update button styling
+    if (button) {
+      if (identifyModeActive) {
+        button.classList.add('esri-widget--button-active');
+        button.style.backgroundColor = '#0079c1';
+        button.style.color = '#ffffff';
+        button.setAttribute('title', 'Identify Features (Active - click map to identify)');
+      } else {
+        button.classList.remove('esri-widget--button-active');
+        button.style.backgroundColor = '';
+        button.style.color = '';
+        button.setAttribute('title', 'Identify Features');
+      }
+    }
+
+    // Update cursor on map container
+    if (view?.container) {
+      (view.container as HTMLElement).style.cursor = identifyModeActive ? 'crosshair' : '';
+    }
+  }, [identifyModeActive]);
 
   // Show placeholder if no Web Map ID is configured
   if (!effectiveWebMapId) {
