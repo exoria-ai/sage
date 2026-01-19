@@ -265,6 +265,16 @@ export default function Home() {
                 example: 'render_map({ apn: "0030251020", basemap: "aerial" })',
               },
               {
+                name: 'get_interactive_map_url',
+                desc: 'URL for interactive map explorer',
+                example: 'get_interactive_map_url({ apn: "0030251020", preset: "hazards" })',
+              },
+              {
+                name: 'list_map_presets',
+                desc: 'Available map presets',
+                example: 'list_map_presets()',
+              },
+              {
                 name: 'get_directions',
                 desc: 'Turn-by-turn directions',
                 example:

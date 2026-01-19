@@ -17,6 +17,7 @@ import { orgChartTools } from './org-chart';
 import { directionsTools } from './directions';
 import { renderMapTools } from './render-map';
 import { imageGenerationTools } from './image-generation';
+import { interactiveMapTools } from './interactive-map';
 
 // Re-export individual tool groups for granular imports
 export * from './gis-core';
@@ -29,6 +30,7 @@ export * from './org-chart';
 export * from './directions';
 export * from './render-map';
 export * from './image-generation';
+export * from './interactive-map';
 
 /**
  * All tool definitions for MCP registration.
@@ -63,6 +65,9 @@ export const allTools: ToolDefinition<any>[] = [
   // Map rendering
   ...renderMapTools,
 
+  // Interactive map
+  ...interactiveMapTools,
+
   // Image generation
   ...imageGenerationTools,
 ];
@@ -83,6 +88,7 @@ export function getToolStats() {
       orgChart: orgChartTools.length,
       directions: directionsTools.length,
       renderMap: renderMapTools.length,
+      interactiveMap: interactiveMapTools.length,
       imageGeneration: imageGenerationTools.length,
     },
   };

@@ -7,7 +7,7 @@ import { WEB_MAPS } from '@/lib/esri/webmaps';
 
 // Dynamically import MapContainer to avoid SSR issues with ESRI
 const MapContainer = dynamic(
-  () => import('@/app/components/map/MapContainer'),
+  () => import('@/app/components/map/MapContainer').then((mod) => mod.MapContainer),
   {
     ssr: false,
     loading: () => (
@@ -47,6 +47,23 @@ function MapPageContent() {
     : undefined;
 
   const initialZoom = zoomParam && !isNaN(Number(zoomParam)) ? Number(zoomParam) : undefined;
+
+  // Parse route parameters (format: "lng,lat" or "lng,lat,label")
+  const originParam = searchParams.get('origin');
+  const destinationParam = searchParams.get('destination');
+
+  const parseRouteStop = (param: string | null) => {
+    if (!param) return undefined;
+    const parts = param.split(',');
+    if (parts.length < 2) return undefined;
+    const lng = Number(parts[0]);
+    const lat = Number(parts[1]);
+    const label = parts.length > 2 ? decodeURIComponent(parts.slice(2).join(',')) : undefined;
+    return !isNaN(lng) && !isNaN(lat) ? { longitude: lng, latitude: lat, label } : undefined;
+  };
+
+  const routeOrigin = parseRouteStop(originParam);
+  const routeDestination = parseRouteStop(destinationParam);
 
   return (
     <div className="flex flex-col h-full min-h-screen">
@@ -92,6 +109,8 @@ function MapPageContent() {
           highlightAddress={highlightAddress}
           initialCenter={initialCenter}
           initialZoom={initialZoom}
+          routeOrigin={routeOrigin}
+          routeDestination={routeDestination}
         />
       </main>
 
