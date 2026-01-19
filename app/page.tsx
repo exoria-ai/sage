@@ -230,53 +230,154 @@ export default function Home() {
       {/* Setup */}
       <section id="setup" style={{ marginBottom: '3.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>Setup</h2>
-        <p style={{ color: '#475569', marginBottom: '1rem' }}>
-          Add SAGE to any MCP-compatible client (Claude Desktop, Claude Code, Cursor, etc.):
+        <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
+          Choose your preferred way to use SAGE with Claude.
         </p>
 
-        <div style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem', color: '#475569' }}>
-            Claude Desktop / Cursor
-          </h3>
-          <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.75rem' }}>
-            Add to your <code style={{ background: '#f1f5f9', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>claude_desktop_config.json</code>:
+        {/* Claude Code Plugin - Recommended */}
+        <div
+          style={{
+            marginBottom: '2rem',
+            padding: '1.5rem',
+            background: 'linear-gradient(135deg, #eff6ff 0%, #f5f3ff 100%)',
+            border: '2px solid #3b82f6',
+            borderRadius: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <span
+              style={{
+                background: '#3b82f6',
+                color: 'white',
+                fontSize: '0.7rem',
+                padding: '0.25rem 0.5rem',
+                borderRadius: '4px',
+                fontWeight: 600,
+              }}
+            >
+              RECOMMENDED
+            </span>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0, color: '#1e293b' }}>
+              Claude Code Plugin
+            </h3>
+          </div>
+          <p style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '1rem' }}>
+            The best experience. Includes the MCP server plus a Skill that teaches Claude how to interpret Solano County data, combine tools effectively, and provide actionable answers.
           </p>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>
+              1. Install{' '}
+              <a href="https://code.claude.com/docs/en/quickstart" style={{ color: '#3b82f6' }}>
+                Claude Code
+              </a>{' '}
+              or{' '}
+              <a href="https://code.claude.com/docs/en/desktop" style={{ color: '#3b82f6' }}>
+                Claude Desktop
+              </a>
+            </p>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.5rem' }}>
+              2. Run these commands:
+            </p>
+          </div>
+
           <pre
             style={{
               background: '#0f172a',
               color: '#e2e8f0',
-              padding: '1.25rem',
+              padding: '1rem',
               borderRadius: '8px',
               overflow: 'auto',
-              fontSize: '0.875rem',
+              fontSize: '0.85rem',
+              marginBottom: '0.75rem',
             }}
           >
-            {`{
+            {`/plugin marketplace add exoria-ai/sage-plugin
+/plugin install sage@exoria-ai-sage-plugin`}
+          </pre>
+          <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>
+            That&apos;s it! Start asking questions about Solano County.
+          </p>
+        </div>
+
+        {/* Alternative: MCP Config */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem', color: '#475569' }}>
+            Alternative: MCP Config Only
+          </h3>
+          <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '1rem' }}>
+            For Claude Desktop, Cursor, or other MCP clients. Provides tools without the enhanced Skill context.
+          </p>
+
+          <details style={{ marginBottom: '1rem' }}>
+            <summary
+              style={{
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                color: '#3b82f6',
+                fontWeight: 500,
+                marginBottom: '0.75rem',
+              }}
+            >
+              Claude Desktop / Cursor config
+            </summary>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.75rem 0 0.5rem 0' }}>
+              Add to{' '}
+              <code style={{ background: '#f1f5f9', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>
+                claude_desktop_config.json
+              </code>
+              :
+            </p>
+            <pre
+              style={{
+                background: '#0f172a',
+                color: '#e2e8f0',
+                padding: '1rem',
+                borderRadius: '8px',
+                overflow: 'auto',
+                fontSize: '0.85rem',
+              }}
+            >
+              {`{
   "mcpServers": {
     "sage": {
       "url": "https://sage-three-theta.vercel.app/api/mcp"
     }
   }
 }`}
-          </pre>
-        </div>
+            </pre>
+          </details>
 
-        <div>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem', color: '#475569' }}>Claude Code</h3>
-          <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.75rem' }}>
-            Add to <code style={{ background: '#f1f5f9', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>.mcp.json</code> in your project:
-          </p>
-          <pre
-            style={{
-              background: '#0f172a',
-              color: '#e2e8f0',
-              padding: '1.25rem',
-              borderRadius: '8px',
-              overflow: 'auto',
-              fontSize: '0.875rem',
-            }}
-          >
-            {`{
+          <details>
+            <summary
+              style={{
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                color: '#3b82f6',
+                fontWeight: 500,
+                marginBottom: '0.75rem',
+              }}
+            >
+              Claude Code .mcp.json config
+            </summary>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0.75rem 0 0.5rem 0' }}>
+              Add to{' '}
+              <code style={{ background: '#f1f5f9', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>
+                .mcp.json
+              </code>{' '}
+              in your project:
+            </p>
+            <pre
+              style={{
+                background: '#0f172a',
+                color: '#e2e8f0',
+                padding: '1rem',
+                borderRadius: '8px',
+                overflow: 'auto',
+                fontSize: '0.85rem',
+              }}
+            >
+              {`{
   "mcpServers": {
     "sage": {
       "type": "http",
@@ -284,7 +385,8 @@ export default function Home() {
     }
   }
 }`}
-          </pre>
+            </pre>
+          </details>
         </div>
       </section>
 
