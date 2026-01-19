@@ -177,8 +177,8 @@ export default function Home() {
       <section style={{ marginBottom: '3.5rem' }}>
         <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>GIS Layer Catalog</h2>
         <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
-          Discover and query 87 GIS layers across 11 categories from Solano County, cities, FEMA, CAL FIRE, and CGS.
-          Includes 10 years of historical aerial imagery (2004-2025) plus city-specific data from Benicia and Vallejo.
+          Discover and query 94 GIS layers across 11 categories from Solano County, cities, Caltrans, DWR, CAL FIRE, FEMA, and CalGEM.
+          Includes 10 years of historical aerial imagery, state flood data, traffic volumes, and oil/gas wells.
         </p>
         <div
           style={{
@@ -188,14 +188,14 @@ export default function Home() {
             marginBottom: '1.5rem',
           }}
         >
-          <CategoryCard name="Basemap" count={10} examples="Aerials 2004-2025" />
           <CategoryCard name="Zoning" count={18} examples="County + 7 cities" />
+          <CategoryCard name="Hazards" count={12} examples="Flood, fire, DWR" />
           <CategoryCard name="Districts" count={11} examples="BOS, voting, school" />
-          <CategoryCard name="Hazards" count={10} examples="Flood, fire, airport" />
-          <CategoryCard name="Environmental" count={8} examples="Habitat, marsh, CPAD" />
-          <CategoryCard name="POI" count={10} examples="Schools, parks, EV" />
-          <CategoryCard name="Infrastructure" count={6} examples="Roads, PCI, bike" />
-          <CategoryCard name="Services" count={5} examples="Garbage, water, SRA" />
+          <CategoryCard name="POI" count={11} examples="Schools, rest areas" />
+          <CategoryCard name="Basemap" count={10} examples="Aerials 2004-2025" />
+          <CategoryCard name="Environmental" count={10} examples="Wells, habitat" />
+          <CategoryCard name="Infrastructure" count={8} examples="Traffic, bridges" />
+          <CategoryCard name="Services" count={5} examples="Garbage, water" />
         </div>
         <p style={{ fontSize: '0.9rem', color: '#64748b' }}>
           Each layer includes service URLs, field definitions, and example questions it can answer.
@@ -377,7 +377,7 @@ export default function Home() {
           tools={[
             { name: 'list_gis_categories', desc: 'Browse 11 layer categories' },
             { name: 'list_gis_layers', desc: 'List layers by category or priority' },
-            { name: 'search_gis_layers', desc: 'Keyword search across 87 layers' },
+            { name: 'search_gis_layers', desc: 'Keyword search across 94 layers' },
             { name: 'get_gis_layer_details', desc: 'Service URL, fields, metadata' },
             { name: 'find_layers_for_question', desc: 'Match questions to relevant layers' },
           ]}

@@ -39,6 +39,27 @@
       "maintainer": "California Department of Conservation"
     },
     {
+      "id": "caltrans",
+      "name": "Caltrans GIS",
+      "baseUrl": "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway",
+      "type": "state",
+      "maintainer": "California Department of Transportation"
+    },
+    {
+      "id": "ca-dwr",
+      "name": "California Department of Water Resources",
+      "baseUrl": "https://services.gis.ca.gov/arcgis/rest/services/InlandWaters",
+      "type": "state",
+      "maintainer": "California Department of Water Resources"
+    },
+    {
+      "id": "ca-doc",
+      "name": "California Department of Conservation",
+      "baseUrl": "https://gis.conservation.ca.gov/server/rest/services",
+      "type": "state",
+      "maintainer": "California Department of Conservation"
+    },
+    {
       "id": "benicia",
       "name": "City of Benicia GIS",
       "baseUrl": "https://services5.arcgis.com/eclQh1J6mUFYeV4m/arcgis/rest/services",
@@ -2103,6 +2124,205 @@
       "priority": "medium",
       "coverage": "cities",
       "notes": "Vallejo city only. Includes both existing infrastructure and planned improvements."
+    },
+    {
+      "id": "caltrans-traffic-aadt",
+      "name": "Caltrans Traffic Volumes (AADT)",
+      "description": "Annual Average Daily Traffic counts at locations throughout California's state highway system. Shows traffic volume patterns for transportation planning.",
+      "sourceId": "caltrans",
+      "serviceUrl": "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/Traffic_AADT/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["traffic", "aadt", "volume", "highway", "caltrans", "transportation"],
+      "userQuestions": [
+        "What's the traffic volume on this highway?",
+        "How busy is this road?",
+        "What's the AADT for this location?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "ROUTE", "alias": "Route", "type": "String", "description": "Highway route number", "isPrimary": true},
+        {"name": "BACK_AADT", "alias": "Back AADT", "type": "Integer", "description": "Annual average daily traffic (one direction)"},
+        {"name": "AHEAD_AADT", "alias": "Ahead AADT", "type": "Integer", "description": "Annual average daily traffic (other direction)"},
+        {"name": "COUNTY", "alias": "County", "type": "String", "description": "County name"},
+        {"name": "LOCATION_DESCRIPTION", "alias": "Location", "type": "String", "description": "Site description"},
+        {"name": "PM", "alias": "Post Mile", "type": "Double", "description": "Post mile marker"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "updateFrequency": "annual",
+      "notes": "Statewide coverage. AADT = total yearly volume / 365, adjusted for seasonal variations."
+    },
+    {
+      "id": "caltrans-rest-areas",
+      "name": "California Rest Areas",
+      "description": "Safety Roadside Rest Areas along California state highways. Includes amenities like restrooms, water, picnic tables, RV stations, and pet areas.",
+      "sourceId": "caltrans",
+      "serviceUrl": "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/Rest_Areas/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["rest area", "highway", "amenities", "travel", "caltrans"],
+      "userQuestions": [
+        "Where's the nearest rest area?",
+        "Are there rest stops on I-80?",
+        "Does this rest area have an RV dump station?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "MAP_LABEL_NAME", "alias": "Name", "type": "String", "description": "Rest area name", "isPrimary": true},
+        {"name": "ROUTE", "alias": "Route", "type": "String", "description": "Highway route"},
+        {"name": "COUNTY", "alias": "County", "type": "String", "description": "County location"},
+        {"name": "RESTROOM", "alias": "Restroom", "type": "String", "description": "Restroom availability"},
+        {"name": "RV_STATION", "alias": "RV Station", "type": "String", "description": "RV dump station"},
+        {"name": "PET_AREA", "alias": "Pet Area", "type": "String", "description": "Pet exercise area"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide",
+      "notes": "Statewide coverage. Useful for trip planning on state highways."
+    },
+    {
+      "id": "caltrans-bridges",
+      "name": "California State Highway Bridges",
+      "description": "State highway bridges managed by Caltrans. Includes bridge name, year built, length, and material. Over 13,000 bridges statewide.",
+      "sourceId": "caltrans",
+      "serviceUrl": "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/State_Highway_Bridges/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["bridge", "highway", "infrastructure", "caltrans"],
+      "userQuestions": [
+        "What bridges are in Solano County?",
+        "When was this bridge built?",
+        "What's the Carquinez Bridge information?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "NAME", "alias": "Bridge Name", "type": "String", "description": "Bridge name", "isPrimary": true},
+        {"name": "BRIDGE", "alias": "Bridge Number", "type": "String", "description": "Bridge identification number"},
+        {"name": "YRBLT", "alias": "Year Built", "type": "Integer", "description": "Construction year"},
+        {"name": "LENG", "alias": "Length", "type": "Double", "description": "Bridge length"},
+        {"name": "MATERIAL_MAIN", "alias": "Material", "type": "String", "description": "Primary construction material"},
+        {"name": "RTE", "alias": "Route", "type": "String", "description": "Highway route"}
+      ],
+      "lookupMethod": "both",
+      "priority": "low",
+      "coverage": "countywide",
+      "updateFrequency": "quarterly",
+      "notes": "Statewide coverage. Data from Caltrans Structure Maintenance and Investigations."
+    },
+    {
+      "id": "ca-100yr-floodplain",
+      "name": "California 100-Year Floodplains (DWR)",
+      "description": "State-level 100-year floodplain mapping from Department of Water Resources. Best available flood hazard information per Senate Bill 5. Complements FEMA data.",
+      "sourceId": "ca-dwr",
+      "serviceUrl": "https://services.gis.ca.gov/arcgis/rest/services/InlandWaters/Flood_Risk_State/MapServer/0",
+      "layerType": "MapServer",
+      "layerIndex": 0,
+      "category": "hazards",
+      "tags": ["flood", "floodplain", "100-year", "dwr", "hazard", "sb5"],
+      "userQuestions": [
+        "Is this in a state-designated floodplain?",
+        "What's the DWR flood risk here?",
+        "Is this property in the 100-year flood zone?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "FloodZone", "alias": "Flood Zone", "type": "String", "description": "Flood zone code (100, 200, 500)", "isPrimary": true},
+        {"name": "FLD_ZONE", "alias": "Zone Description", "type": "String", "description": "Flood zone description"},
+        {"name": "County", "alias": "County", "type": "String", "description": "County name"},
+        {"name": "Group_", "alias": "Data Source", "type": "String", "description": "Floodplain data source"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "partial",
+      "notes": "Covers Sacramento and San Joaquin River Basins. Use with FEMA NFHL for complete picture."
+    },
+    {
+      "id": "ca-200yr-floodplain",
+      "name": "California 200-Year Floodplains (DWR)",
+      "description": "State-level 200-year floodplain mapping (0.5% annual chance) from Department of Water Resources.",
+      "sourceId": "ca-dwr",
+      "serviceUrl": "https://services.gis.ca.gov/arcgis/rest/services/InlandWaters/Flood_Risk_State/MapServer/1",
+      "layerType": "MapServer",
+      "layerIndex": 1,
+      "category": "hazards",
+      "tags": ["flood", "floodplain", "200-year", "dwr", "hazard"],
+      "userQuestions": [
+        "Is this in a 200-year floodplain?",
+        "What's the extended flood risk here?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "FloodZone", "alias": "Flood Zone", "type": "String", "description": "Flood zone code", "isPrimary": true},
+        {"name": "County", "alias": "County", "type": "String", "description": "County name"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "partial",
+      "notes": "Covers Sacramento and San Joaquin River Basins. 0.5% annual chance flood."
+    },
+    {
+      "id": "ca-oil-gas-wells",
+      "name": "California Oil and Gas Wells",
+      "description": "All oil and gas wells in California from the CalGEM WellSTAR database. Includes well type, status, operator, and location. Updated nightly.",
+      "sourceId": "ca-doc",
+      "serviceUrl": "https://gis.conservation.ca.gov/server/rest/services/WellSTAR/Wells/MapServer/0",
+      "layerType": "MapServer",
+      "layerIndex": 0,
+      "category": "environmental",
+      "tags": ["oil", "gas", "wells", "energy", "calgem", "wellstar"],
+      "userQuestions": [
+        "Are there any oil or gas wells near this property?",
+        "What's the status of nearby wells?",
+        "Who operates the wells in this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "API", "alias": "API Number", "type": "String", "description": "Unique well identifier", "isPrimary": true},
+        {"name": "WellStatus", "alias": "Well Status", "type": "String", "description": "Current well status (Active, Idle, Plugged)"},
+        {"name": "WellType", "alias": "Well Type", "type": "String", "description": "Type of well (Oil, Gas, Injection)"},
+        {"name": "OperatorName", "alias": "Operator", "type": "String", "description": "Well operator name"},
+        {"name": "FieldName", "alias": "Field Name", "type": "String", "description": "Oil/gas field name"},
+        {"name": "CountyName", "alias": "County", "type": "String", "description": "County location"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "updateFrequency": "daily",
+      "notes": "Statewide coverage from CalGEM WellSTAR. Important for property research near historic oil fields."
+    },
+    {
+      "id": "ca-geothermal-wells",
+      "name": "California Geothermal Wells",
+      "description": "Geothermal wells in California from the CalGEM WellSTAR database.",
+      "sourceId": "ca-doc",
+      "serviceUrl": "https://gis.conservation.ca.gov/server/rest/services/WellSTAR/Wells/MapServer/1",
+      "layerType": "MapServer",
+      "layerIndex": 1,
+      "category": "environmental",
+      "tags": ["geothermal", "wells", "energy", "calgem"],
+      "userQuestions": [
+        "Are there geothermal wells in this area?",
+        "Where are geothermal resources in Solano County?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "API", "alias": "API Number", "type": "String", "description": "Unique well identifier", "isPrimary": true},
+        {"name": "WellStatus", "alias": "Well Status", "type": "String", "description": "Current well status"},
+        {"name": "OperatorName", "alias": "Operator", "type": "String", "description": "Well operator name"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide",
+      "notes": "Limited geothermal activity in Solano County, but included for completeness."
     }
   ]
 }
