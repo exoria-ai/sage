@@ -40,6 +40,10 @@ const MAP_VIEW_PADDING = { top: 80, bottom: 50, left: 50, right: 50 };
 // The vector tile handles display, the feature layer handles queries/identify
 const VECTOR_TILE_SUFFIX = '[VECTOR_TILE]';
 
+// Exclusive group suffix - GroupLayers with this suffix will use radio-button behavior
+// (only one child layer visible at a time). Tag is stripped from display name.
+const EXCLUSIVE_GROUP_SUFFIX = '[EXCLUSIVE]';
+
 /**
  * Represents a paired layer configuration where a VectorTileLayer handles
  * display and a FeatureLayer handles queries/identify operations
@@ -61,6 +65,7 @@ import BasemapGallery from '@arcgis/core/widgets/BasemapGallery';
 import Expand from '@arcgis/core/widgets/Expand';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
+import GroupLayer from '@arcgis/core/layers/GroupLayer';
 import Graphic from '@arcgis/core/Graphic';
 import Search from '@arcgis/core/widgets/Search';
 import LayerSearchSource from '@arcgis/core/widgets/Search/LayerSearchSource';
@@ -527,6 +532,18 @@ export function MapContainer({
 
           layerPairsRef.current = layerPairs;
           console.log(`Configured ${layerPairs.length} layer pair(s)`);
+
+          // Configure exclusive groups - GroupLayers tagged with [EXCLUSIVE] get radio-button behavior
+          const groupLayers = allLayers.filter((l) => l.type === 'group') as GroupLayer[];
+          for (const groupLayer of groupLayers) {
+            if (groupLayer.title?.includes(EXCLUSIVE_GROUP_SUFFIX)) {
+              // Set exclusive visibility mode (only one child visible at a time)
+              groupLayer.visibilityMode = 'exclusive';
+              // Strip the suffix from the display name
+              groupLayer.title = groupLayer.title.replace(EXCLUSIVE_GROUP_SUFFIX, '').trim();
+              console.log(`Configured exclusive group: "${groupLayer.title}"`);
+            }
+          }
         }
 
         // Create highlight graphics layer
