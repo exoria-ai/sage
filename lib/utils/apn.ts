@@ -5,17 +5,19 @@
  */
 
 /**
- * Solano County APN format: XXX-XXX-XXX or XXX-XXX-XXXX
- * - First 3 digits: Map book number
+ * Solano County APN format: XXX-XXX-XXX, XXX-XXX-XXXX, or XXXX-XXX-XXX
+ * - First 3-4 digits: Map book number
  * - Middle 3 digits: Page number
- * - Last 3-4 digits: Parcel number (can be 3 or 4 digits)
+ * - Last 3-4 digits: Parcel number
  *
  * May be provided with or without dashes.
- * Examples: "003-025-102", "0030251020", "123-456-7890"
+ * Examples: "003-025-102", "0030251020", "123-456-7890", "0046-202-130"
  */
 
-// Match 9-10 digit APNs with optional dashes
-const APN_PATTERN = /^(\d{3})-?(\d{3})-?(\d{3,4})$/;
+// Match 9-11 digit APNs with optional dashes
+// Standard format: XXX-XXX-XXX or XXX-XXX-XXXX (9-10 digits)
+// Extended format: XXXX-XXX-XXX (11 digits, 4-digit map book)
+const APN_PATTERN = /^(\d{3,4})-?(\d{3})-?(\d{3,4})$/;
 
 export interface ParsedAPN {
   raw: string;

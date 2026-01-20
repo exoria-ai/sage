@@ -243,8 +243,9 @@ export async function getZoning(args: {
 
       if (features.length > 0) {
         const attrs = features[0]!.attributes;
-        zoningCode = String(attrs['ZONING'] || attrs['ZONE'] || attrs['ZONE_CODE'] || 'Unknown');
-        zoningDesc = String(attrs['ZONE_DESC'] || attrs['DESCRIPTION'] || attrs['ZONE_NAME'] || '');
+        // County zoning layer uses lowercase field names: zone_abrev, zone_name
+        zoningCode = String(attrs['zone_abrev'] || attrs['ZONING'] || attrs['ZONE'] || 'Unknown');
+        zoningDesc = String(attrs['zone_name'] || attrs['ZONE_DESC'] || attrs['DESCRIPTION'] || '');
       }
 
       zoningCodeLink = 'https://www.solanocounty.com/depts/rm/planning/default.asp';

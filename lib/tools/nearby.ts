@@ -12,8 +12,8 @@ import { EARTH_RADIUS_FEET, LIMITS } from '@/lib/config';
 const POI_LAYERS: Record<string, { path: string; nameField: string; typeField?: string }> = {
   school: {
     path: 'Schools/FeatureServer/0',
-    nameField: 'Name',
-    typeField: 'SchoolType',
+    nameField: 'name',
+    typeField: 'type',
   },
   park: {
     path: 'ParksInSolanoCounty/FeatureServer/0',

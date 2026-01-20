@@ -194,10 +194,10 @@ export async function getSpecialDistricts(args: {
     ] = await Promise.all([
       resolvedAPN ? getParcelDistricts(resolvedAPN) : Promise.resolve(null),
       queryDistrictLayer(LAYERS.BOS_DISTRICTS, lat, lon, 'name', 'district'),
-      queryDistrictLayer(DISTRICT_LAYERS.GARBAGE, lat, lon, 'Name'),
+      queryDistrictLayer(DISTRICT_LAYERS.GARBAGE, lat, lon, 'service_pr'),  // Field: service_pr
       queryDistrictLayer(DISTRICT_LAYERS.WATER, lat, lon, 'Name'),
-      queryDistrictLayer(DISTRICT_LAYERS.FIRE_RESPONSE, lat, lon, 'Name'),
-      queryDistrictLayer(DISTRICT_LAYERS.CEMETERY, lat, lon, 'Name'),
+      queryDistrictLayer(DISTRICT_LAYERS.FIRE_RESPONSE, lat, lon, 'dispname'),  // Field: dispname
+      queryDistrictLayer(DISTRICT_LAYERS.CEMETERY, lat, lon, 'cemetery_d'),  // Field: cemetery_d
       queryDistrictLayer(DISTRICT_LAYERS.RECLAMATION, lat, lon, 'Name'),
       queryDistrictLayer(DISTRICT_LAYERS.GSA, lat, lon, 'GSA_Name'),
     ]);
