@@ -2215,6 +2215,38 @@
       "notes": "Statewide coverage. Data from Caltrans Structure Maintenance and Investigations."
     },
     {
+      "id": "solano-road-centerlines",
+      "name": "Road Centerlines",
+      "description": "Road centerline feature class for Solano County, actively updated monthly. Follows CalOES schema with additional county-specific fields. Includes street names, road classification, speed limits, one-way designations, and address ranges.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/arcgis/rest/services/Road_Centerlines/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["road", "street", "centerline", "transportation", "address", "speed limit", "routing"],
+      "userQuestions": [
+        "What road is this?",
+        "What's the speed limit on this road?",
+        "What streets are in this area?",
+        "Is this road one-way?",
+        "Who maintains this road?"
+      ],
+      "geometryType": "Polyline",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "st_name", "alias": "Street Name", "type": "String", "description": "Street name without directional prefix/suffix", "isPrimary": true},
+        {"name": "fulladdress", "alias": "Full Address", "type": "String", "description": "Complete street address"},
+        {"name": "roadowner", "alias": "Road Owner", "type": "String", "description": "Entity responsible for road maintenance"},
+        {"name": "roadclass", "alias": "Road Class", "type": "String", "description": "Road classification (arterial, collector, local, etc.)"},
+        {"name": "speedlimit", "alias": "Speed Limit", "type": "Integer", "description": "Posted speed limit in mph"},
+        {"name": "oneway", "alias": "One-Way", "type": "String", "description": "One-way designation (FT, TF, or blank for two-way)"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide",
+      "updateFrequency": "monthly",
+      "notes": "Data maintained by Geographic Technologies Group (GTG). CalOES schema compliant."
+    },
+    {
       "id": "ca-100yr-floodplain",
       "name": "California 100-Year Floodplains (DWR)",
       "description": "State-level 100-year floodplain mapping from Department of Water Resources. Best available flood hazard information per Senate Bill 5. Complements FEMA data.",
@@ -2323,6 +2355,429 @@
       "priority": "low",
       "coverage": "countywide",
       "notes": "Limited geothermal activity in Solano County, but included for completeness."
+    },
+    {
+      "id": "solano-subdivisions",
+      "name": "Subdivisions",
+      "description": "Recorded subdivision boundaries in Solano County. Shows subdivision names and phases for property research and development history.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Subdivisions/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "property",
+      "tags": ["subdivision", "development", "tract", "property", "plat", "lot"],
+      "userQuestions": [
+        "What subdivision is this property in?",
+        "What's the name of this development?",
+        "What phase is this lot in?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "subdiv", "alias": "Subdivision Name", "type": "String", "description": "Name of the subdivision", "isPrimary": true},
+        {"name": "phase", "alias": "Phase", "type": "String", "description": "Development phase number"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-census-blocks",
+      "name": "Census Blocks (2020)",
+      "description": "2020 Census block boundaries with population and housing unit counts. Most granular census geography for detailed demographic analysis.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Census_Blocks/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "population", "demographics", "housing", "blocks", "2020"],
+      "userQuestions": [
+        "What's the population of this block?",
+        "How many housing units are in this area?",
+        "What's the census block ID for this location?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "geoid20", "alias": "GEOID", "type": "String", "description": "Geographic identifier", "isPrimary": true},
+        {"name": "name20", "alias": "Block Name", "type": "String", "description": "Census block name"},
+        {"name": "pop20", "alias": "Population 2020", "type": "Integer", "description": "Total population from 2020 Census"},
+        {"name": "housing20", "alias": "Housing Units", "type": "Integer", "description": "Total housing units"},
+        {"name": "tractce20", "alias": "Tract Code", "type": "String", "description": "Census tract code"},
+        {"name": "blockce20", "alias": "Block Code", "type": "String", "description": "Census block code"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-sphere-of-influence",
+      "name": "City Sphere of Influence",
+      "description": "LAFCO-approved Sphere of Influence boundaries for incorporated cities in Solano County. Defines probable future service areas and urban growth boundaries.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Cities_SphereOfInfluence/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["sphere of influence", "soi", "lafco", "planning", "urban growth", "city boundary"],
+      "userQuestions": [
+        "Is this property in a city's sphere of influence?",
+        "Which city's SOI is this in?",
+        "Is this area planned for annexation?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "sphere", "alias": "Sphere", "type": "String", "description": "City name for sphere of influence", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "countywide",
+      "notes": "Updated by LAFCO. Key for understanding potential future annexation and service extensions."
+    },
+    {
+      "id": "solano-greenbelts",
+      "name": "Greenbelts",
+      "description": "Agricultural and open space greenbelts surrounding urban areas. Includes Vacaville-Dixon, Davis-Dixon, and Vacaville-Fairfield-Solano greenbelts. Managed by local jurisdictions and land trusts.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Greenbelts/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["greenbelt", "open space", "agriculture", "conservation", "growth boundary"],
+      "userQuestions": [
+        "Is this property in a greenbelt?",
+        "What greenbelt protections apply here?",
+        "Where are the urban growth boundaries?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "name", "alias": "Name", "type": "String", "description": "Greenbelt name", "isPrimary": true},
+        {"name": "gisacres", "alias": "GIS Acres", "type": "Double", "description": "Calculated acreage"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-hydrology-lines",
+      "name": "Streams and Waterways (NHD)",
+      "description": "National Hydrography Dataset line features including rivers, streams, canals, and ditches in Solano County. 1:24,000 scale from USGS.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/National_Hydrology_Database_Line_Features/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["hydrology", "streams", "rivers", "waterways", "nhd", "creeks", "canals"],
+      "userQuestions": [
+        "What stream is near this property?",
+        "Is there a creek on this parcel?",
+        "What waterways are in this area?"
+      ],
+      "geometryType": "Polyline",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "GNIS_NAME", "alias": "Name", "type": "String", "description": "Geographic name from GNIS", "isPrimary": true},
+        {"name": "FTYPE", "alias": "Feature Type", "type": "Integer", "description": "Hydrographic feature type code"},
+        {"name": "LENGTHKM", "alias": "Length (km)", "type": "Double", "description": "Stream length in kilometers"},
+        {"name": "FLOWDIR", "alias": "Flow Direction", "type": "String", "description": "Direction of flow"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-hydrology-polygons",
+      "name": "Water Bodies (NHD)",
+      "description": "National Hydrography Dataset polygon features including lakes, ponds, reservoirs, and marshes in Solano County. 1:24,000 scale from USGS.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/National_Hydrology_Database_Polygon_Features/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "environmental",
+      "tags": ["hydrology", "lakes", "ponds", "reservoir", "marsh", "wetland", "nhd", "water body"],
+      "userQuestions": [
+        "Is there a lake near this property?",
+        "What water bodies are in this area?",
+        "Is this property near a reservoir?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "GNIS_NAME", "alias": "Name", "type": "String", "description": "Geographic name from GNIS", "isPrimary": true},
+        {"name": "FTYPE", "alias": "Feature Type", "type": "Integer", "description": "390=Lake/Pond, 436=Reservoir, 466=Swamp/Marsh"},
+        {"name": "AREASQKM", "alias": "Area (sq km)", "type": "Double", "description": "Area in square kilometers"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-community-college-districts",
+      "name": "Community College Districts",
+      "description": "Community college district boundaries in Solano County. Shows the 7 community college districts serving county residents.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CommunityCollegeDistricts_2022/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["community college", "education", "district", "solano college"],
+      "userQuestions": [
+        "What community college district is this in?",
+        "Which community college serves this area?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "district", "alias": "District", "type": "String", "description": "Community college district name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-travis-afb",
+      "name": "Travis Air Force Base Boundary",
+      "description": "Property boundaries for Travis Air Force Base. Federal land under DoD jurisdiction, important for land use planning and AICUZ considerations.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Travis_Air_Force_Base_property_boundaries/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "districts",
+      "tags": ["travis", "air force", "military", "federal", "dod", "base"],
+      "userQuestions": [
+        "Is this property on Travis AFB?",
+        "Where is Travis Air Force Base?",
+        "How close is this to Travis AFB?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "featurenam", "alias": "Feature Name", "type": "String", "description": "Feature name", "isPrimary": true}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-mobile-home-parks",
+      "name": "Mobile Home Parks",
+      "description": "Mobile home park locations in Solano County. Includes park name, address, number of units, and contact information.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Mobile_Home_Parks/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "property",
+      "tags": ["mobile home", "manufactured housing", "trailer park", "affordable housing"],
+      "userQuestions": [
+        "Where are mobile home parks in Solano County?",
+        "Is this a mobile home park?",
+        "How many units are in this mobile home park?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "name", "alias": "Name", "type": "String", "description": "Park name", "isPrimary": true},
+        {"name": "address", "alias": "Address", "type": "String", "description": "Street address"},
+        {"name": "city", "alias": "City", "type": "String", "description": "City"},
+        {"name": "units", "alias": "Units", "type": "Integer", "description": "Number of mobile home units"},
+        {"name": "telephone", "alias": "Phone", "type": "String", "description": "Contact phone number"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-nursing-homes",
+      "name": "Nursing Homes",
+      "description": "Skilled nursing facility locations in Solano County. Includes bed counts, staffing levels, and Medicare/Medicaid IDs.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Nursing_Homes/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "services",
+      "tags": ["nursing home", "skilled nursing", "healthcare", "elderly care", "senior"],
+      "userQuestions": [
+        "Where are nursing homes in Solano County?",
+        "How many beds does this nursing home have?",
+        "What nursing facilities are near this location?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "name", "alias": "Name", "type": "String", "description": "Facility name", "isPrimary": true},
+        {"name": "address", "alias": "Address", "type": "String", "description": "Street address"},
+        {"name": "city", "alias": "City", "type": "String", "description": "City"},
+        {"name": "beds", "alias": "Beds", "type": "Integer", "description": "Number of beds"},
+        {"name": "ownership", "alias": "Ownership", "type": "String", "description": "Ownership type"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-senior-centers",
+      "name": "Senior Centers",
+      "description": "Senior center and adult day program locations in Solano County.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Senior_Centers/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "services",
+      "tags": ["senior center", "elderly", "community services", "aging"],
+      "userQuestions": [
+        "Where are senior centers in Solano County?",
+        "What senior services are near this location?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "name", "alias": "Name", "type": "String", "description": "Facility name", "isPrimary": true},
+        {"name": "address", "alias": "Address", "type": "String", "description": "Street address"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-government-buildings",
+      "name": "Government Buildings",
+      "description": "Government building locations in Solano County including county offices, city halls, and other civic facilities.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Government_Buildings/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["government", "civic", "county office", "city hall", "public building"],
+      "userQuestions": [
+        "Where is the nearest county office?",
+        "What government buildings are in this city?",
+        "Where is city hall?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "buildname", "alias": "Building Name", "type": "String", "description": "Building name", "isPrimary": true},
+        {"name": "address", "alias": "Address", "type": "String", "description": "Street address"},
+        {"name": "city", "alias": "City", "type": "String", "description": "City"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-courthouses",
+      "name": "Courthouses",
+      "description": "Courthouse locations in Solano County including Superior Court facilities.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Courthouses/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["courthouse", "court", "legal", "judicial", "superior court"],
+      "userQuestions": [
+        "Where is the courthouse in Solano County?",
+        "What courts are in this city?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "name", "alias": "Name", "type": "String", "description": "Courthouse name", "isPrimary": true},
+        {"name": "address", "alias": "Address", "type": "String", "description": "Street address"},
+        {"name": "city", "alias": "City", "type": "String", "description": "City"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-electrical-substations",
+      "name": "Electrical Substations",
+      "description": "Electrical substation locations in Solano County. Includes owner, voltage, and type information.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/Electrical_Substations/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "infrastructure",
+      "tags": ["electrical", "substation", "power", "utility", "pge", "energy"],
+      "userQuestions": [
+        "Where are electrical substations near this property?",
+        "What utility infrastructure is in this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "name", "alias": "Name", "type": "String", "description": "Substation name", "isPrimary": true},
+        {"name": "owner", "alias": "Owner", "type": "String", "description": "Utility owner"},
+        {"name": "type", "alias": "Type", "type": "String", "description": "Substation type"},
+        {"name": "max_voltage", "alias": "Max Voltage", "type": "String", "description": "Maximum voltage"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-plss-township-range",
+      "name": "PLSS Township and Range",
+      "description": "Public Land Survey System township and range grid. Used for legal land descriptions in property documents.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/PLSS_TownshipRange/FeatureServer/0",
+      "layerType": "FeatureServer",
+      "category": "property",
+      "tags": ["plss", "township", "range", "survey", "legal description", "blm"],
+      "userQuestions": [
+        "What township and range is this property in?",
+        "What's the PLSS description for this location?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "TownshipRange", "alias": "Township Range", "type": "String", "description": "Combined township and range", "isPrimary": true},
+        {"name": "Township", "alias": "Township", "type": "String", "description": "Township designation"},
+        {"name": "Range", "alias": "Range", "type": "String", "description": "Range designation"},
+        {"name": "Meridian", "alias": "Meridian", "type": "String", "description": "Base meridian"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-drinking-water-systems",
+      "name": "Drinking Water System Boundaries",
+      "description": "Service area boundaries for drinking water providers as verified by the State Water Resources Control Board Division of Drinking Water.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/CA_DrinkingWater_SystemAreaBoundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "services",
+      "tags": ["water", "drinking water", "utility", "water system", "public water"],
+      "userQuestions": [
+        "What water system serves this property?",
+        "Who provides drinking water here?",
+        "What's the water service area for this location?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "water_syst", "alias": "Water System", "type": "String", "description": "Water system name", "isPrimary": true},
+        {"name": "population", "alias": "Population Served", "type": "Integer", "description": "Population served"},
+        {"name": "owner_type", "alias": "Owner Type", "type": "String", "description": "Public/private ownership"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "countywide"
+    },
+    {
+      "id": "solano-polling-places",
+      "name": "Polling Places",
+      "description": "Voting polling place locations in Solano County. Updated for each election cycle by the Registrar of Voters.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/PollingPlaces/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "poi",
+      "tags": ["polling", "voting", "election", "ballot", "registrar"],
+      "userQuestions": [
+        "Where is my polling place?",
+        "Where can I vote in this area?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 3857,
+      "fields": [
+        {"name": "ppl_name", "alias": "Polling Place Name", "type": "String", "description": "Polling place name", "isPrimary": true},
+        {"name": "ppl_addres", "alias": "Address", "type": "String", "description": "Street address"},
+        {"name": "ppl_city", "alias": "City", "type": "String", "description": "City"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "countywide",
+      "updateFrequency": "per election",
+      "notes": "Locations may change each election. Contact Registrar of Voters for current information."
     }
   ]
 }
