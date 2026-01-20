@@ -52,3 +52,8 @@ body {
   width: 40px !important;
   height: 40px !important;
 }
+
+/* Dim layer names when layer is not visible (eye icon shows view-hide) */
+.esri-layer-list__item:has(.esri-layer-list__visible-toggle calcite-icon[icon="view-hide"]) {
+  opacity: 0.5;
+}
