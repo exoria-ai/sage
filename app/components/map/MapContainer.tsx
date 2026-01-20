@@ -35,6 +35,21 @@ const MAP_DEFAULTS = {
 
 const MAP_VIEW_PADDING = { top: 80, bottom: 50, left: 50, right: 50 };
 
+// Layer pairing constants for vector tile optimization
+// Layers with [VECTOR_TILE] suffix are paired with their base FeatureLayer
+// The vector tile handles display, the feature layer handles queries/identify
+const VECTOR_TILE_SUFFIX = '[VECTOR_TILE]';
+
+/**
+ * Represents a paired layer configuration where a VectorTileLayer handles
+ * display and a FeatureLayer handles queries/identify operations
+ */
+interface LayerPair {
+  baseName: string;
+  vectorTileLayer: __esri.VectorTileLayer;
+  featureLayer: __esri.FeatureLayer;
+}
+
 // ESRI imports - these are loaded dynamically client-side only
 import esriConfig from '@arcgis/core/config';
 import WebMap from '@arcgis/core/WebMap';
@@ -101,6 +116,7 @@ export function MapContainer({
   const highlightLayerRef = useRef<GraphicsLayer | null>(null);
   const routeLayerRef = useRef<GraphicsLayer | null>(null);
   const identifyButtonRef = useRef<HTMLDivElement | null>(null);
+  const layerPairsRef = useRef<LayerPair[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
@@ -458,6 +474,59 @@ export function MapContainer({
 
           // Log layer info after load
           console.log('Layers loaded:', view.map.allLayers.map(l => `${l.title} (${l.type})`).toArray());
+
+          // Detect and configure vector tile / feature layer pairs
+          // Layers named "X [VECTOR_TILE]" are paired with "X" feature layers
+          const layerPairs: LayerPair[] = [];
+          const allLayers = view.map.allLayers.toArray();
+
+          // Find all vector tile layers with the suffix
+          const vectorTileLayers = allLayers.filter(
+            (l) => l.type === 'vector-tile' && l.title?.includes(VECTOR_TILE_SUFFIX)
+          ) as __esri.VectorTileLayer[];
+
+          for (const vtLayer of vectorTileLayers) {
+            // Extract base name (remove suffix and trim)
+            const baseName = vtLayer.title!.replace(VECTOR_TILE_SUFFIX, '').trim();
+
+            // Find matching feature layer with same base name
+            const featureLayer = allLayers.find(
+              (l) => l.type === 'feature' && l.title === baseName
+            ) as __esri.FeatureLayer | undefined;
+
+            if (featureLayer) {
+              console.log(`Layer pair detected: "${baseName}" (VectorTile + FeatureLayer)`);
+
+              // Configure the pair:
+              // 1. Vector tile layer handles display - rename it to base name for clean UI
+              vtLayer.title = baseName;
+
+              // 2. Feature layer is hidden from display but kept for queries
+              //    - Set listMode to 'hide' so it doesn't appear in LayerList
+              //    - Set opacity to 0 so it doesn't render, but stays "visible" for queries
+              featureLayer.listMode = 'hide';
+              featureLayer.opacity = 0;
+
+              // 3. Sync visibility: when vector tile visibility changes, update feature layer
+              vtLayer.watch('visible', (visible) => {
+                featureLayer.visible = visible;
+              });
+
+              // Initial sync
+              featureLayer.visible = vtLayer.visible;
+
+              layerPairs.push({
+                baseName,
+                vectorTileLayer: vtLayer,
+                featureLayer,
+              });
+            } else {
+              console.warn(`No matching FeatureLayer found for "${vtLayer.title}"`);
+            }
+          }
+
+          layerPairsRef.current = layerPairs;
+          console.log(`Configured ${layerPairs.length} layer pair(s)`);
         }
 
         // Create highlight graphics layer
@@ -802,40 +871,94 @@ export function MapContainer({
         }
 
         try {
+          // First, try standard hitTest for visible feature layers
           const response = await view.hitTest(event, {
             include: view.map?.allLayers?.filter(
               (l) => l.type === 'feature' || l.type === 'map-image'
             ),
           });
 
-          if (response.results.length > 0) {
-            // Extract graphics for popup
-            const graphics = response.results
-              .filter((result) => result.type === 'graphic')
-              .map((result) => (result as __esri.GraphicHit).graphic);
+          // Collect all graphics from hitTest
+          const allGraphics: __esri.Graphic[] = response.results
+            .filter((result) => result.type === 'graphic')
+            .map((result) => (result as __esri.GraphicHit).graphic);
 
-            // Also store in Zustand for external access
-            const features = response.results
-              .filter((result) => result.type === 'graphic')
-              .map((result) => {
-                const graphicResult = result as __esri.GraphicHit;
-                return {
-                  layerId: graphicResult.layer?.id || 'unknown',
-                  layerTitle: graphicResult.layer?.title || 'Unknown Layer',
-                  attributes: graphicResult.graphic.attributes || {},
-                  geometry: graphicResult.graphic.geometry,
-                };
-              });
+          // For paired layers: query the hidden FeatureLayer at click point
+          // This handles clicks on VectorTileLayer areas (which hitTest doesn't detect)
+          const pairedLayerQueries = layerPairsRef.current
+            .filter((pair) => pair.vectorTileLayer.visible) // Only query if layer is visible
+            .map(async (pair) => {
+              try {
+                const spatialQuery = new Query({
+                  geometry: event.mapPoint,
+                  spatialRelationship: 'intersects',
+                  outFields: ['*'],
+                  returnGeometry: true,
+                });
+
+                const result = await pair.featureLayer.queryFeatures(spatialQuery);
+
+                if (result.features && result.features.length > 0) {
+                  // Return features with the display name (not the hidden layer name)
+                  return result.features.map((f) => {
+                    // Override the layer reference to use the base name for display
+                    const graphic = f.clone();
+                    // Store the base name for popup title
+                    graphic.setAttribute('_layerTitle', pair.baseName);
+                    return graphic;
+                  });
+                }
+                return [];
+              } catch (err) {
+                console.error(`Error querying paired layer "${pair.baseName}":`, err);
+                return [];
+              }
+            });
+
+          // Wait for all paired layer queries
+          const pairedResults = await Promise.all(pairedLayerQueries);
+          const pairedGraphics = pairedResults.flat();
+
+          // Combine hitTest results with paired layer query results
+          // Deduplicate by checking if we already have a feature from the same layer
+          const hitTestLayerIds = new Set(
+            allGraphics.map((g) => g.layer?.id).filter(Boolean)
+          );
+
+          // Add paired graphics that aren't already in hitTest results
+          for (const graphic of pairedGraphics) {
+            const layerTitle = graphic.getAttribute('_layerTitle');
+            // Check if we already have results from this layer (by title since hidden layer has different id)
+            const alreadyHave = allGraphics.some(
+              (g) => g.layer?.title === layerTitle || g.getAttribute('_layerTitle') === layerTitle
+            );
+            if (!alreadyHave) {
+              allGraphics.push(graphic);
+            }
+          }
+
+          if (allGraphics.length > 0) {
+            // Build features for Zustand store
+            const features = allGraphics.map((graphic) => {
+              const layerTitle =
+                graphic.getAttribute('_layerTitle') ||
+                graphic.layer?.title ||
+                'Unknown Layer';
+              return {
+                layerId: String(graphic.layer?.id || 'paired-layer'),
+                layerTitle,
+                attributes: graphic.attributes || {},
+                geometry: graphic.geometry,
+              };
+            });
 
             setSelectedFeatures(features);
 
             // Open popup with identified features
-            if (graphics.length > 0) {
-              view.openPopup({
-                location: event.mapPoint,
-                features: graphics,
-              });
-            }
+            view.openPopup({
+              location: event.mapPoint,
+              features: allGraphics,
+            });
           } else {
             setSelectedFeatures([]);
             view.closePopup();
