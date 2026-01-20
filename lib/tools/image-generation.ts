@@ -52,6 +52,38 @@ async function fetchImageAsBase64(url: string, contentType: string): Promise<{ b
   return { base64, mimeType };
 }
 
+// Maximum prompt length for fal.ai models (conservative limit)
+const MAX_PROMPT_LENGTH = 500;
+
+/**
+ * Truncate prompt to max length while preserving meaning.
+ * Tries to break at sentence boundaries.
+ */
+function truncatePrompt(prompt: string, maxLength: number = MAX_PROMPT_LENGTH): { text: string; wasTruncated: boolean } {
+  if (prompt.length <= maxLength) {
+    return { text: prompt, wasTruncated: false };
+  }
+
+  // Try to find a good break point (end of sentence)
+  let truncated = prompt.substring(0, maxLength);
+  const lastPeriod = truncated.lastIndexOf('.');
+  const lastComma = truncated.lastIndexOf(',');
+
+  if (lastPeriod > maxLength * 0.6) {
+    truncated = truncated.substring(0, lastPeriod + 1);
+  } else if (lastComma > maxLength * 0.6) {
+    truncated = truncated.substring(0, lastComma);
+  } else {
+    // Just cut at word boundary
+    const lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > maxLength * 0.8) {
+      truncated = truncated.substring(0, lastSpace);
+    }
+  }
+
+  return { text: truncated.trim(), wasTruncated: true };
+}
+
 /**
  * Generate images using Nano Banana Pro.
  *
@@ -61,12 +93,15 @@ async function fetchImageAsBase64(url: string, contentType: string): Promise<{ b
  */
 export async function generateImage(params: GenerateImageParams): Promise<GenerateImageResult> {
   const {
-    prompt,
+    prompt: rawPrompt,
     aspect_ratio = '16:9',
     resolution = '1K',
     output_format = 'png',
     num_images = 1,
   } = params;
+
+  // Truncate prompt if too long (prevents API errors)
+  const { text: prompt, wasTruncated } = truncatePrompt(rawPrompt);
 
   // Validate num_images
   const imageCount = Math.min(Math.max(1, num_images), 4);
@@ -113,7 +148,9 @@ export async function generateImage(params: GenerateImageParams): Promise<Genera
     return {
       success: true,
       images,
-      description,
+      description: wasTruncated
+        ? `${description || ''} (Note: Prompt was truncated from ${rawPrompt.length} to ${prompt.length} characters for API compatibility)`
+        : description,
     };
   } catch (error) {
     return {
@@ -154,13 +191,16 @@ interface EditImageResult {
  */
 export async function editImage(params: EditImageParams): Promise<EditImageResult> {
   const {
-    prompt,
+    prompt: rawPrompt,
     image_urls,
     aspect_ratio = 'auto',
     resolution = '1K',
     output_format = 'png',
     num_images = 1,
   } = params;
+
+  // Truncate prompt if too long (prevents API errors)
+  const { text: prompt, wasTruncated } = truncatePrompt(rawPrompt);
 
   // Validate image_urls
   if (!image_urls || image_urls.length === 0) {
@@ -216,7 +256,9 @@ export async function editImage(params: EditImageParams): Promise<EditImageResul
     return {
       success: true,
       images,
-      description,
+      description: wasTruncated
+        ? `${description || ''} (Note: Prompt was truncated from ${rawPrompt.length} to ${prompt.length} characters for API compatibility)`
+        : description,
     };
   } catch (error) {
     return {

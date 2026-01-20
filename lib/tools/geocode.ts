@@ -43,17 +43,39 @@ export async function geocodeAddress(args: { address: string }): Promise<Geocode
     // Field names from SOLANO_GIS_LAYERS.md: fulladdress, add_number, st_name, apn, lat, long, post_comm, post_code
     const cleanedAddress = address.trim().toUpperCase();
 
+    // Normalize street types: "STREET" -> "ST", "ROAD" -> "RD", etc.
+    // The fulladdress field uses abbreviated types (ST, RD, DR, etc.)
+    const streetTypeMap: Record<string, string> = {
+      'STREET': 'ST', 'AVENUE': 'AVE', 'DRIVE': 'DR', 'ROAD': 'RD',
+      'LANE': 'LN', 'COURT': 'CT', 'CIRCLE': 'CIR', 'BOULEVARD': 'BLVD',
+      'PLACE': 'PL', 'WAY': 'WAY', 'TERRACE': 'TER', 'PARKWAY': 'PKWY',
+    };
+
+    let normalizedAddress = cleanedAddress;
+    for (const [full, abbrev] of Object.entries(streetTypeMap)) {
+      // Replace full street type with abbreviated (word boundary aware)
+      normalizedAddress = normalizedAddress.replace(new RegExp(`\\b${full}\\b`, 'g'), abbrev);
+    }
+
     // Try to extract street number and name for better matching
-    const streetMatch = cleanedAddress.match(/^(\d+)\s+(.+?)(?:,|\s+(?:FAIRFIELD|VACAVILLE|VALLEJO|BENICIA|DIXON|RIO VISTA|SUISUN|SOLANO))/i);
+    // Updated regex to handle multi-word street names (greedy match up to city/comma)
+    const streetMatch = normalizedAddress.match(/^(\d+)\s+(.+?)(?:\s*,\s*|\s+(?:FAIRFIELD|VACAVILLE|VALLEJO|BENICIA|DIXON|RIO VISTA|SUISUN CITY|SUISUN|SOLANO))/i);
 
     let whereClause: string;
     if (streetMatch) {
-      const [, streetNum, streetName] = streetMatch;
+      const [, streetNum, streetRaw] = streetMatch;
+      // Remove trailing street type for st_name matching, but keep it flexible
+      const streetName = streetRaw?.trim()
+        .replace(/'/g, "''")
+        .replace(/\s+(ST|AVE|DR|RD|LN|CT|WAY|BLVD|CIR|PL|TER|PKWY)\.?$/i, '')
+        .trim();
+
       // Query by street number and partial street name
-      whereClause = `add_number = ${streetNum} AND UPPER(st_name) LIKE '%${streetName?.trim().replace(/'/g, "''").replace(/\s+(ST|AVE|DR|RD|LN|CT|WAY|BLVD|CIR|PL)\.?$/i, '')}%'`;
+      // Also try fulladdress as fallback for better coverage
+      whereClause = `(add_number = ${streetNum} AND UPPER(st_name) LIKE '%${streetName}%') OR UPPER(fulladdress) LIKE '%${streetNum} ${streetName}%'`;
     } else {
-      // Fallback: search by full address text
-      whereClause = `UPPER(fulladdress) LIKE '%${cleanedAddress.replace(/'/g, "''").substring(0, 50)}%'`;
+      // Fallback: search by full address text (use normalized version)
+      whereClause = `UPPER(fulladdress) LIKE '%${normalizedAddress.replace(/'/g, "''").substring(0, 50)}%'`;
     }
 
     const features = await solanoClient.queryByAttribute(

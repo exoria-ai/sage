@@ -48,15 +48,46 @@ interface SearchResult {
 }
 
 /**
+ * Normalize zone code for flexible matching.
+ * Handles variations like "R-R-5" vs "RR-5" vs "RR5".
+ */
+function normalizeZoneCode(zone: string): string[] {
+  const upper = zone.toUpperCase().trim();
+  const variants: string[] = [upper];
+
+  // Remove all hyphens for a compact version
+  const noHyphens = upper.replace(/-/g, '');
+  if (noHyphens !== upper) variants.push(noHyphens);
+
+  // Handle R-R-X pattern -> RR-X
+  const rrMatch = upper.match(/^R-R-(\d+\.?\d*)$/);
+  if (rrMatch) {
+    variants.push(`RR-${rrMatch[1]}`);  // RR-5
+    variants.push(`RR${rrMatch[1]}`);   // RR5
+  }
+
+  // Handle RR-X pattern -> R-R-X
+  const rrMatch2 = upper.match(/^RR-(\d+\.?\d*)$/);
+  if (rrMatch2) {
+    variants.push(`R-R-${rrMatch2[1]}`);  // R-R-5
+  }
+
+  return [...new Set(variants)];  // Remove duplicates
+}
+
+/**
  * Build WHERE clause from search criteria
  */
 function buildWhereClause(criteria: SearchCriteria): string {
   const conditions: string[] = [];
 
   if (criteria.zoning) {
-    // Match zone1, zone2, or zone3
-    const zone = criteria.zoning.toUpperCase();
-    conditions.push(`(zone1 LIKE '%${zone}%' OR zone2 LIKE '%${zone}%' OR zone3 LIKE '%${zone}%')`);
+    // Match zone1, zone2, or zone3 with normalized variants
+    const variants = normalizeZoneCode(criteria.zoning);
+    const zoneConditions = variants.map(zone =>
+      `(zone1 LIKE '%${zone}%' OR zone2 LIKE '%${zone}%' OR zone3 LIKE '%${zone}%')`
+    );
+    conditions.push(`(${zoneConditions.join(' OR ')})`);
   }
 
   if (criteria.use_code) {
