@@ -98,6 +98,10 @@ export default function Home() {
             question="Is this property in a fire hazard zone?"
             answer="High Fire Hazard Severity Zone (SRA). 100ft defensible space required. Chapter 7A building standards recommended. Disclosure required at sale."
           />
+          <ExampleCard
+            question="Create school district boundaries from parcel data"
+            answer="Dissolved 152,738 parcels into 9 school district polygons. GeoJSON available at [URL]. Add to ArcGIS Online: Content → Add Item → URL → GeoJSON."
+          />
         </div>
       </section>
 
@@ -168,6 +172,17 @@ export default function Home() {
               'Organizational chart (21 depts, 3,284 FTE)',
               'Position searches across 399 job classes',
               'Department comparisons',
+            ]}
+          />
+          <DataCard
+            icon="⚙️"
+            title="Geoprocessing"
+            items={[
+              'Dissolve parcels by attribute (school, fire, water districts)',
+              'Create derived boundary layers',
+              'Inspect shapefile fields',
+              'Export to GeoJSON for ArcGIS Online',
+              '152k parcel dataset with 89 fields',
             ]}
           />
         </div>
@@ -482,6 +497,14 @@ export default function Home() {
             { name: 'search_gis_layers', desc: 'Keyword search across 112 layers' },
             { name: 'get_gis_layer_details', desc: 'Service URL, fields, metadata' },
             { name: 'find_layers_for_question', desc: 'Match questions to relevant layers' },
+          ]}
+        />
+
+        <ToolGroup
+          title="Geoprocessing"
+          tools={[
+            { name: 'dissolve_layer', desc: 'Create boundary layers from parcels (school, fire, water districts)' },
+            { name: 'inspect_layer', desc: 'Inspect shapefile fields and dissolve candidates' },
           ]}
         />
 

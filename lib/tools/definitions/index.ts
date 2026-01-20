@@ -19,6 +19,7 @@ import { renderMapTools } from './render-map';
 import { imageGenerationTools } from './image-generation';
 import { interactiveMapTools } from './interactive-map';
 import { gisLayersTools } from './gis-layers';
+import { geoprocessingTools } from './geoprocessing';
 
 // Re-export individual tool groups for granular imports
 export * from './gis-core';
@@ -33,6 +34,7 @@ export * from './render-map';
 export * from './image-generation';
 export * from './interactive-map';
 export * from './gis-layers';
+export * from './geoprocessing';
 
 /**
  * All tool definitions for MCP registration.
@@ -75,6 +77,9 @@ export const allTools: ToolDefinition<any>[] = [
 
   // GIS layers discovery
   ...gisLayersTools,
+
+  // Geoprocessing (Modal + GeoPandas)
+  ...geoprocessingTools,
 ];
 
 /**
@@ -96,6 +101,7 @@ export function getToolStats() {
       interactiveMap: interactiveMapTools.length,
       imageGeneration: imageGenerationTools.length,
       gisLayers: gisLayersTools.length,
+      geoprocessing: geoprocessingTools.length,
     },
   };
 }
