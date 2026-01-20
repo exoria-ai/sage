@@ -3,6 +3,92 @@
 > Research conducted: January 20, 2026
 > Status: Research complete, implementation pending
 
+---
+
+## Questions & Technical Challenges
+
+### High Priority
+
+#### 1. Omega/Phi/Kappa → Heading/Pitch/Roll Conversion
+The photogrammetric angles (omega, phi, kappa) used by Sanborn follow aerial survey conventions, while ESRI's OIC uses (heading, pitch, roll) in a navigation reference frame. The conversion is **not** simply radians-to-degrees:
+- Omega/phi/kappa are rotations applied in a specific order around specific axes
+- The `isFlipped` flag in Sanborn data suggests camera orientation varies
+- Getting this wrong means measurements and click-to-location will be broken
+
+**Questions:**
+- What rotation order does Sanborn use? (ω-φ-κ is typical but need to confirm)
+- How does `isFlipped: true` affect the transformation?
+- Can we validate by comparing footprint polygons from Sanborn vs our calculation?
+
+#### 2. COG Rendering in OrientedImageryLayer
+Sanborn serves 50-75MB Cloud Optimized GeoTIFFs. Their viewer uses a custom `CogImage` JavaScript class with byte-range requests.
+
+**Questions:**
+- Does OrientedImageryLayer natively support COG URLs, or does it expect a tile service?
+- If not native, can we use geotiff.js as an intermediary?
+- Would a server-side tile proxy (converting COG → PNG tiles on demand) be needed?
+- What's the latency/UX impact of loading large COGs vs pre-tiled imagery?
+
+#### 3. Dynamic Feature Source Updates
+We want to query FindFootprints on map click and display results in OrientedImageryLayer.
+
+**Questions:**
+- Can OrientedImageryLayer's `source` property be updated dynamically after creation?
+- Does OrientedImageryViewer widget handle layer source changes gracefully?
+- Should we create a new layer per query, or maintain a single layer with accumulating features?
+
+### Medium Priority
+
+#### 4. State Plane Projection Performance
+Every interaction requires EPSG:6418 ↔ WGS84 conversion.
+
+**Questions:**
+- Is ESRI's client-side projection engine fast enough for real-time use?
+- Should we do projection server-side in the FindFootprints proxy?
+- Can we cache the projection transformation?
+
+#### 5. Multi-Year Dataset Handling
+Sanborn has 2022, 2023, and 2024 imagery with different dataset IDs.
+
+**Questions:**
+- Should users select a year, or show all available years?
+- How do we handle the UI when multiple years have coverage for the same location?
+- Are there differences in camera calibration between years that affect the OIC schema?
+
+#### 6. Measurement Tool Accuracy
+ESRI's OrientedImageryViewer includes height/distance measurement tools that require the `Accuracy` field.
+
+**Questions:**
+- What accuracy values should we use? (Currently hardcoded `"0.5,0.5,1,1,1,1,1,1"`)
+- Does Sanborn provide actual accuracy/uncertainty metadata anywhere?
+- Do measurements require the `surfaceModelUrl` (DEM) data to work correctly?
+
+### Lower Priority / Nice to Have
+
+#### 7. Integration with Existing Parcel Workflow
+When a user looks up a parcel in SAGE, could we automatically show oblique views?
+
+**Questions:**
+- What's the best UX? Automatic panel? Button to open obliques?
+- Should oblique imagery be a separate "mode" or integrated into the main map?
+
+#### 8. Fallback to Sanborn Viewer
+If our integration has issues, we could link out to Sanborn's viewer.
+
+**Questions:**
+- Can we construct a deep link to Sanborn's viewer for a specific location?
+- What URL parameters does their viewer accept?
+
+#### 9. API Stability / Terms of Service
+We're using undocumented APIs discovered through reverse engineering.
+
+**Questions:**
+- Is Solano County aware we're accessing this data directly?
+- Could Sanborn block or rate-limit our access?
+- Should we coordinate with County GIS staff about this integration?
+
+---
+
 ## Executive Summary
 
 Solano County has Sanborn oblique aerial imagery with a dedicated viewer at https://obliqueanalyst.sanborn.com/Solano_County/. This research documents how the imagery API works and how it could be integrated into SAGE using ESRI's `OrientedImageryLayer`.
