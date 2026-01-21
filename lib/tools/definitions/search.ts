@@ -57,8 +57,8 @@ and then filter by city or use spatial queries.`,
   },
 });
 
-export const getParcelsInBufferTool = defineTool({
-  name: 'get_parcels_in_buffer',
+export const findNearbyParcelsTool = defineTool({
+  name: 'find_nearby_parcels',
   description: `Find all parcels within a specified radius of a location or parcel.
 
 PRIMARY USE CASE: Property owner notification lists for discretionary permits.
@@ -114,4 +114,4 @@ LIMITS: Maximum 250 parcels returned. If truncated, total_parcels shows full cou
 });
 
 /** All search tools */
-export const searchTools = [searchParcelsTool, getParcelsInBufferTool];
+export const searchTools = [searchParcelsTool, findNearbyParcelsTool];

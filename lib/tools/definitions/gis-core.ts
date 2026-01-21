@@ -220,8 +220,8 @@ USE CASE: "Who provides services to this property?" or
   },
 });
 
-export const getNearbyTool = defineTool({
-  name: 'get_nearby',
+export const findNearbyTool = defineTool({
+  name: 'find_nearby',
   description: `Find nearby points of interest.
 
 AVAILABLE LAYER TYPES:
@@ -267,5 +267,5 @@ export const gisCoreTools = [
   getFireHazardZoneTool,
   getSupervisorDistrictTool,
   getSpecialDistrictsTool,
-  getNearbyTool,
+  findNearbyTool,
 ];

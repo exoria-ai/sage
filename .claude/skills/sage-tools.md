@@ -110,8 +110,8 @@ return jsonResponse({ success: true, data: result });
 
 ### Search (`search.ts`)
 - `search_parcels` - Query parcels by criteria
-- `get_parcels_in_buffer` - Notification list generation
-- `get_nearby` - POI proximity search
+- `find_nearby_parcels` - Notification list generation
+- `find_nearby` - POI proximity search
 
 ### Documents
 - `search_county_code`, `get_county_code_sections` - County Code

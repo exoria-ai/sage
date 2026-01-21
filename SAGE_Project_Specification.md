@@ -63,7 +63,7 @@ SAGE now has full capability in 11 of 13 functions, with partial capability in 1
 │  │  geocode_address    search_county_code  search_parcels  render_map   │   │
 │  │  get_parcel_details get_code_sections   get_parcels_in  generate_    │   │
 │  │  get_zoning         search_budget         _buffer         infographic│   │
-│  │  get_flood_zone     get_dept_budget     get_nearby      edit_image   │   │
+│  │  get_flood_zone     get_dept_budget     find_nearby      edit_image   │   │
 │  │  get_fire_hazard    search_general_plan                              │   │
 │  │  get_supervisor     get_gp_policies                                  │   │
 │  │  get_special_dists  get_gp_chapter      ROUTING         ORG CHART    │   │
@@ -180,8 +180,8 @@ Level 3: On-Demand Reference (Skill)
 | Tool | Input | Output | Status |
 |------|-------|--------|--------|
 | `search_parcels` | criteria object | count, aggregates, sample parcels | ✓ Live |
-| `get_parcels_in_buffer` | APN + radius | parcels within buffer for notifications | ✓ Live |
-| `get_nearby` | layer type, location, radius | nearby features with distances | ✓ Live |
+| `find_nearby_parcels` | APN + radius | parcels within buffer for notifications | ✓ Live |
+| `find_nearby` | layer type, location, radius | nearby features with distances | ✓ Live |
 | `render_map` | APN, buffer, or bbox | Static map PNG with parcel highlighting | ✓ Live |
 
 #### County Code Tools (Chapter 26, 28, etc.)

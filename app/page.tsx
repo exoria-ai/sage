@@ -415,7 +415,7 @@ export default function Home() {
             { name: 'geocode_address', desc: 'Convert address to coordinates and APN' },
             { name: 'get_parcel_details', desc: 'Property info, assessment, boundaries' },
             { name: 'search_parcels', desc: 'Find parcels by zoning, size, use, value' },
-            { name: 'get_parcels_in_buffer', desc: 'Parcels within radius (for notification lists)' },
+            { name: 'find_nearby_parcels', desc: 'Parcels within radius (for notification lists)' },
           ]}
         />
 
@@ -425,7 +425,7 @@ export default function Home() {
             { name: 'get_zoning', desc: 'Zoning with automatic jurisdiction routing' },
             { name: 'get_special_districts', desc: 'Fire, water, school, waste districts' },
             { name: 'get_supervisor_district', desc: 'Board of Supervisors district' },
-            { name: 'get_nearby', desc: 'Schools, parks, fire stations within radius' },
+            { name: 'find_nearby', desc: 'Schools, parks, fire stations within radius' },
           ]}
         />
 
@@ -496,7 +496,7 @@ export default function Home() {
             { name: 'list_gis_layers', desc: 'List layers by category or priority' },
             { name: 'search_gis_layers', desc: 'Keyword search across 112 layers' },
             { name: 'get_gis_layer_details', desc: 'Service URL, fields, metadata' },
-            { name: 'find_layers_for_question', desc: 'Match questions to relevant layers' },
+            { name: 'suggest_layers', desc: 'Match questions to relevant layers' },
           ]}
         />
 

@@ -319,7 +319,7 @@ INPUT: Either APN or coordinates`,
     },
   },
   {
-    name: 'get_nearby',
+    name: 'find_nearby',
     description: `Find nearby points of interest.
 
 LAYER TYPES: school, park, fire_station, hospital, library, police, transit, community_center
@@ -392,7 +392,7 @@ SECTION ID FORMAT: "26-11", "28.21.20", "28.01"`,
     },
   },
   {
-    name: 'get_parcels_in_buffer',
+    name: 'find_nearby_parcels',
     description: `Find parcels within a radius of a location.
 
 INPUT: apn or coordinates, radius_feet (default: 300)
@@ -818,7 +818,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'get_special_districts':
         result = await getSpecialDistricts(args as { apn?: string; latitude?: number; longitude?: number });
         break;
-      case 'get_nearby':
+      case 'find_nearby':
         result = await getNearby(args as Parameters<typeof getNearby>[0]);
         break;
       case 'get_county_code_sections':
@@ -833,7 +833,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'search_county_code':
         result = await searchCountyCode(args as { query: string; chapter?: string; max_results?: number });
         break;
-      case 'get_parcels_in_buffer':
+      case 'find_nearby_parcels':
         result = await getParcelsInBuffer(args as Parameters<typeof getParcelsInBuffer>[0]);
         break;
       case 'search_budget':

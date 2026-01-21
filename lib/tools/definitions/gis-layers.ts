@@ -132,8 +132,8 @@ Example searches:
   },
 });
 
-export const findLayersForQuestionTool = defineTool({
-  name: 'find_layers_for_question',
+export const suggestLayersTool = defineTool({
+  name: 'suggest_layers',
   description: `Find GIS layers that can answer a user's question.
 
 WHEN TO USE:
@@ -171,5 +171,5 @@ export const gisLayersTools = [
   listGISLayersTool,
   getGISLayerDetailsTool,
   searchGISLayersTool,
-  findLayersForQuestionTool,
+  suggestLayersTool,
 ];

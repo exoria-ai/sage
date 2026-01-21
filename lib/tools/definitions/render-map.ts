@@ -50,7 +50,7 @@ BASEMAP OPTIONS:
 BUFFER MODE:
   render_map({ buffer: { apn: "003-025-1020", radius_feet: 300 } })
   → Source parcel highlighted orange, buffer shown as dashed circle
-  → Use get_parcels_in_buffer separately if you need owner names for notification lists
+  → Use find_nearby_parcels separately if you need owner names for notification lists
 
 COUNTY VIEW:
   render_map({ extent: 'county', layers: { countyBoundary: true, cityBoundary: true } })

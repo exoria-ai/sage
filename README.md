@@ -40,9 +40,9 @@ Provides Claude with 40+ tools across multiple categories:
 - `get_fire_hazard_zone` - CAL FIRE FHSZ classification
 - `get_supervisor_district` - Board of Supervisors district
 - `get_special_districts` - All service districts for a location
-- `get_nearby` - Find nearby schools, parks, fire stations, etc.
+- `find_nearby` - Find nearby schools, parks, fire stations, etc.
 - `search_parcels` - Search parcels by criteria with aggregations
-- `get_parcels_in_buffer` - Parcels within radius (notification lists)
+- `find_nearby_parcels` - Parcels within radius (notification lists)
 - `render_map` - Generate static map images
 - `get_solano_context` - Retrieve reference materials
 - `get_directions` - Turn-by-turn driving directions
