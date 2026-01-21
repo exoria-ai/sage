@@ -47,15 +47,19 @@ export const getParcelDetailsTool = defineTool({
 INPUT: Either APN (preferred) or coordinates
 
 OUTPUT:
-- Basic: APN, situs address, acreage, legal description
-- Assessment: Assessed land/improvement values, base year (Prop 13)
-- Owner: Owner name (if public record)
-- Geometry: Parcel boundary coordinates
+- Parcel: APN, address, city, acreage, lot sqft, use code/description, subdivision, zoning
+- Building: Year built, sqft (total, floors, garage), stories, beds/baths, rooms, HVAC, pool, solar
+- Assessment: Roll year, land/improvement/total value, trees & vines, equipment, tax rate area
+- Williamson Act: Enrollment status, contract number, prime/nonprime acres (if applicable)
+- Flags: Government owned, homeowner exemption
+- Links: Property details URL, tax map URL, tax info URL
+- Geometry: Parcel boundary polygon
 
 NOTES:
 - APN format: XXX-XXX-XXX (with or without dashes)
 - Assessed value ≠ market value (Prop 13 limits increases to 2%/year)
-- For coordinates, returns parcel containing that point`,
+- For coordinates, returns parcel containing that point
+- Empty/null fields are omitted from response`,
   schema: {
     apn: z.string().optional().describe("Assessor's Parcel Number (format: XXX-XXX-XXX)"),
     latitude: z.number().optional().describe('Latitude in WGS84 (use if no APN)'),
