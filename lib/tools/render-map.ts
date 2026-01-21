@@ -1,12 +1,17 @@
 /**
- * Render Map Tool v2
+ * Capture Map View Tool
  *
- * Generates static map images using ESRI's Export Web Map Task.
- * This mirrors the interactive map viewer by using the same WebMap configuration,
- * sending a single request to ESRI's print service for server-side rendering.
+ * Generates map snapshots for AI spatial analysis using ESRI's Export Web Map Task.
+ * This tool is designed for the AI to visually assess geographic context, verify
+ * spatial relationships, and understand the layout of features.
  *
- * Operational layers use the map service's default symbology.
- * Custom symbology is only applied to graphics layers (highlights, buffers, markers).
+ * Key features:
+ * - Vector tile parcels with APN labels at appropriate zoom levels
+ * - Configurable layers (aerial imagery, boundaries, hazards)
+ * - Highlight and buffer visualization for specific parcels
+ * - Rich metadata for spatial context (extent, scale, layers shown)
+ *
+ * For user-facing interactive maps, use get_interactive_map_url instead.
  */
 
 import { parseAPN } from '@/lib/utils/apn';
@@ -73,6 +78,19 @@ export interface ExtentLayerConfig {
 
 type BasemapType = 'topographic' | 'imagery' | 'imagery-hybrid' | 'navigation';
 
+/** Layout template options for print output */
+type LayoutTemplate = 'MAP_ONLY' | 'Letter ANSI A Landscape' | 'A4 Landscape';
+
+/** Layout options when using a template with marginalia */
+interface LayoutOptions {
+  /** Title text for the map */
+  title?: string;
+  /** Author attribution */
+  author?: string;
+  /** Scale bar unit: 'Feet', 'Miles', 'Meters', 'Kilometers' */
+  scalebarUnit?: 'Feet' | 'Miles' | 'Meters' | 'Kilometers';
+}
+
 interface MapOptions {
   center?: { latitude: number; longitude: number };
   apn?: string;
@@ -93,9 +111,41 @@ interface MapOptions {
   additionalLayers?: AdditionalMapService[];
   /** Use a layer's extent as the map extent */
   extentLayer?: ExtentLayerConfig;
+  /** Layout template - 'MAP_ONLY' for just the map, or a template with scale bar/title */
+  layout?: LayoutTemplate;
+  /** Options for layout templates with marginalia */
+  layoutOptions?: LayoutOptions;
 }
 
-interface RenderMapResult {
+/** Spatial context metadata for AI analysis */
+interface SpatialContext {
+  /** Bounding box of the map view in WGS84 */
+  extent: {
+    xmin: number;
+    ymin: number;
+    xmax: number;
+    ymax: number;
+  };
+  /** Approximate map scale (e.g., "1:5000") */
+  scale: string;
+  /** List of layers visible in the map */
+  layersShown: string[];
+  /** APNs that are highlighted on the map */
+  highlightedApns?: string[];
+  /** Buffer info if a buffer is shown */
+  buffer?: {
+    centerApn?: string;
+    radiusFeet: number;
+  };
+  /** Approximate area shown in the map */
+  approximateArea: string;
+  /** Layout template used (if not MAP_ONLY, includes scale bar) */
+  layout?: string;
+  /** Whether a scale bar is included in the output */
+  hasScaleBar?: boolean;
+}
+
+interface CaptureMapResult {
   success: boolean;
   imageUrl?: string;
   imageBase64?: string;
@@ -104,6 +154,8 @@ interface RenderMapResult {
   width?: number;
   height?: number;
   zoom?: number;
+  /** Rich spatial context for AI analysis */
+  context?: SpatialContext;
   error_type?: string;
   message?: string;
   suggestion?: string;
@@ -123,6 +175,8 @@ const DEFAULT_ZOOM = MAP_DEFAULTS.zoom;
 // Layer URLs - these match the WebMap's configured layers
 const LAYER_URLS = {
   parcels: `${SOLANO_AGOL_BASE}/Parcels_Public_Aumentum/FeatureServer/0`,
+  // Vector tile layer includes APN labels at appropriate zoom levels
+  parcelsVectorTile: 'https://vectortileservices7.arcgis.com/KbDaBCmcuKbyQfck/arcgis/rest/services/Parcels_Public_Aumentum_Vector_Tile/VectorTileServer',
   addressPoints: `${SOLANO_AGOL_BASE}/Address_Points/FeatureServer/0`,
   cityBoundary: SOLANO_SERVICES.cityBoundary,
   countyBoundary: `${SOLANO_AGOL_BASE}/County_Boundary/FeatureServer/1`,
@@ -553,6 +607,7 @@ interface WebMapJson {
     id: string;
     title: string;
     url?: string;
+    styleUrl?: string; // For VectorTileLayer
     visibility: boolean;
     opacity: number;
     layerType: string;
@@ -663,16 +718,16 @@ function buildWebMapJson(options: {
     });
   }
 
-  // 3. Parcel boundaries (use service default symbology)
+  // 3. Parcel boundaries with labels (vector tile layer)
+  // Vector tiles include APN labels at zoom >= 16
   if (layers.parcels !== false && zoom >= 14) {
     operationalLayers.push({
       id: 'parcels',
       title: 'Parcels',
-      url: LAYER_URLS.parcels,
+      layerType: 'VectorTileLayer',
+      styleUrl: `${LAYER_URLS.parcelsVectorTile}/resources/styles/root.json`,
       visibility: true,
       opacity: 1,
-      layerType: 'ArcGISFeatureLayer',
-      // No layerDefinition.drawingInfo - use service default symbology
     });
   }
 
@@ -901,7 +956,11 @@ function buildWebMapJson(options: {
 // Export Function
 // =============================================================================
 
-async function exportWebMap(webMapJson: WebMapJson): Promise<{
+async function exportWebMap(
+  webMapJson: WebMapJson,
+  layout: LayoutTemplate = 'MAP_ONLY',
+  layoutOptions?: LayoutOptions
+): Promise<{
   success: boolean;
   imageUrl?: string;
   error?: string;
@@ -910,9 +969,31 @@ async function exportWebMap(webMapJson: WebMapJson): Promise<{
     const params = new URLSearchParams({
       Web_Map_as_JSON: JSON.stringify(webMapJson),
       Format: 'PNG32',
-      Layout_Template: 'MAP_ONLY',
+      Layout_Template: layout,
       f: 'json',
     });
+
+    // Add layout options if using a template with marginalia
+    if (layout !== 'MAP_ONLY' && layoutOptions) {
+      const options: Record<string, unknown> = {};
+      if (layoutOptions.title) options.titleText = layoutOptions.title;
+      if (layoutOptions.author) options.authorText = layoutOptions.author;
+      if (layoutOptions.scalebarUnit) {
+        options.scaleBarOptions = {
+          metricUnit: layoutOptions.scalebarUnit === 'Meters' ? 'esriMeters' :
+                      layoutOptions.scalebarUnit === 'Kilometers' ? 'esriKilometers' : undefined,
+          metricLabel: layoutOptions.scalebarUnit === 'Meters' ? 'm' :
+                       layoutOptions.scalebarUnit === 'Kilometers' ? 'km' : undefined,
+          nonMetricUnit: layoutOptions.scalebarUnit === 'Feet' ? 'esriFeet' :
+                         layoutOptions.scalebarUnit === 'Miles' ? 'esriMiles' : undefined,
+          nonMetricLabel: layoutOptions.scalebarUnit === 'Feet' ? 'ft' :
+                          layoutOptions.scalebarUnit === 'Miles' ? 'mi' : undefined,
+        };
+      }
+      if (Object.keys(options).length > 0) {
+        params.set('Layout_Options', JSON.stringify(options));
+      }
+    }
 
     const response = await fetch(PRINT_SERVICE_URL, {
       method: 'POST',
@@ -979,7 +1060,52 @@ async function fetchImageAsBase64(url: string): Promise<{
 // Main Export
 // =============================================================================
 
-export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
+/**
+ * Calculate approximate map scale based on zoom level and latitude
+ */
+function calculateScale(zoom: number, latitude: number): string {
+  // At zoom 0, the entire world (360°) fits in 256 pixels
+  // Each zoom level doubles the resolution
+  // Scale = ground distance / map distance
+  // Ground distance per pixel = (circumference of earth * cos(lat)) / (256 * 2^zoom)
+  const earthCircumference = 40075016.686; // meters
+  const metersPerPixel = (earthCircumference * Math.cos(latitude * Math.PI / 180)) / (256 * Math.pow(2, zoom));
+
+  // Assuming 96 DPI display, 1 inch = 0.0254 meters
+  const metersPerInch = 0.0254;
+  const pixelsPerInch = 96;
+  const scale = Math.round(metersPerPixel * pixelsPerInch / metersPerInch);
+
+  // Round to nice numbers
+  if (scale >= 1000000) return `1:${Math.round(scale / 1000000)}M`;
+  if (scale >= 1000) return `1:${Math.round(scale / 1000)}K`;
+  return `1:${scale}`;
+}
+
+/**
+ * Calculate approximate area shown in the map
+ */
+function calculateApproximateArea(bbox: { xmin: number; ymin: number; xmax: number; ymax: number }): string {
+  const latCenter = (bbox.ymin + bbox.ymax) / 2;
+
+  // Convert degrees to approximate distances
+  const lonDist = (bbox.xmax - bbox.xmin) * 111320 * Math.cos(latCenter * Math.PI / 180); // meters
+  const latDist = (bbox.ymax - bbox.ymin) * 110540; // meters
+
+  const areaSqMeters = lonDist * latDist;
+  const areaSqMiles = areaSqMeters / 2589988;
+  const areaAcres = areaSqMeters / 4046.86;
+
+  if (areaSqMiles >= 1) {
+    return `~${areaSqMiles.toFixed(1)} sq miles`;
+  } else if (areaAcres >= 10) {
+    return `~${Math.round(areaAcres)} acres`;
+  } else {
+    return `~${areaAcres.toFixed(1)} acres`;
+  }
+}
+
+export async function captureMapView(args: MapOptions): Promise<CaptureMapResult> {
   const {
     center,
     apn,
@@ -997,6 +1123,8 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     layers = {},
     additionalLayers,
     extentLayer,
+    layout = 'MAP_ONLY',
+    layoutOptions,
   } = args;
 
   // Determine center and zoom
@@ -1112,6 +1240,20 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       }
       lat = parcelExtent.centerLat;
       lon = parcelExtent.centerLon;
+    } else if (apns && apns.length > 0) {
+      // When only apns provided, center on the first one
+      const firstApn = apns[0]!;
+      const parcelExtent = await getParcelExtent(firstApn);
+      if (!parcelExtent) {
+        return {
+          success: false,
+          error_type: 'APN_NOT_FOUND',
+          message: `Could not find parcel with APN "${firstApn}"`,
+          suggestion: 'Verify the APN format or provide coordinates instead',
+        };
+      }
+      lat = parcelExtent.centerLat;
+      lon = parcelExtent.centerLon;
     } else if (center) {
       lat = center.latitude;
       lon = center.longitude;
@@ -1125,7 +1267,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
       return {
         success: false,
         error_type: 'INVALID_INPUT',
-        message: 'Must provide either center coordinates, APN, bbox, or buffer',
+        message: 'Must provide either center coordinates, APN, apns, bbox, or buffer',
         suggestion: 'Provide at least one location parameter',
       };
     }
@@ -1165,7 +1307,7 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
   });
 
   // Export the map
-  const exportResult = await exportWebMap(webMapJson);
+  const exportResult = await exportWebMap(webMapJson, layout, layoutOptions);
   if (!exportResult.success || !exportResult.imageUrl) {
     return {
       success: false,
@@ -1186,6 +1328,44 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     };
   }
 
+  // Build list of layers shown
+  const layersShown: string[] = [];
+  if (layers.aerial2025) layersShown.push('aerial2025');
+  if (layers.garbageAreas) layersShown.push('garbageAreas');
+  if (layers.parcels !== false && zoom >= 14) layersShown.push('parcels (with labels)');
+  if (boundaries?.showCities || layers.cityBoundary) layersShown.push('cityBoundary');
+  if (boundaries?.showCounty || layers.countyBoundary) layersShown.push('countyBoundary');
+  if (layers.addressPoints) layersShown.push('addressPoints');
+  if (additionalLayers) {
+    additionalLayers.forEach(l => layersShown.push(l.title || 'additional layer'));
+  }
+  layersShown.push(`basemap: ${basemap}`);
+
+  // Build spatial context
+  const context: SpatialContext = {
+    extent: bbox,
+    scale: calculateScale(zoom, lat),
+    layersShown,
+    approximateArea: calculateApproximateArea(bbox),
+  };
+
+  if (parcelApns.length > 0) {
+    context.highlightedApns = parcelApns;
+  }
+
+  if (buffer && bufferRadiusFeet) {
+    context.buffer = {
+      centerApn: bufferSourceApn,
+      radiusFeet: bufferRadiusFeet,
+    };
+  }
+
+  // Add layout info
+  if (layout !== 'MAP_ONLY') {
+    context.layout = layout;
+    context.hasScaleBar = true;
+  }
+
   return {
     success: true,
     imageUrl: exportResult.imageUrl,
@@ -1195,5 +1375,9 @@ export async function renderMap(args: MapOptions): Promise<RenderMapResult> {
     width,
     height,
     zoom,
+    context,
   };
 }
+
+// Keep legacy export for backward compatibility during migration
+export const renderMap = captureMapView;

@@ -1,94 +1,84 @@
 /**
- * Render Map Tool Definition
+ * Capture Map View Tool Definition
  *
- * Map rendering with Vercel Blob storage for image URLs.
+ * Generates map snapshots for AI spatial analysis.
+ * For user-facing interactive maps, use get_interactive_map_url instead.
  */
 
 import { z } from 'zod';
 import { put } from '@vercel/blob';
 import { defineTool, ToolResponse } from '../types';
-import { renderMap } from '../render-map';
+import { captureMapView } from '../render-map';
 
-export const renderMapTool = defineTool({
-  name: 'render_map',
-  description: `Generate a static map image for the user to view.
+export const captureMapViewTool = defineTool({
+  name: 'capture_map_view',
+  description: `Capture a map snapshot for spatial analysis.
 
-**PURPOSE**: Creates a visual map image. You MUST share the imageUrl with the user.
+**PURPOSE**: Generates a map image for YOU (the AI) to visually analyze spatial relationships,
+verify locations, and understand geographic context. The image is returned directly to you.
 
-WORKFLOW (address → map):
-1. geocode_address({ address: "675 Texas St, Fairfield, CA" }) → get APN
-2. render_map({ apn: "003-025-1020" }) → centers on parcel, highlights it
+For USER-FACING interactive maps where they can pan/zoom/explore, use get_interactive_map_url instead.
 
-LOCATION INPUT (provide ONE):
-- apn: Assessor's Parcel Number - centers on parcel and highlights it
-- center: { latitude, longitude } - centers on point with marker
-- apns: Array of APNs - highlights multiple parcels
-- buffer: Buffer visualization for notification radius maps
-- extent: 'county' - shows entire Solano County
+**WHEN TO USE THIS TOOL**:
+- You need to visually verify a location or parcel
+- You're assessing spatial relationships ("is this near the freeway?")
+- You want to see the layout of parcels in a buffer/notification area
+- You need to confirm what layers/features are present in an area
+- You're making a spatial decision that requires visual context
 
-LAYER CONTROL:
-Enable/disable layers via the 'layers' option. All layers use map service default symbology.
+**WHAT YOU GET BACK**:
+- The map image (displayed to you for analysis)
+- Spatial context metadata:
+  - extent: Bounding box coordinates
+  - scale: Approximate map scale (e.g., "1:5K")
+  - layersShown: List of visible layers
+  - highlightedApns: APNs highlighted on map
+  - approximateArea: Area shown (e.g., "~25 acres")
 
-  render_map({ apn: "003-025-1020", layers: { aerial2025: true } })
+**LOCATION INPUT** (provide ONE):
+- apn: Centers on and highlights a parcel
+- center: { latitude, longitude } - Centers on a point
+- apns: Array of APNs to highlight
+- buffer: Buffer visualization for notification maps
+- extent: 'county' for full Solano County view
 
-Available layers:
-- aerial2025: Solano County 2025 high-resolution aerial imagery (default: false)
-  **IMPORTANT**: Enable this when zoomed in on parcels - it's clearer and more accurate than
-  the generic world imagery basemap, especially when showing parcel boundaries.
-- parcels: Parcel boundaries (default: true when zoom >= 14)
-- addressPoints: Address point markers (default: false)
-- cityBoundary: City boundary outlines (default: false)
-- countyBoundary: County boundary outline (default: false)
-- garbageAreas: Garbage service areas (default: false)
+**EXAMPLES**:
 
-BASEMAP OPTIONS:
-- topographic: (default) Street map with terrain/hillshade
-- imagery: ESRI World satellite imagery
-- imagery-hybrid: Satellite imagery with road/label overlay
-- navigation: Clean navigation-focused street map
+Verify a parcel location:
+  capture_map_view({ apn: "003-025-1020" })
 
-BUFFER MODE:
-  render_map({ buffer: { apn: "003-025-1020", radius_feet: 300 } })
-  → Source parcel highlighted orange, buffer shown as dashed circle
-  → Use find_nearby_parcels separately if you need owner names for notification lists
+See parcels in a notification buffer:
+  capture_map_view({ buffer: { apn: "003-025-1020", radius_feet: 300 } })
 
-COUNTY VIEW:
-  render_map({ extent: 'county', layers: { countyBoundary: true, cityBoundary: true } })
-
-ADDITIONAL MAP SERVICES:
-Add custom map services as overlays rendered in order (first = bottom, last = top):
-  render_map({
+Check flood zones for a property:
+  capture_map_view({
     apn: "003-025-1020",
     additionalLayers: [
-      { url: "https://services2.arcgis.com/.../Zoning/FeatureServer/0", title: "Zoning", opacity: 0.7 },
       { url: "https://hazards.fema.gov/.../NFHL/MapServer/28", title: "Flood Zones" }
     ]
   })
 
-EXTENT FROM LAYER:
-Set the map extent to match a layer's extent:
-  render_map({
-    extentLayer: {
-      url: "https://services2.arcgis.com/.../Fire_Stations/FeatureServer/0",
-      padding: 0.15
-    },
-    additionalLayers: [
-      { url: "https://services2.arcgis.com/.../Fire_Stations/FeatureServer/0", title: "Fire Stations" }
-    ]
-  })
+View with aerial imagery for detail:
+  capture_map_view({ apn: "003-025-1020", layers: { aerial2025: true } })
 
-OTHER OPTIONS:
-- zoom: 1-19 (default: 17, auto-calculated for buffer/extent modes)
-- width/height: Image dimensions in pixels (default: 1200x800)
+**AVAILABLE LAYERS**:
+- parcels: Parcel boundaries WITH APN LABELS (default: true at zoom >= 14)
+- aerial2025: Solano County 2025 high-res aerial - great for parcel detail
+- addressPoints: Address point markers
+- cityBoundary: City boundary outlines
+- countyBoundary: County boundary outline
+- garbageAreas: Garbage service areas
 
-REMEMBER: Always include the imageUrl in your response!`,
+**BASEMAPS**: topographic (default), imagery, imagery-hybrid, navigation
+
+**NOTE**: An imageUrl is also generated for sharing with the user if needed.`,
   schema: {
-    apn: z.string().optional().describe("Assessor's Parcel Number to center map on and highlight"),
-    apns: z.array(z.string()).optional().describe('Array of APNs to highlight'),
+    apn: z.string().optional().describe("APN to center on and highlight"),
+    apns: z.array(z.string()).optional().describe('Multiple APNs to highlight'),
     center: z.object({
       latitude: z.number(),
       longitude: z.number(),
-    }).optional().describe('Center point coordinates (shows marker if no APN)'),
+    }).optional().describe('Center point (shows marker if no APN)'),
     bbox: z.object({
       xmin: z.number(),
       ymin: z.number(),
@@ -96,43 +86,49 @@ REMEMBER: Always include the imageUrl in your response!`,
       ymax: z.number(),
     }).optional().describe('Bounding box in WGS84'),
     buffer: z.object({
-      apn: z.string().optional().describe('Source parcel APN for buffer center'),
-      latitude: z.number().optional().describe('Source point latitude (if no APN)'),
-      longitude: z.number().optional().describe('Source point longitude (if no APN)'),
-      radius_feet: z.number().describe('Buffer radius in feet (e.g., 300, 500, 1000)'),
+      apn: z.string().optional().describe('Source parcel APN'),
+      latitude: z.number().optional(),
+      longitude: z.number().optional(),
+      radius_feet: z.number().describe('Buffer radius in feet'),
       show_ring: z.boolean().optional().describe('Show buffer circle (default: true)'),
-    }).optional().describe('Buffer visualization for notification radius maps'),
+    }).optional().describe('Buffer visualization'),
     layers: z.object({
-      aerial2025: z.boolean().optional().describe('Solano County 2025 high-res aerial - USE THIS when zoomed in on parcels'),
-      parcels: z.boolean().optional().describe('Parcel boundaries (default: true at zoom >= 14)'),
-      addressPoints: z.boolean().optional().describe('Address point markers'),
-      cityBoundary: z.boolean().optional().describe('City boundary outlines'),
-      countyBoundary: z.boolean().optional().describe('County boundary outline'),
-      garbageAreas: z.boolean().optional().describe('Garbage service areas'),
-    }).optional().describe('Layer visibility - all use map service default symbology'),
-    extent: z.enum(['county']).optional().describe("'county' to show entire Solano County"),
-    basemap: z.enum(['topographic', 'imagery', 'imagery-hybrid', 'navigation']).optional()
-      .describe("Base tiles: 'topographic' (default), 'imagery', 'imagery-hybrid', or 'navigation'"),
-    zoom: z.number().optional().describe('Zoom level 1-19 (default: 17)'),
-    width: z.number().optional().describe('Image width in pixels (default: 1200)'),
-    height: z.number().optional().describe('Image height in pixels (default: 800)'),
-    format: z.enum(['png', 'jpg']).optional().describe('Image format (default: png)'),
+      aerial2025: z.boolean().optional().describe('2025 high-res aerial imagery'),
+      parcels: z.boolean().optional().describe('Parcels with APN labels (default: true at zoom >= 14)'),
+      addressPoints: z.boolean().optional(),
+      cityBoundary: z.boolean().optional(),
+      countyBoundary: z.boolean().optional(),
+      garbageAreas: z.boolean().optional(),
+    }).optional().describe('Layer visibility'),
+    extent: z.enum(['county']).optional().describe("'county' for full Solano County"),
+    basemap: z.enum(['topographic', 'imagery', 'imagery-hybrid', 'navigation']).optional(),
+    zoom: z.number().optional().describe('Zoom 1-19 (default: 17)'),
+    width: z.number().optional().describe('Width in pixels (default: 1200)'),
+    height: z.number().optional().describe('Height in pixels (default: 800)'),
+    format: z.enum(['png', 'jpg']).optional(),
     additionalLayers: z.array(z.object({
-      url: z.string().describe('URL to the map service (MapServer or FeatureServer)'),
-      title: z.string().optional().describe('Display title for the layer'),
-      opacity: z.number().min(0).max(1).optional().describe('Layer opacity (0-1, default: 1)'),
-      layerType: z.enum(['ArcGISTiledMapServiceLayer', 'ArcGISMapServiceLayer', 'ArcGISFeatureLayer']).optional()
-        .describe('Layer type - auto-detected if not specified'),
-      where: z.string().optional().describe('Optional definition expression to filter features'),
-    })).optional().describe('Additional map services to overlay (rendered in order: first = bottom, last = top)'),
+      url: z.string().describe('Map service URL'),
+      title: z.string().optional(),
+      opacity: z.number().min(0).max(1).optional(),
+      layerType: z.enum(['ArcGISTiledMapServiceLayer', 'ArcGISMapServiceLayer', 'ArcGISFeatureLayer']).optional(),
+      where: z.string().optional().describe('Filter expression'),
+    })).optional().describe('Additional overlay layers'),
     extentLayer: z.object({
-      url: z.string().describe('URL to the layer (FeatureServer or MapServer)'),
-      where: z.string().optional().describe('Optional where clause to filter features for extent calculation'),
-      padding: z.number().min(0).max(1).optional().describe('Padding around the extent as a percentage (0-1, default: 0.1 = 10%)'),
-    }).optional().describe("Use a layer's extent as the map extent"),
+      url: z.string(),
+      where: z.string().optional(),
+      padding: z.number().min(0).max(1).optional(),
+    }).optional().describe("Use a layer's extent as map extent"),
+    layout: z.enum(['MAP_ONLY', 'Letter ANSI A Landscape', 'A4 Landscape']).optional()
+      .describe("Layout template: 'MAP_ONLY' (default) or template with scale bar/title"),
+    layoutOptions: z.object({
+      title: z.string().optional().describe('Title text for the map'),
+      author: z.string().optional().describe('Author attribution'),
+      scalebarUnit: z.enum(['Feet', 'Miles', 'Meters', 'Kilometers']).optional()
+        .describe('Scale bar unit'),
+    }).optional().describe('Options for layout templates (only used with non-MAP_ONLY layouts)'),
   },
-  handler: async ({ apn, apns, center, bbox, buffer, layers, extent, basemap, zoom, width, height, format, additionalLayers, extentLayer }): Promise<ToolResponse> => {
-    const result = await renderMap({
+  handler: async ({ apn, apns, center, bbox, buffer, layers, extent, basemap, zoom, width, height, format, additionalLayers, extentLayer, layout, layoutOptions }): Promise<ToolResponse> => {
+    const result = await captureMapView({
       apn,
       apns,
       center,
@@ -147,6 +143,8 @@ REMEMBER: Always include the imageUrl in your response!`,
       basemap,
       additionalLayers,
       extentLayer,
+      layout,
+      layoutOptions,
     });
 
     // If successful, upload to Vercel Blob and return URL
@@ -183,27 +181,34 @@ REMEMBER: Always include the imageUrl in your response!`,
         imageUrl = `${baseUrl}/api/map?${params.toString()}`;
       }
 
+      // Build spatial context summary for AI
+      const ctx = result.context;
+      const contextSummary = ctx ? `
+**Spatial Context:**
+- Scale: ${ctx.scale}
+- Area shown: ${ctx.approximateArea}
+- Layers: ${ctx.layersShown.join(', ')}
+- Extent: [${ctx.extent.xmin.toFixed(4)}, ${ctx.extent.ymin.toFixed(4)}] to [${ctx.extent.xmax.toFixed(4)}, ${ctx.extent.ymax.toFixed(4)}]
+${ctx.highlightedApns ? `- Highlighted APNs: ${ctx.highlightedApns.join(', ')}` : ''}
+${ctx.buffer ? `- Buffer: ${ctx.buffer.radiusFeet} ft radius${ctx.buffer.centerApn ? ` from ${ctx.buffer.centerApn}` : ''}` : ''}
+${ctx.hasScaleBar ? `- Layout: ${ctx.layout} (includes scale bar)` : ''}` : '';
+
       return {
         content: [
           {
             type: 'image',
             data: result.imageBase64,
             mimeType: result.mimeType,
-            annotations: {
-              audience: ['user'],
-              priority: 1.0,
-            },
           },
           {
             type: 'text',
-            text: `Map generated successfully.
+            text: `Map captured successfully.
+${contextSummary}
 
-📍 **IMPORTANT - Share this link with the user:**
-${imageUrl}
+**For user sharing:** ${imageUrl}
 
-Center: ${result.center?.latitude}, ${result.center?.longitude}
-Dimensions: ${result.width}x${result.height}
-Zoom: ${result.zoom}`,
+Center: ${result.center?.latitude.toFixed(6)}, ${result.center?.longitude.toFixed(6)}
+Dimensions: ${result.width}x${result.height} | Zoom: ${result.zoom}`,
           },
         ],
       };
@@ -216,5 +221,8 @@ Zoom: ${result.zoom}`,
   },
 });
 
-/** All render map tools */
-export const renderMapTools = [renderMapTool];
+// Legacy alias for backward compatibility
+export const renderMapTool = captureMapViewTool;
+
+/** All map capture tools */
+export const renderMapTools = [captureMapViewTool];
