@@ -102,6 +102,10 @@ export default function Home() {
             question="Create school district boundaries from parcel data"
             answer="Dissolved 152,738 parcels into 9 school district polygons. GeoJSON available at [URL]. Add to ArcGIS Online: Content → Add Item → URL → GeoJSON."
           />
+          <ExampleCard
+            question="Download parcel data for offline analysis"
+            answer="Parcels available as Shapefile (152k features, 89 fields) or File Geodatabase. Direct download URLs provided. LiDAR point cloud data also available for elevation analysis."
+          />
         </div>
       </section>
 
@@ -193,7 +197,7 @@ export default function Home() {
         <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>GIS Layer Catalog</h2>
         <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
           Discover and query 112 GIS layers across 11 categories from Solano County, cities, Caltrans, DWR, CAL FIRE, FEMA, and CalGEM.
-          Includes 10 years of historical aerial imagery, state flood data, traffic volumes, and oil/gas wells.
+          Many layers offer both live service URLs for real-time queries and file downloads (Shapefile, Geodatabase, LiDAR) for offline analysis.
         </p>
         <div
           style={{
@@ -213,15 +217,17 @@ export default function Home() {
           <CategoryCard name="Services" count={8} examples="Water, garbage" />
         </div>
         <p style={{ fontSize: '0.9rem', color: '#64748b' }}>
-          Each layer includes service URLs, field definitions, and example questions it can answer.
+          Each layer includes service URLs, field definitions, download links (where available), and example questions it can answer.
         </p>
       </section>
 
       {/* Map Capabilities */}
       <section style={{ marginBottom: '3.5rem' }}>
-        <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>Map Generation</h2>
+        <h2 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 600 }}>Map Tools</h2>
         <p style={{ color: '#475569', marginBottom: '1.5rem' }}>
-          Generate static map images or links to the interactive map explorer with various presets.
+          Two distinct map tools: <strong>capture_map_view</strong> generates static images for AI spatial analysis
+          (verifying locations, assessing relationships), while <strong>get_interactive_map_url</strong> creates links
+          for user exploration with pan/zoom/layer controls.
         </p>
         <div
           style={{
@@ -481,8 +487,8 @@ export default function Home() {
         <ToolGroup
           title="Maps & Visualization"
           tools={[
-            { name: 'render_map', desc: 'Generate static map images' },
-            { name: 'get_interactive_map_url', desc: 'URL for interactive map explorer' },
+            { name: 'capture_map_view', desc: 'Static map images for AI spatial analysis' },
+            { name: 'get_interactive_map_url', desc: 'URL for user exploration with presets' },
             { name: 'generate_infographic', desc: 'AI-generated diagrams and charts' },
             { name: 'get_directions', desc: 'Turn-by-turn driving directions' },
             { name: 'get_travel_time', desc: 'Distance and drive time' },
@@ -495,8 +501,9 @@ export default function Home() {
             { name: 'list_gis_categories', desc: 'Browse 11 layer categories' },
             { name: 'list_gis_layers', desc: 'List layers by category or priority' },
             { name: 'search_gis_layers', desc: 'Keyword search across 112 layers' },
-            { name: 'get_gis_layer_details', desc: 'Service URL, fields, metadata' },
+            { name: 'get_gis_layer_details', desc: 'Service URL, fields, metadata, downloads' },
             { name: 'suggest_layers', desc: 'Match questions to relevant layers' },
+            { name: 'list_gis_downloads', desc: 'Datasets available for download (Shapefile, GDB, LiDAR)' },
           ]}
         />
 
