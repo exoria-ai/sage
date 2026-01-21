@@ -174,10 +174,14 @@ export function MapContainer({
         // Query parcel by APN and zoom to it
         try {
           console.log('Querying parcel by APN:', highlightApn);
-          // parcelid field is the APN without dashes
-          const apnNoDashes = highlightApn.replace(/-/g, '');
+          // Normalize APN: strip dashes/spaces, add trailing 0 if 9 digits
+          // Solano County parcelids are always 10 digits ending in 0
+          let normalizedApn = highlightApn.replace(/[-\s]/g, '');
+          if (/^\d{9}$/.test(normalizedApn)) {
+            normalizedApn = normalizedApn + '0';
+          }
           const queryTask = new Query({
-            where: `parcelid = '${apnNoDashes}' OR parcelid = '${highlightApn}'`,
+            where: `parcelid = '${normalizedApn}'`,
             outFields: ['*'],
             returnGeometry: true,
           });
@@ -229,9 +233,13 @@ export function MapContainer({
 
             // If we got an APN from the address, query the parcel to highlight it
             if (apn) {
-              const apnNoDashes = apn.replace(/-/g, '');
+              // Normalize APN: strip dashes/spaces, add trailing 0 if 9 digits
+              let normalizedApn = String(apn).replace(/[-\s]/g, '');
+              if (/^\d{9}$/.test(normalizedApn)) {
+                normalizedApn = normalizedApn + '0';
+              }
               const parcelQuery = new Query({
-                where: `parcelid = '${apnNoDashes}' OR parcelid = '${apn}'`,
+                where: `parcelid = '${normalizedApn}'`,
                 outFields: ['*'],
                 returnGeometry: true,
               });
@@ -756,11 +764,73 @@ export function MapContainer({
             exactMatch: false,
             outFields: ['*'],
             name: 'Parcels (APN)',
-            placeholder: 'Enter APN (e.g., 0027010010)...',
+            placeholder: 'Enter APN (e.g., 003-025-102)...',
             maxResults: 6,
             maxSuggestions: 6,
             suggestionsEnabled: true,
             minSuggestCharacters: 4,
+            // Custom filter to normalize APN input (strip dashes, add trailing 0 if 9 digits)
+            filter: {
+              where: '1=1', // Default filter, actual filtering done in getResults
+            },
+            // Override getResults to normalize APN format before querying
+            getResults: (async (params: __esri.GetResultsHandlerParams) => {
+              const searchText = String(params.suggestResult?.text || '');
+              // Normalize: strip dashes/spaces, pad to 10 digits if 9
+              let normalized = searchText.replace(/[-\s]/g, '');
+              if (/^\d{9}$/.test(normalized)) {
+                normalized = normalized + '0'; // Add trailing zero for 9-digit APNs
+              }
+
+              // Query with normalized value
+              const searchQuery = new Query({
+                where: `parcelid LIKE '${normalized}%'`,
+                outFields: ['*'],
+                returnGeometry: true,
+                num: 6,
+              });
+
+              try {
+                const result = await query.executeQueryJSON(SOLANO_SERVICES.parcels, searchQuery);
+                return result.features.map((feature) => ({
+                  extent: feature.geometry?.extent,
+                  feature: new Graphic({
+                    geometry: feature.geometry ?? undefined,
+                    attributes: feature.attributes ?? {},
+                  }),
+                  name: String(feature.attributes?.parcelid || 'Unknown'),
+                }));
+              } catch {
+                return [];
+              }
+            }) as __esri.GetResultsHandler,
+            // Override getSuggestions to normalize APN format for suggestions
+            getSuggestions: (async (params: __esri.GetSuggestionsParametersParams) => {
+              const searchText = String(params.suggestTerm || '');
+              // Normalize: strip dashes/spaces, pad to 10 digits if 9
+              let normalized = searchText.replace(/[-\s]/g, '');
+              if (/^\d{9}$/.test(normalized)) {
+                normalized = normalized + '0';
+              }
+
+              // Query for suggestions
+              const suggestQuery = new Query({
+                where: `parcelid LIKE '${normalized}%'`,
+                outFields: ['parcelid'],
+                returnGeometry: false,
+                num: 6,
+              });
+
+              try {
+                const result = await query.executeQueryJSON(SOLANO_SERVICES.parcels, suggestQuery);
+                return result.features.map((feature) => ({
+                  text: String(feature.attributes?.parcelid || ''),
+                  key: String(feature.attributes?.parcelid || ''),
+                }));
+              } catch {
+                return [];
+              }
+            }) as __esri.GetSuggestionsParameters,
           }),
         ],
       });
