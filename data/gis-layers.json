@@ -72,6 +72,14 @@
       "baseUrl": "https://services7.arcgis.com/MyTOuXKXZoizwPz9/arcgis/rest/services",
       "type": "city",
       "maintainer": "City of Vallejo IT Department"
+    },
+    {
+      "id": "esri-living-atlas",
+      "name": "ESRI Living Atlas - US Census ACS",
+      "baseUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services",
+      "type": "federal",
+      "maintainer": "US Census Bureau / ESRI",
+      "notes": "American Community Survey 5-year estimates. Auto-updates annually when Census releases new data (typically December)."
     }
   ],
   "layers": [
@@ -2896,6 +2904,373 @@
           "notes": "USGS data portal with LAZ point cloud tiles, DEMs, and metadata. Navigate to select individual tiles or download bulk data."
         }
       ]
+    },
+    {
+      "id": "acs-population-race",
+      "name": "ACS Population by Race and Hispanic Origin",
+      "description": "Population broken down by race and Hispanic origin from the American Community Survey 5-year estimates. Includes total population, racial breakdowns, and Hispanic/Latino percentages.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "population", "race", "ethnicity", "hispanic", "demographics"],
+      "userQuestions": [
+        "What is the population of this area?",
+        "What is the racial breakdown?",
+        "What percentage is Hispanic or Latino?",
+        "How diverse is this community?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B03002_001E", "alias": "Total Population", "type": "Integer", "description": "Total population estimate", "isPrimary": true},
+        {"name": "B03002_calc_pctNHWhiteE", "alias": "% White (non-Hispanic)", "type": "Double", "description": "Percent White alone, not Hispanic/Latino"},
+        {"name": "B03002_calc_pctBlackE", "alias": "% Black", "type": "Double", "description": "Percent Black/African American"},
+        {"name": "B03002_calc_pctAsianE", "alias": "% Asian", "type": "Double", "description": "Percent Asian"},
+        {"name": "B03002_calc_pctHispLatE", "alias": "% Hispanic/Latino", "type": "Double", "description": "Percent Hispanic or Latino"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey",
+      "notes": "Auto-updates annually when Census releases new 5-year estimates. County-level data (layer 1). Use layer 2 for tract-level detail."
+    },
+    {
+      "id": "acs-median-income",
+      "name": "ACS Median Household Income",
+      "description": "Median household income by race and age of householder from American Community Survey 5-year estimates.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Median_Income_by_Race_and_Age_Selp_Emp_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "income", "median income", "household income", "economics"],
+      "userQuestions": [
+        "What is the median household income?",
+        "How much do people earn here?",
+        "What is the income level in this area?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B19049_001E", "alias": "Median Household Income", "type": "Integer", "description": "Median household income (all households)", "isPrimary": true},
+        {"name": "B19049_002E", "alias": "Median Income (Householder <25)", "type": "Integer", "description": "Median income for householder under 25"},
+        {"name": "B19049_003E", "alias": "Median Income (Householder 25-44)", "type": "Integer", "description": "Median income for householder 25-44"},
+        {"name": "B19049_004E", "alias": "Median Income (Householder 45-64)", "type": "Integer", "description": "Median income for householder 45-64"},
+        {"name": "B19049_005E", "alias": "Median Income (Householder 65+)", "type": "Integer", "description": "Median income for householder 65+"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-poverty",
+      "name": "ACS Poverty Status by Age",
+      "description": "Poverty status by age group from American Community Survey 5-year estimates. Shows population below poverty level.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Poverty_by_Age_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "poverty", "income", "economics", "low income"],
+      "userQuestions": [
+        "What is the poverty rate?",
+        "How many people are below the poverty line?",
+        "What percentage live in poverty?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B17020_001E", "alias": "Total Population (Poverty Status)", "type": "Integer", "description": "Population for whom poverty status is determined", "isPrimary": true},
+        {"name": "B17020_002E", "alias": "Population Below Poverty", "type": "Integer", "description": "Population below poverty level"},
+        {"name": "B17020_calc_pctPovE", "alias": "% Below Poverty", "type": "Double", "description": "Percent below poverty level"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-housing-costs",
+      "name": "ACS Housing Costs",
+      "description": "Housing costs including median rent, median home value, and cost burden from American Community Survey 5-year estimates.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Housing_Costs_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "housing", "rent", "home value", "cost burden", "affordability"],
+      "userQuestions": [
+        "What is the median rent?",
+        "What is the median home value?",
+        "How affordable is housing here?",
+        "What are housing costs?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B25064_001E", "alias": "Median Gross Rent", "type": "Integer", "description": "Median gross rent", "isPrimary": true},
+        {"name": "B25077_001E", "alias": "Median Home Value", "type": "Integer", "description": "Median home value (owner-occupied)"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-employment",
+      "name": "ACS Employment Status",
+      "description": "Employment status and labor force participation from American Community Survey 5-year estimates.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Employment_Status_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "employment", "unemployment", "labor force", "jobs", "workforce"],
+      "userQuestions": [
+        "What is the unemployment rate?",
+        "How many people are employed?",
+        "What is the labor force participation?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B23020_001E", "alias": "Mean Usual Hours Worked", "type": "Double", "description": "Mean usual hours worked per week", "isPrimary": true},
+        {"name": "B23025_003E", "alias": "Civilian Labor Force", "type": "Integer", "description": "Civilian labor force population"},
+        {"name": "B23025_005E", "alias": "Unemployed", "type": "Integer", "description": "Unemployed population"},
+        {"name": "B23025_calc_pctUnempE", "alias": "% Unemployed", "type": "Double", "description": "Unemployment rate"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-education",
+      "name": "ACS Educational Attainment",
+      "description": "Educational attainment levels for population 25 years and over from American Community Survey 5-year estimates.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Educational_Attainment_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "education", "college", "high school", "degree", "attainment"],
+      "userQuestions": [
+        "What is the education level?",
+        "What percentage have a college degree?",
+        "How many have a high school diploma?",
+        "What is the educational attainment?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B15003_001E", "alias": "Population 25+", "type": "Integer", "description": "Population 25 years and over", "isPrimary": true},
+        {"name": "B15003_calc_pctHSE", "alias": "% High School or Higher", "type": "Double", "description": "Percent with high school diploma or higher"},
+        {"name": "B15003_calc_pctBachE", "alias": "% Bachelor's or Higher", "type": "Double", "description": "Percent with bachelor's degree or higher"},
+        {"name": "B15003_calc_pctGradProfE", "alias": "% Graduate/Professional", "type": "Double", "description": "Percent with graduate or professional degree"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-internet",
+      "name": "ACS Internet Connectivity",
+      "description": "Internet access and broadband connectivity from American Community Survey 5-year estimates.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Internet_Connectivity_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "internet", "broadband", "connectivity", "digital divide", "technology"],
+      "userQuestions": [
+        "What percentage have internet access?",
+        "How many have broadband?",
+        "Is there a digital divide here?",
+        "What is the internet connectivity?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B28002_001E", "alias": "Total Households", "type": "Integer", "description": "Total households", "isPrimary": true},
+        {"name": "B28002_002E", "alias": "With Internet Subscription", "type": "Integer", "description": "Households with internet subscription"},
+        {"name": "B28002_calc_pctNoIntE", "alias": "% No Internet", "type": "Double", "description": "Percent without internet access"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-transportation",
+      "name": "ACS Transportation to Work",
+      "description": "Means of transportation to work from American Community Survey 5-year estimates. Includes commute mode breakdown.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Means_of_Transportation_to_Work_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "transportation", "commute", "transit", "driving", "work"],
+      "userQuestions": [
+        "How do people commute?",
+        "What percentage drive to work?",
+        "How many use public transit?",
+        "What is the commute mode?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B08301_001E", "alias": "Workers 16+", "type": "Integer", "description": "Workers 16 years and over", "isPrimary": true},
+        {"name": "B08301_calc_pctDrvAlnE", "alias": "% Drive Alone", "type": "Double", "description": "Percent who drive alone"},
+        {"name": "B08301_calc_pctCarpoolE", "alias": "% Carpool", "type": "Double", "description": "Percent who carpool"},
+        {"name": "B08301_calc_pctPubTransE", "alias": "% Public Transit", "type": "Double", "description": "Percent who use public transit"},
+        {"name": "B08301_calc_pctWFHE", "alias": "% Work from Home", "type": "Double", "description": "Percent who work from home"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-disability",
+      "name": "ACS Disability Status",
+      "description": "Disability status by age and sex from American Community Survey 5-year estimates.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Disability_by_Age_and_Sex_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "disability", "accessibility", "ada", "special needs"],
+      "userQuestions": [
+        "What is the disability rate?",
+        "How many people have disabilities?",
+        "What percentage have a disability?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B18101_001E", "alias": "Total Population", "type": "Integer", "description": "Total civilian noninstitutionalized population", "isPrimary": true},
+        {"name": "B18101_calc_pctDisE", "alias": "% With Disability", "type": "Double", "description": "Percent with a disability"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-health-insurance",
+      "name": "ACS Health Insurance Coverage",
+      "description": "Health insurance coverage status from American Community Survey 5-year estimates.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Health_Insurance_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "health insurance", "healthcare", "uninsured", "coverage"],
+      "userQuestions": [
+        "What percentage have health insurance?",
+        "How many are uninsured?",
+        "What is the health insurance coverage?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B27001_001E", "alias": "Total Population", "type": "Integer", "description": "Total civilian noninstitutionalized population", "isPrimary": true},
+        {"name": "B27001_calc_pctNoHIE", "alias": "% Uninsured", "type": "Double", "description": "Percent without health insurance"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-veterans",
+      "name": "ACS Veteran Status",
+      "description": "Veteran population by sex and age from American Community Survey 5-year estimates.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Veteran_Status_by_Sex_and_Age_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "veterans", "military", "armed forces"],
+      "userQuestions": [
+        "How many veterans live here?",
+        "What is the veteran population?",
+        "What percentage are veterans?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B21001_001E", "alias": "Population 18+", "type": "Integer", "description": "Civilian population 18 years and over", "isPrimary": true},
+        {"name": "B21001_002E", "alias": "Veteran Population", "type": "Integer", "description": "Veteran population"},
+        {"name": "B21001_calc_pctVetE", "alias": "% Veterans", "type": "Double", "description": "Percent veterans"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "low",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-senior-wellbeing",
+      "name": "ACS Context for Senior Well-Being",
+      "description": "Key indicators relevant to senior populations including age 65+, living alone, poverty, disability, and health insurance status.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Highlights_Senior_Well_Being_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "seniors", "elderly", "aging", "65+", "well-being"],
+      "userQuestions": [
+        "How many seniors live here?",
+        "What is the senior population?",
+        "What services do seniors need?",
+        "How many elderly live alone?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B01001_001E", "alias": "Total Population", "type": "Integer", "description": "Total population", "isPrimary": true},
+        {"name": "B01001_calc_numGE65E", "alias": "Population 65+", "type": "Integer", "description": "Population 65 years and over"},
+        {"name": "B01001_calc_pctGE65E", "alias": "% Age 65+", "type": "Double", "description": "Percent age 65 and over"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "medium",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey"
+    },
+    {
+      "id": "acs-emergency-response",
+      "name": "ACS Context for Emergency Response",
+      "description": "Key vulnerability indicators for emergency planning including age groups, disability status, language barriers, and vehicle access.",
+      "sourceId": "esri-living-atlas",
+      "serviceUrl": "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Highlights_Emergency_Response_Boundaries/FeatureServer/1",
+      "layerType": "FeatureServer",
+      "category": "demographics",
+      "tags": ["census", "acs", "emergency", "vulnerability", "evacuation", "disaster", "planning"],
+      "userQuestions": [
+        "What are the vulnerable populations?",
+        "Who needs help in an emergency?",
+        "What is the vulnerability profile?",
+        "How many lack vehicle access?"
+      ],
+      "geometryType": "Polygon",
+      "spatialReference": 4326,
+      "fields": [
+        {"name": "B01001_001E", "alias": "Total Population", "type": "Integer", "description": "Total population", "isPrimary": true},
+        {"name": "B01001_calc_numLT18E", "alias": "Population Under 18", "type": "Integer", "description": "Population under 18"},
+        {"name": "B01001_calc_pctLT18E", "alias": "% Under 18", "type": "Double", "description": "Percent under 18"},
+        {"name": "B01001_calc_numGE65E", "alias": "Population 65+", "type": "Integer", "description": "Population 65 and over"},
+        {"name": "B01001_calc_pctGE65E", "alias": "% Age 65+", "type": "Double", "description": "Percent 65 and over"}
+      ],
+      "lookupMethod": "spatial",
+      "priority": "high",
+      "coverage": "nationwide",
+      "updateFrequency": "annual (December)",
+      "dataSource": "US Census Bureau American Community Survey",
+      "notes": "Useful for emergency planning and identifying populations that may need assistance during disasters."
     }
   ]
 }
