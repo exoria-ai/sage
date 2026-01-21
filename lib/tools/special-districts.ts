@@ -92,9 +92,10 @@ async function getParcelDistricts(
   const parsed = parseAPN(apn);
   if (!parsed) return null;
 
+  // parcelid field uses no dashes (numeric format)
   const features = await solanoClient.queryByAttribute(
     LAYERS.PARCELS,
-    `APN = '${parsed.raw}' OR APN = '${parsed.formatted}'`,
+    `parcelid = '${parsed.numeric}'`,
     'fund_fire,desc_fire,fund_water,desc_water,f_school,d_school'
   );
 
