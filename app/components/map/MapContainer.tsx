@@ -16,8 +16,7 @@ const ESRI_ROUTE_SERVICE = 'https://route-api.arcgis.com/arcgis/rest/services/Wo
 
 // Map styling constants (should match lib/config/defaults.ts)
 const MAP_COLORS = {
-  highlightFill: [255, 255, 0, 0.3] as [number, number, number, number],
-  highlightOutline: [255, 165, 0] as [number, number, number],
+  highlightOutline: [255, 165, 0] as [number, number, number], // Orange outline for selected parcels
   routeLine: [0, 100, 255, 0.9] as [number, number, number, number],
   originMarker: [34, 197, 94] as [number, number, number],
   destinationMarker: [239, 68, 68] as [number, number, number],
@@ -155,9 +154,9 @@ export function MapContainer({
 
     let isMounted = true;
 
-    // Highlight symbol for parcels
+    // Highlight symbol for parcels - outline only, no fill to avoid obscuring the parcel
     const highlightSymbol = new SimpleFillSymbol({
-      color: [255, 255, 0, 0.3], // Yellow with transparency
+      color: [0, 0, 0, 0], // Transparent fill
       outline: {
         color: [255, 165, 0], // Orange outline
         width: 3,
@@ -841,11 +840,11 @@ export function MapContainer({
           // Clear previous highlights
           highlightLayerRef.current.removeAll();
 
-          // Add new highlight
+          // Add new highlight - outline only, no fill to avoid obscuring the parcel
           const highlightGraphic = new Graphic({
             geometry: event.result.feature.geometry,
             symbol: new SimpleFillSymbol({
-              color: MAP_COLORS.highlightFill,
+              color: [0, 0, 0, 0], // Transparent fill
               outline: {
                 color: MAP_COLORS.highlightOutline,
                 width: MAP_DEFAULTS.highlightOutlineWidth,

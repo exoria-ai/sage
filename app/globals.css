@@ -53,7 +53,8 @@ body {
   height: 40px !important;
 }
 
-/* Dim layer names when layer is not visible (eye icon shows view-hide) */
-.esri-layer-list__item:has(.esri-layer-list__visible-toggle calcite-icon[icon="view-hide"]) {
-  opacity: 0.5;
+/* Style layer names when layer is not visible (eye icon shows view-hide) */
+/* Use lighter text color instead of opacity to keep text legible */
+.esri-layer-list__item:has(.esri-layer-list__visible-toggle calcite-icon[icon="view-hide"]) .esri-layer-list__item-title {
+  color: #9ca3af; /* Tailwind gray-400 - visible but clearly inactive */
 }
