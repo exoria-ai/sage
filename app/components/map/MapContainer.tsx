@@ -474,23 +474,80 @@ export function MapContainer({
 
         viewRef.current = view;
 
-        // Ensure all layers are loaded
+        // Progressive layer loading for better perceived performance
+        // Priority 1: Basemap and critical boundary layers load first (blocking)
+        // Priority 2: Remaining operational layers load in background (non-blocking)
         if (view.map) {
+          const allLayers = view.map.allLayers.toArray();
+
+          // Categorize layers by priority
+          const isBasemapLayer = (layer: __esri.Layer) =>
+            layer.type === 'tile' ||
+            layer.type === 'vector-tile' && (
+              layer.title?.toLowerCase().includes('basemap') ||
+              layer.title?.toLowerCase().includes('topographic') ||
+              layer.title?.toLowerCase().includes('hillshade') ||
+              layer.title?.toLowerCase().includes('world')
+            );
+
+          const isCriticalLayer = (layer: __esri.Layer) => {
+            const title = layer.title?.toLowerCase() || '';
+            return (
+              title.includes('county boundary') ||
+              title.includes('city boundary') ||
+              // Include both Parcels vector tile and feature layer for initial display + queries
+              title.includes('parcels')
+            );
+          };
+
+          const priorityLayers = allLayers.filter(l => isBasemapLayer(l) || isCriticalLayer(l));
+          const deferredLayers = allLayers.filter(l => !isBasemapLayer(l) && !isCriticalLayer(l));
+
+          console.log(`Loading ${priorityLayers.length} priority layers first, deferring ${deferredLayers.length} layers`);
+
+          // Load priority layers synchronously (blocks until complete)
           await Promise.all(
-            view.map.allLayers.map(async (layer) => {
+            priorityLayers.map(async (layer) => {
               if (layer.load) {
-                await layer.load();
+                try {
+                  await layer.load();
+                } catch (e) {
+                  console.warn(`Failed to load priority layer "${layer.title}":`, e);
+                }
               }
             })
           );
 
-          // Log layer info after load
-          console.log('Layers loaded:', view.map.allLayers.map(l => `${l.title} (${l.type})`).toArray());
+          // Load deferred layers in background (non-blocking)
+          // This allows the map to become interactive while remaining layers load
+          const loadDeferredLayers = async () => {
+            for (const layer of deferredLayers) {
+              if (!isMounted) break;
+              if (layer.load) {
+                try {
+                  await layer.load();
+                } catch (e) {
+                  console.warn(`Failed to load deferred layer "${layer.title}":`, e);
+                }
+              }
+            }
+            if (isMounted) {
+              console.log('All deferred layers loaded');
+            }
+          };
+
+          // Start background loading but don't await it
+          if (deferredLayers.length > 0) {
+            loadDeferredLayers();
+          }
+
+          // Log layer info
+          console.log('Priority layers loaded:', priorityLayers.map(l => `${l.title} (${l.type})`));
 
           // Detect and configure vector tile / feature layer pairs
           // Layers named "X [VECTOR_TILE]" are paired with "X" feature layers
+          // Note: This can run before all layers finish loading since we're just configuring references
           const layerPairs: LayerPair[] = [];
-          const allLayers = view.map.allLayers.toArray();
 
           // Find all vector tile layers with the suffix
           const vectorTileLayers = allLayers.filter(
@@ -1166,13 +1223,12 @@ export function MapContainer({
 
   return (
     <div className={`${className}`} style={{ minHeight: '400px' }}>
-      {/* Loading overlay */}
+      {/* Loading overlay - shows until priority layers are loaded */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading map...</p>
-            <p className="text-gray-400 text-sm mt-2">Web Map ID: {effectiveWebMapId}</p>
           </div>
         </div>
       )}

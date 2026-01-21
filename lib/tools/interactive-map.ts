@@ -18,7 +18,7 @@ const getMapBaseUrl = () => {
 };
 
 export interface OpenInteractiveMapInput {
-  preset?: 'base' | 'hazards' | 'zoning' | 'environmental' | 'districts';
+  preset?: 'parcels' | 'planning' | 'hazards';
   webMapId?: string;
   center?: { longitude: number; latitude: number };
   zoom?: number;
@@ -39,7 +39,7 @@ export interface OpenInteractiveMapOutput {
 export async function openInteractiveMap(
   input: OpenInteractiveMapInput
 ): Promise<OpenInteractiveMapOutput> {
-  const preset = input.preset || 'base';
+  const preset = input.preset || 'parcels';
   const config = getWebMapConfig(preset);
 
   // Build the URL with query parameters
@@ -113,7 +113,7 @@ export async function getInteractiveMapStatus(): Promise<GetInteractiveMapStatus
 /**
  * Format a response about the interactive map for the user
  */
-export function formatMapInstructions(preset: string = 'base'): string {
+export function formatMapInstructions(preset: string = 'parcels'): string {
   const config = getWebMapConfig(preset);
   const configured = isPresetConfigured(preset);
   const baseUrl = getMapBaseUrl();

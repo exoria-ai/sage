@@ -44,7 +44,7 @@ const CLIENT_URL_PARAMETERS = {
  * Map presets supported by the client.
  * Must match WEB_MAPS keys in lib/esri/webmaps.ts
  */
-const CLIENT_MAP_PRESETS = ['base', 'hazards', 'zoning', 'environmental', 'districts'] as const;
+const CLIENT_MAP_PRESETS = ['parcels', 'planning', 'hazards'] as const;
 
 describe('Interactive Map URL Tool - Client Sync', () => {
   describe('URL Parameter Coverage', () => {

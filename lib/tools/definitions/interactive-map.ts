@@ -11,15 +11,13 @@ import { defineTool, jsonResponse, ToolResponse } from '../types';
 import { env } from '@/lib/config';
 
 /** Available map presets */
-const MAP_PRESETS = ['base', 'hazards', 'zoning', 'environmental', 'districts'] as const;
+const MAP_PRESETS = ['parcels', 'planning', 'hazards'] as const;
 
 /** Preset descriptions for documentation */
 const PRESET_DESCRIPTIONS: Record<(typeof MAP_PRESETS)[number], string> = {
-  base: 'Property Research - Default view with parcels, addresses, and basic layers',
-  hazards: 'Hazard Assessment - Flood zones, fire hazard severity, and risk layers',
-  zoning: 'Zoning Analysis - Zoning districts and land use designations',
-  environmental: 'Environmental Review - Wetlands, habitat, and environmental constraints',
-  districts: 'District Lookup - Supervisor districts, special districts, and service areas',
+  parcels: 'Parcels - Default view with parcels, addresses, and property information',
+  planning: 'Planning - Zoning, general plans, and land use',
+  hazards: 'Hazards - FEMA flood zones and CAL FIRE severity zones',
 };
 
 /**
@@ -103,11 +101,9 @@ this opens a live map where users can pan, zoom, toggle layers, and explore.
 **URL PARAMETERS**:
 
 1. **Map Preset** (preset): Which layer configuration to use
-   - base: Property Research (default) - parcels, addresses, basic layers
-   - hazards: Hazard Assessment - flood zones, fire hazard severity
-   - zoning: Zoning Analysis - zoning districts, land use
-   - environmental: Environmental Review - wetlands, habitat
-   - districts: District Lookup - supervisor districts, service areas
+   - parcels: Parcels (default) - parcels, addresses, property information
+   - planning: Planning - zoning, general plans, land use
+   - hazards: Hazards - FEMA flood zones, CAL FIRE severity zones
 
 2. **Feature Highlight** (one of):
    - apn: Highlight and zoom to a parcel by APN (e.g., "0001-011-180")
@@ -151,7 +147,7 @@ Custom view:
 
   schema: {
     preset: z.enum(MAP_PRESETS).optional()
-      .describe('Map preset/theme: base (default), hazards, zoning, environmental, districts'),
+      .describe('Map preset/theme: parcels (default), planning, hazards'),
     webMapId: z.string().optional()
       .describe('Custom ArcGIS Web Map ID (overrides preset)'),
     apn: z.string().optional()
@@ -201,7 +197,7 @@ Custom view:
     // Build a description of what the map will show
     const features: string[] = [];
 
-    const presetName = preset || 'base';
+    const presetName = preset || 'parcels';
     features.push(`**Preset**: ${presetName} - ${PRESET_DESCRIPTIONS[presetName as keyof typeof PRESET_DESCRIPTIONS]}`);
 
     if (apn) {

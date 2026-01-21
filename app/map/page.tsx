@@ -26,7 +26,7 @@ function MapPageContent() {
 
   // Get webMapId from URL params (e.g., /map?id=abc123 or /map?preset=hazards)
   const webMapId = searchParams.get('id') || undefined;
-  const preset = (searchParams.get('preset') as keyof typeof WEB_MAPS) || 'base';
+  const preset = (searchParams.get('preset') as keyof typeof WEB_MAPS) || 'parcels';
 
   // Parse feature highlight parameters
   const highlightApn = searchParams.get('apn') || undefined;
@@ -74,7 +74,7 @@ function MapPageContent() {
             SAGE
           </h1>
           <span className="text-sm text-gray-500 whitespace-nowrap">
-            Solano County GIS Explorer
+            Interactive Map
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -90,11 +90,9 @@ function MapPageContent() {
               window.location.href = url.toString();
             }}
           >
-            <option value="base">Property Research</option>
-            <option value="hazards">Hazard Assessment</option>
-            <option value="zoning">Zoning Analysis</option>
-            <option value="environmental">Environmental Review</option>
-            <option value="districts">District Lookup</option>
+            <option value="parcels">Parcels</option>
+            <option value="planning">Planning</option>
+            <option value="hazards">Hazards</option>
           </select>
         </div>
       </header>

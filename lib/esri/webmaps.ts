@@ -28,39 +28,25 @@ export interface WebMapConfig {
  * The ID is the alphanumeric string in the URL after "id="
  */
 export const WEB_MAPS: Record<string, WebMapConfig> = {
-  base: {
-    id: 'cec12b4c94ea4c62b32e1ebd340e8bac',
-    name: 'Property Research',
-    description: 'Parcels, city boundaries, and basic property information',
+  parcels: {
+    id: 'cb2950078519445aa33f413f3d7d6a49',
+    name: 'Parcels',
+    description: 'Parcels, addresses, and property information',
+    defaultCenter: { longitude: -121.972606, latitude: 38.256397 },
+    defaultZoom: 10,
+  },
+  planning: {
+    id: 'ad2ccb372575468092b5a0ab65a1f101',
+    name: 'Planning',
+    description: 'Zoning, general plans, and land use',
     defaultCenter: { longitude: -121.972606, latitude: 38.256397 },
     defaultZoom: 10,
   },
   hazards: {
-    id: '', // TODO: Add sage-hazards Web Map ID
-    name: 'Hazard Assessment',
+    id: '1522f21627de455eb6e91ed24791bf1d',
+    name: 'Hazards',
     description: 'FEMA flood zones and CAL FIRE severity zones',
-    defaultCenter: { longitude: -122.0, latitude: 38.25 },
-    defaultZoom: 10,
-  },
-  zoning: {
-    id: '', // TODO: Add sage-zoning Web Map ID
-    name: 'Zoning Analysis',
-    description: 'County and city zoning layers',
-    defaultCenter: { longitude: -122.0, latitude: 38.25 },
-    defaultZoom: 10,
-  },
-  environmental: {
-    id: '', // TODO: Add sage-environmental Web Map ID
-    name: 'Environmental Review',
-    description: 'Wetlands, important farmland, and environmental constraints',
-    defaultCenter: { longitude: -122.0, latitude: 38.25 },
-    defaultZoom: 10,
-  },
-  districts: {
-    id: '', // TODO: Add sage-districts Web Map ID
-    name: 'District Lookup',
-    description: 'Supervisor, water, fire, and school districts',
-    defaultCenter: { longitude: -122.0, latitude: 38.25 },
+    defaultCenter: { longitude: -121.972606, latitude: 38.256397 },
     defaultZoom: 10,
   },
 };
