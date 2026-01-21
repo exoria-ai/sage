@@ -111,7 +111,18 @@
       "priority": "high",
       "coverage": "countywide",
       "updateFrequency": "quarterly",
-      "notes": "Assessed value differs from market value due to Prop 13 limits. Tax maps are authoritative source for boundary discrepancies."
+      "notes": "Assessed value differs from market value due to Prop 13 limits. Tax maps are authoritative source for boundary discrepancies.",
+      "metadataUrl": "https://solanocountygis.com/portal/home/item.html?id=c2d1aea7f78841b688d797dba8b57fe8",
+      "downloads": [
+        {
+          "format": "shapefile",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Parcels_Public_Aumentum_GIS/Parcels_Public_Aumentum_Shapefiles.zip"
+        },
+        {
+          "format": "geodatabase",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Parcels_Public_Aumentum_GIS/Parcels_Public_Aumentum_fileGDB.zip"
+        }
+      ]
     },
     {
       "id": "solano-address-points",
@@ -142,7 +153,18 @@
       "lookupMethod": "attribute",
       "priority": "high",
       "coverage": "countywide",
-      "notes": "Multiple address points can share the same APN (multi-unit buildings)."
+      "notes": "Multiple address points can share the same APN (multi-unit buildings).",
+      "metadataUrl": "https://solanocountygis.com/portal/home/item.html?id=a1be2d4601144f02ac056e1e288e461e",
+      "downloads": [
+        {
+          "format": "shapefile",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Address_Pts_GIS/Address_Pts_Shapefiles.zip"
+        },
+        {
+          "format": "geodatabase",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Address_Pts_GIS/Address_Pts_fileGDB.zip"
+        }
+      ]
     },
     {
       "id": "solano-city-boundary",
@@ -167,7 +189,18 @@
       "lookupMethod": "spatial",
       "priority": "high",
       "coverage": "countywide",
-      "notes": "Returns no feature if location is in unincorporated area. Cities: Benicia, Dixon, Fairfield, Rio Vista, Suisun City, Vacaville, Vallejo."
+      "notes": "Returns no feature if location is in unincorporated area. Cities: Benicia, Dixon, Fairfield, Rio Vista, Suisun City, Vacaville, Vallejo.",
+      "metadataUrl": "https://solanocountygis.com/portal/home/item.html?id=11fd48ab73ae460aab4a0408722af505",
+      "downloads": [
+        {
+          "format": "shapefile",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/CityBoundary_GIS/CityBoundary_Shapefiles.zip"
+        },
+        {
+          "format": "geodatabase",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/CityBoundary_GIS/CityBoundary_fileGDB.zip"
+        }
+      ]
     },
     {
       "id": "solano-county-boundary",
@@ -188,7 +221,18 @@
       ],
       "lookupMethod": "spatial",
       "priority": "medium",
-      "coverage": "countywide"
+      "coverage": "countywide",
+      "metadataUrl": "https://solanocountygis.com/portal/home/item.html?id=44671cce1cbe42d38b520dfec0a664c9",
+      "downloads": [
+        {
+          "format": "shapefile",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/County_Boundary_GIS/County_Boundary_Shapefiles.zip"
+        },
+        {
+          "format": "geodatabase",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/County_Boundary_GIS/County_Boundary_fileGDB.zip"
+        }
+      ]
     },
     {
       "id": "solano-county-zoning",
@@ -218,7 +262,18 @@
       "priority": "high",
       "coverage": "unincorporated",
       "notes": "Returns empty for addresses within city limits. Check city boundary first, then use appropriate city zoning layer.",
-      "relatedLayers": ["benicia-zoning", "dixon-zoning", "fairfield-zoning", "rio-vista-zoning", "suisun-city-zoning", "vacaville-zoning", "vallejo-zoning"]
+      "relatedLayers": ["benicia-zoning", "dixon-zoning", "fairfield-zoning", "rio-vista-zoning", "suisun-city-zoning", "vacaville-zoning", "vallejo-zoning"],
+      "metadataUrl": "https://solanocountygis.com/portal/home/item.html?id=7228aa75ce184989a71eda8c13c3c35a",
+      "downloads": [
+        {
+          "format": "shapefile",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/SolanoCountyUnincorporatedZoning_GIS/SolanoCountyUnincorporatedZoning_Shapefiles.zip"
+        },
+        {
+          "format": "geodatabase",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/SolanoCountyUnincorporatedZoning_GIS/SolanoCountyUnincorporatedZoning_fileGDB.zip"
+        }
+      ]
     },
     {
       "id": "solano-county-general-plan",
@@ -244,7 +299,18 @@
       "lookupMethod": "spatial",
       "priority": "high",
       "coverage": "unincorporated",
-      "notes": "Returns 'INC' for incorporated (city) areas. Updated September 2023."
+      "notes": "Returns 'INC' for incorporated (city) areas. Updated September 2023.",
+      "metadataUrl": "https://solanocountygis.com/portal/home/item.html?id=120aa8da232e49eea24cba022e5d3295",
+      "downloads": [
+        {
+          "format": "shapefile",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/SolanoCountyUnincorporated_GeneralPlan2008_GIS/SolanoCountyUnincorporated_GeneralPlan2008_Shapefiles.zip"
+        },
+        {
+          "format": "geodatabase",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/SolanoCountyUnincorporated_GeneralPlan2008_GIS/SolanoCountyUnincorporated_GeneralPlan2008_fileGDB.zip"
+        }
+      ]
     },
     {
       "id": "solano-bos-districts",
@@ -269,7 +335,18 @@
       ],
       "lookupMethod": "spatial",
       "priority": "high",
-      "coverage": "countywide"
+      "coverage": "countywide",
+      "metadataUrl": "https://solanocountygis.com/portal/home/item.html?id=6f99357497b34731929dab7c0833fec8",
+      "downloads": [
+        {
+          "format": "shapefile",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/BOS_District_Boundaries_2021_SolanoCounty_GIS/BOS_District_Boundaries_2021_SolanoCounty_Shapefiles.zip"
+        },
+        {
+          "format": "geodatabase",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/BOS_District_Boundaries_2021_SolanoCounty_GIS/BOS_District_Boundaries_2021_SolanoCounty_fileGDB.zip"
+        }
+      ]
     },
     {
       "id": "solano-fire-hazard-zone",
@@ -577,7 +654,7 @@
       "name": "Dixon Zoning",
       "description": "City of Dixon zoning districts.",
       "sourceId": "solano-agol",
-      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Dixon_Zoning/FeatureServer/0",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Dixon_Zoning/FeatureServer/3",
       "layerType": "FeatureServer",
       "category": "zoning",
       "tags": ["zoning", "dixon", "city", "land use"],
@@ -619,7 +696,7 @@
       "name": "Fairfield Zoning",
       "description": "City of Fairfield zoning districts.",
       "sourceId": "solano-agol",
-      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Fairfield_Zoning/FeatureServer/0",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Fairfield_Zoning/FeatureServer/3",
       "layerType": "FeatureServer",
       "category": "zoning",
       "tags": ["zoning", "fairfield", "city", "land use"],
@@ -745,7 +822,7 @@
       "name": "Vacaville Zoning",
       "description": "City of Vacaville zoning districts.",
       "sourceId": "solano-agol",
-      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Vacaville_Zoning/FeatureServer/0",
+      "serviceUrl": "https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services/City_of_Vacaville_Zoning/FeatureServer/3",
       "layerType": "FeatureServer",
       "category": "zoning",
       "tags": ["zoning", "vacaville", "city", "land use"],
@@ -2244,7 +2321,18 @@
       "priority": "medium",
       "coverage": "countywide",
       "updateFrequency": "monthly",
-      "notes": "Data maintained by Geographic Technologies Group (GTG). CalOES schema compliant."
+      "notes": "Data maintained by Geographic Technologies Group (GTG). CalOES schema compliant.",
+      "metadataUrl": "https://solanocountygis.com/portal/home/item.html?id=f475eb56871c4604b607ba645be48231",
+      "downloads": [
+        {
+          "format": "shapefile",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Road_Centerlines_GIS/Road_Centerlines_Shapefiles.zip"
+        },
+        {
+          "format": "geodatabase",
+          "url": "https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Road_Centerlines_GIS/Road_Centerlines_fileGDB.zip"
+        }
+      ]
     },
     {
       "id": "ca-100yr-floodplain",
@@ -2778,6 +2866,36 @@
       "coverage": "countywide",
       "updateFrequency": "per election",
       "notes": "Locations may change each election. Contact Registrar of Voters for current information."
+    },
+    {
+      "id": "solano-lidar-2023",
+      "name": "Solano County LiDAR (2023)",
+      "description": "Quality Level 1 LiDAR elevation data for Solano County, collected in 2023 in partnership with USGS 3D Elevation Program (3DEP). Includes point cloud data (LAZ), digital elevation models (DEM), and intensity images.",
+      "sourceId": "solano-agol",
+      "serviceUrl": "",
+      "layerType": "download-only",
+      "category": "basemap",
+      "tags": ["lidar", "elevation", "dem", "topography", "terrain", "3dep", "usgs", "point cloud"],
+      "userQuestions": [
+        "Where can I download LiDAR data for Solano County?",
+        "Is there elevation data available?",
+        "Where can I get terrain/topographic data?"
+      ],
+      "geometryType": "Point",
+      "spatialReference": 6340,
+      "fields": [],
+      "lookupMethod": "download",
+      "priority": "medium",
+      "coverage": "countywide",
+      "updateFrequency": "periodic (multi-year)",
+      "notes": "QL1 LiDAR with 8 pulses per square meter. Data hosted by USGS via The National Map. Multiple tile formats available including LAZ point clouds and derived DEMs.",
+      "downloads": [
+        {
+          "format": "lidar",
+          "url": "https://rockyweb.usgs.gov/vdelivery/Datasets/Staged/Elevation/LPC/Projects/CA_SolanoCounty_A23/CA_SolanoCounty_1_A23/",
+          "notes": "USGS data portal with LAZ point cloud tiles, DEMs, and metadata. Navigate to select individual tiles or download bulk data."
+        }
+      ]
     }
   ]
 }
