@@ -8,11 +8,8 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-700 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              S
-            </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-700 to-emerald-800">
-              SAGE
+            <span className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-700 to-emerald-800 tracking-tight">
+              Solano Agent for Geographic Enquiry
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -40,7 +37,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-100 text-teal-700 text-xs font-semibold uppercase tracking-wider mb-6">
             <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
-            Solano Agent for Geographic Enquiry
+            SAGE v1.0 • System Online
           </div>
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
             The Intelligence Layer for{' '}
@@ -167,14 +164,14 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <SystemCard title="Property & Parcels" count="152k Records" icon="🗺️" />
-            <SystemCard title="Zoning (7 Cities)" count="Live Routing" icon="📍" />
-            <SystemCard title="County Code" count="8 Chapters" icon="📜" />
-            <SystemCard title="General Plan" count="1,345 Policies" icon="📋" />
-            <SystemCard title="Budget & Staffing" count="3,284 FTEs" icon="💰" />
-            <SystemCard title="Hazards (Fire/Flood)" count="FEMA/CAL FIRE" icon="⚠️" />
-            <SystemCard title="Special Districts" count="School/Water" icon="🏫" />
-            <SystemCard title="Meeting Minutes" count="BOS & ReGIS" icon="🎙️" />
+            <SystemCard title="Property & Parcels" count="152k Records" icon="🗺️" slug="property" />
+            <SystemCard title="Zoning (7 Cities)" count="Live Routing" icon="📍" slug="zoning" />
+            <SystemCard title="County Code" count="8 Chapters" icon="📜" slug="code" />
+            <SystemCard title="General Plan" count="1,345 Policies" icon="📋" slug="general-plan" />
+            <SystemCard title="Budget & Staffing" count="3,284 FTEs" icon="💰" slug="budget" />
+            <SystemCard title="Hazards (Fire/Flood)" count="FEMA/CAL FIRE" icon="⚠️" slug="hazards" />
+            <SystemCard title="Special Districts" count="School/Water" icon="🏫" slug="districts" />
+            <SystemCard title="Meeting Minutes" count="BOS & ReGIS" icon="🎙️" slug="meetings" />
           </div>
         </div>
       </section>
@@ -283,14 +280,21 @@ function ScenarioCard({ icon, title, question, result }: { icon: string; title: 
   );
 }
 
-function SystemCard({ title, count, icon }: { title: string; count: string; icon: string }) {
+function SystemCard({ title, count, icon, slug }: { title: string; count: string; icon: string; slug: string }) {
   return (
-    <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 hover:border-teal-200 hover:bg-teal-50/30 transition-colors group">
+    <Link 
+      href={`/capabilities/${slug}`}
+      className="bg-slate-50 rounded-xl p-4 border border-slate-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all hover:-translate-y-0.5 group block"
+    >
       <div className="flex items-center gap-3 mb-1">
         <span className="text-xl group-hover:scale-110 transition-transform">{icon}</span>
         <h4 className="font-semibold text-slate-900 text-sm">{title}</h4>
       </div>
       <p className="text-xs text-slate-500 pl-8">{count}</p>
-    </div>
+      <div className="mt-3 pl-8 flex items-center gap-1 text-xs text-teal-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+        <span>Explore details</span>
+        <span>→</span>
+      </div>
+    </Link>
   );
 }
