@@ -10,7 +10,7 @@
 
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
-import { captureMapView } from '../lib/tools/render-map';
+import { captureMapView } from '../lib/tools/capture-map';
 
 const OUTPUT_DIR = 'test-output/capture-map';
 const OPEN_AFTER = process.argv.includes('--open');

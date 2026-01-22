@@ -1,11 +1,11 @@
 #!/usr/bin/env npx tsx
 /**
- * Test script for render_map additionalLayers and extentLayer features
+ * Test script for capture_map_view additionalLayers and extentLayer features
  *
  * Usage: npx tsx scripts/test-additional-layers.ts
  */
 
-import { renderMap } from '../lib/tools/render-map';
+import { captureMapView } from '../lib/tools/capture-map';
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 
 const SOLANO_AGOL_BASE = 'https://services2.arcgis.com/SCn6czzcqKAFwdGU/ArcGIS/rest/services';
@@ -23,14 +23,14 @@ function saveImage(name: string, base64: string) {
 }
 
 async function runTests() {
-  console.log('Testing render_map additionalLayers and extentLayer features\n');
+  console.log('Testing capture_map_view additionalLayers and extentLayer features\n');
   console.log('='.repeat(70));
 
   // Test 1: additionalLayers with Zoning layer
   console.log('\n🧪 Test 1: Zoning layer overlay on a parcel');
   console.log('-'.repeat(70));
   try {
-    const result1 = await renderMap({
+    const result1 = await captureMapView({
       apn: '008-013-001', // Known working APN
       additionalLayers: [
         {
@@ -62,7 +62,7 @@ async function runTests() {
   console.log('\n🧪 Test 2: Multiple overlay layers (Fire Hazard + Flood Zones)');
   console.log('-'.repeat(70));
   try {
-    const result2 = await renderMap({
+    const result2 = await captureMapView({
       center: { latitude: 38.248, longitude: -122.041 }, // Rural Solano area
       zoom: 13,
       additionalLayers: [
@@ -101,7 +101,7 @@ async function runTests() {
   console.log('\n🧪 Test 3: extentLayer - Zoom to Fire Stations extent');
   console.log('-'.repeat(70));
   try {
-    const result3 = await renderMap({
+    const result3 = await captureMapView({
       extentLayer: {
         url: `${SOLANO_AGOL_BASE}/Fire_Stations/FeatureServer/0`,
         padding: 0.1,
@@ -140,7 +140,7 @@ async function runTests() {
   console.log('\n🧪 Test 4: extentLayer with where clause (Fairfield schools)');
   console.log('-'.repeat(70));
   try {
-    const result4 = await renderMap({
+    const result4 = await captureMapView({
       extentLayer: {
         url: `${SOLANO_AGOL_BASE}/Schools/FeatureServer/0`,
         where: "CITY='FAIRFIELD'",
@@ -177,7 +177,7 @@ async function runTests() {
   console.log('\n🧪 Test 5: Board of Supervisors Districts overlay');
   console.log('-'.repeat(70));
   try {
-    const result5 = await renderMap({
+    const result5 = await captureMapView({
       extent: 'county',
       additionalLayers: [
         {

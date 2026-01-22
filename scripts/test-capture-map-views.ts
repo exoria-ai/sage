@@ -2,17 +2,17 @@
 /**
  * Local Map Rendering Test Tool
  *
- * Renders maps using the new render-map.ts implementation and saves them
+ * Renders maps using the new capture-map.ts implementation and saves them
  * locally for visual inspection.
  *
  * Usage:
- *   npx tsx scripts/test-render-map.ts
- *   npx tsx scripts/test-render-map.ts --open  # Opens images after rendering
+ *   npx tsx scripts/test-capture-map.ts
+ *   npx tsx scripts/test-capture-map.ts --open  # Opens images after rendering
  */
 
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
-import { renderMap } from '../lib/tools/render-map';
+import { captureMapView } from '../lib/tools/capture-map';
 
 const OUTPUT_DIR = 'test-output/maps';
 const OPEN_AFTER_RENDER = process.argv.includes('--open');
@@ -25,7 +25,7 @@ if (!existsSync(OUTPUT_DIR)) {
 interface TestCase {
   name: string;
   description: string;
-  options: Parameters<typeof renderMap>[0];
+  options: Parameters<typeof captureMapView>[0];
 }
 
 const testCases: TestCase[] = [
@@ -221,7 +221,7 @@ async function runTest(testCase: TestCase): Promise<{
   console.log(`   Options: ${JSON.stringify(testCase.options, null, 2).split('\n').join('\n   ')}`);
 
   try {
-    const result = await renderMap(testCase.options);
+    const result = await captureMapView(testCase.options);
     const duration = Date.now() - startTime;
 
     if (!result.success) {

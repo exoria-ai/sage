@@ -1422,6 +1422,3 @@ export async function captureMapView(args: MapOptions): Promise<CaptureMapResult
     context,
   };
 }
-
-// Keep legacy export for backward compatibility during migration
-export const renderMap = captureMapView;

@@ -15,7 +15,7 @@ import { budgetTools } from './budget';
 import { generalPlanTools } from './general-plan';
 import { orgChartTools } from './org-chart';
 import { directionsTools } from './directions';
-import { renderMapTools } from './render-map';
+import { captureMapTools } from './capture-map';
 import { imageGenerationTools } from './image-generation';
 import { interactiveMapTools } from './interactive-map';
 import { gisLayersTools } from './gis-layers';
@@ -30,7 +30,7 @@ export * from './budget';
 export * from './general-plan';
 export * from './org-chart';
 export * from './directions';
-export * from './render-map';
+export * from './capture-map';
 export * from './image-generation';
 export * from './interactive-map';
 export * from './gis-layers';
@@ -66,8 +66,8 @@ export const allTools: ToolDefinition<any>[] = [
   // Directions tools
   ...directionsTools,
 
-  // Map rendering
-  ...renderMapTools,
+  // Map capture
+  ...captureMapTools,
 
   // Interactive map
   ...interactiveMapTools,
@@ -97,7 +97,7 @@ export function getToolStats() {
       generalPlan: generalPlanTools.length,
       orgChart: orgChartTools.length,
       directions: directionsTools.length,
-      renderMap: renderMapTools.length,
+      captureMap: captureMapTools.length,
       interactiveMap: interactiveMapTools.length,
       imageGeneration: imageGenerationTools.length,
       gisLayers: gisLayersTools.length,

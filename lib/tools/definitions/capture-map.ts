@@ -8,7 +8,7 @@
 import { z } from 'zod';
 import { put } from '@vercel/blob';
 import { defineTool, ToolResponse } from '../types';
-import { captureMapView } from '../render-map';
+import { captureMapView } from '../capture-map';
 
 export const captureMapViewTool = defineTool({
   name: 'capture_map_view',
@@ -222,4 +222,4 @@ Dimensions: ${result.width}x${result.height} | Zoom: ${result.zoom}`,
 });
 
 /** All map capture tools */
-export const renderMapTools = [captureMapViewTool];
+export const captureMapTools = [captureMapViewTool];

@@ -394,7 +394,7 @@ export async function getParcelsInBuffer(args: {
       truncated,
       parcels: returnedParcels,
       ...(truncated && {
-        message: `Results limited to ${MAX_PARCELS_RETURNED} parcels (${totalParcels} total found). Consider using a smaller radius or render_map for visualization.`,
+        message: `Results limited to ${MAX_PARCELS_RETURNED} parcels (${totalParcels} total found). Consider using a smaller radius or capture_map_view for visualization.`,
       }),
     };
   } catch (error) {

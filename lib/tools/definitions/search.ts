@@ -68,14 +68,14 @@ of a project site for use permits, variances, subdivisions, and rezonings.
 **IMPORTANT: CHOOSING THE RIGHT TOOL**
 
 For VISUALIZATION (buffer map image):
-  → Use render_map with buffer parameter directly. Do NOT call this tool first.
-  → render_map({ buffer: { apn: "123-456-789", radius_feet: 300 } })
+  → Use capture_map_view with buffer parameter directly. Do NOT call this tool first.
+  → capture_map_view({ buffer: { apn: "123-456-789", radius_feet: 300 } })
   → This is much more efficient - the map renderer handles spatial queries internally.
 
 For NOTIFICATION LISTS (owner/address data):
   → Use this tool to get structured parcel data.
   → Results are limited to 250 parcels to avoid context exhaustion.
-  → For larger buffers with 250+ parcels, consider smaller radius or just use render_map.
+  → For larger buffers with 250+ parcels, consider smaller radius or just use capture_map_view.
 
 INPUT (provide ONE):
 - apn: Source parcel APN - buffer measured from parcel boundary

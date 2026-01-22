@@ -98,7 +98,7 @@ For example, create school district boundaries by dissolving parcels on the scho
 **OUTPUT**: URL to GeoJSON file that can be:
 - Viewed in geojson.io
 - Uploaded to ArcGIS Online
-- Used in render_map additionalLayers`,
+- Used in capture_map_view additionalLayers`,
 
   schema: {
     input_url: z.string().url().optional()
@@ -196,7 +196,7 @@ Tip: Use list_gis_downloads to see all available datasets with download URLs.`,
 **Next steps:**
 - View in browser: Open ${result.output_url} in geojson.io
 - Upload to AGOL: Add as new hosted feature layer
-- Use in map: Add to render_map via additionalLayers`,
+- Use in map: Add to capture_map_view via additionalLayers`,
         }],
       };
     } catch (error) {

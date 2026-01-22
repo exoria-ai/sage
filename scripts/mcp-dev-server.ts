@@ -36,7 +36,7 @@ import { getFloodZone } from '../lib/tools/flood.js';
 import { getFireHazardZone } from '../lib/tools/fire.js';
 import { getSupervisorDistrict } from '../lib/tools/supervisor.js';
 import { getSolanoContext } from '../lib/tools/context.js';
-import { renderMap } from '../lib/tools/render-map.js';
+import { captureMapView } from '../lib/tools/capture-map.js';
 import { searchParcels } from '../lib/tools/search-parcels.js';
 import { getSpecialDistricts } from '../lib/tools/special-districts.js';
 import { getNearby } from '../lib/tools/nearby.js';
@@ -218,8 +218,8 @@ AVAILABLE TOPICS:
     },
   },
   {
-    name: 'render_map',
-    description: `Generate a static map image centered on a location or parcel.
+    name: 'capture_map_view',
+    description: `Capture a static map image for AI spatial analysis.
 
 Uses CARTO Voyager or Solano aerial imagery for basemap.
 Parcel overlays rendered via Solano County MapServer.
@@ -786,8 +786,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'get_solano_context':
         result = await getSolanoContext(args as { topic: string });
         break;
-      case 'render_map': {
-        const mapResult = await renderMap(args as Parameters<typeof renderMap>[0]);
+      case 'capture_map_view': {
+        const mapResult = await captureMapView(args as Parameters<typeof captureMapView>[0]);
         if (mapResult.success && mapResult.imageBase64 && mapResult.mimeType) {
           return {
             content: [

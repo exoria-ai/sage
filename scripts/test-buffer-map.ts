@@ -4,7 +4,7 @@
  */
 
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { renderMap } from '../lib/tools/render-map';
+import { captureMapView } from '../lib/tools/capture-map';
 
 async function testBufferMap() {
   console.log('Testing buffer map rendering...\n');
@@ -24,7 +24,7 @@ async function testBufferMap() {
   console.log(`Buffer radius: ${radiusFeet} ft`);
   console.log('Rendering...\n');
 
-  const result = await renderMap({
+  const result = await captureMapView({
     buffer: {
       apn: testApn,
       radius_feet: radiusFeet,

@@ -1,7 +1,7 @@
 /**
  * Test script for county map generation
  */
-import { renderMap } from '../lib/tools/render-map';
+import { captureMapView } from '../lib/tools/capture-map';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
 
@@ -10,7 +10,7 @@ async function main() {
 
   // Test 1: County extent with boundaries
   console.log('Test 1: County extent with boundaries');
-  const result = await renderMap({
+  const result = await captureMapView({
     extent: 'county',
     boundaries: {
       showCounty: true,

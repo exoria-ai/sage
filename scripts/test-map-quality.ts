@@ -6,14 +6,14 @@
  */
 
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { renderMap } from '../lib/tools/render-map';
+import { captureMapView } from '../lib/tools/capture-map';
 
 const outputDir = '/Users/ryan/Development/sage/test-output';
 
 interface TestCase {
   name: string;
   description: string;
-  options: Parameters<typeof renderMap>[0];
+  options: Parameters<typeof captureMapView>[0];
 }
 
 const testCases: TestCase[] = [
@@ -150,7 +150,7 @@ async function runTests() {
     const startTime = Date.now();
 
     try {
-      const result = await renderMap(test.options);
+      const result = await captureMapView(test.options);
       const elapsed = Date.now() - startTime;
 
       if (!result.success) {

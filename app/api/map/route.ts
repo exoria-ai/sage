@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { renderMap } from '@/lib/tools/render-map';
+import { captureMapView } from '@/lib/tools/capture-map';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const result = await renderMap({
+    const result = await captureMapView({
       apn,
       apns,
       center,

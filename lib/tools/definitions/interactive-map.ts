@@ -83,7 +83,7 @@ export const getInteractiveMapUrlTool = defineTool({
   name: 'get_interactive_map_url',
   description: `Generate a URL to open the SAGE interactive map with specific view settings.
 
-**PURPOSE**: Creates a URL for the full interactive map experience. Unlike render_map (static image),
+**PURPOSE**: Creates a URL for the full interactive map experience. Unlike capture_map_view (static image),
 this opens a live map where users can pan, zoom, toggle layers, and explore.
 
 **WHEN TO USE**:
@@ -93,7 +93,7 @@ this opens a live map where users can pan, zoom, toggle layers, and explore.
 - User is looking at multiple properties or wants to navigate around
 - After showing a static map image, offer the interactive link for exploration
 
-**USE render_map INSTEAD** when:
+**USE capture_map_view INSTEAD** when:
 - User just needs a quick visual (static image is faster)
 - User wants to embed an image in a document
 - You need to show a specific view without user interaction
