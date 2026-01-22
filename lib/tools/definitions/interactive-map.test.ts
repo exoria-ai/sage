@@ -91,8 +91,8 @@ describe('Interactive Map URL Tool - Client Sync', () => {
     it('MCP tool preset enum matches client presets', () => {
       // Extract preset enum values from the MCP tool schema
       const presetSchema = getInteractiveMapUrlTool.schema.preset;
-      // @ts-expect-error - accessing internal zod structure
-      const mcpPresets = presetSchema?._def?.innerType?._def?.values as string[] | undefined;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mcpPresets = (presetSchema as any)?._def?.innerType?._def?.values as string[] | undefined;
 
       expect(
         mcpPresets,
@@ -123,7 +123,8 @@ describe('Interactive Map URL Tool - Client Sync', () => {
     it('generates valid URL with preset', async () => {
       const result = await getInteractiveMapUrlTool.handler({ preset: 'hazards' });
       const text = result.content[0];
-      expect(text.type).toBe('text');
+      expect(text).toBeDefined();
+      expect(text!.type).toBe('text');
 
       const data = JSON.parse((text as { type: 'text'; text: string }).text);
       expect(data.url).toContain('preset=hazards');
@@ -235,7 +236,9 @@ describe('Automatic Client Sync', () => {
     let match;
 
     while ((match = getParamRegex.exec(clientSource)) !== null) {
-      clientParams.add(match[1]);
+      if (match[1]) {
+        clientParams.add(match[1]);
+      }
     }
 
     // Sanity check - we should find at least the core params
@@ -292,7 +295,9 @@ describe('Automatic Client Sync', () => {
     let match;
 
     while ((match = optionRegex.exec(clientSource)) !== null) {
-      clientPresets.add(match[1]);
+      if (match[1]) {
+        clientPresets.add(match[1]);
+      }
     }
 
     // Verify we found presets
@@ -300,8 +305,8 @@ describe('Automatic Client Sync', () => {
 
     // Extract MCP presets
     const presetSchema = getInteractiveMapUrlTool.schema.preset;
-    // @ts-expect-error - accessing internal zod structure
-    const mcpPresets = new Set(presetSchema?._def?.innerType?._def?.values as string[]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mcpPresets = new Set((presetSchema as any)?._def?.innerType?._def?.values as string[]);
 
     // Check all client presets are in MCP
     for (const preset of clientPresets) {
