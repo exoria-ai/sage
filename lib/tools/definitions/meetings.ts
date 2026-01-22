@@ -13,6 +13,7 @@ import {
   listMeetings,
   getMeeting,
   getMeetingsOverview,
+  listCommittees,
 } from '../meetings';
 
 export const searchMeetingMinutesTool = defineTool({
@@ -22,14 +23,16 @@ export const searchMeetingMinutesTool = defineTool({
 Use this tool when users ask questions about:
 - Past meeting discussions and decisions
 - Topics covered in ReGIS (Regional GIS Consortium) meetings
+- Board of Supervisors (BOS) meeting agendas and minutes
 - Attendance at meetings
-- Action items and announcements from meetings
+- Action items, resolutions, and votes from meetings
 - GIS-related initiatives discussed in meetings
+- County government decisions and actions
 
 INPUT:
 - query: Search terms (required)
-- top_k: Number of results (default: 5)
-- committee: Filter by committee name (e.g., "ReGIS")
+- top_k: Number of results (default: 10)
+- committee: Filter by committee ("regis", "bos", or full name)
 - document_type: Filter by "agenda" or "minutes"
 - date_from: Filter meetings on or after this date (YYYY-MM-DD)
 - date_to: Filter meetings on or before this date (YYYY-MM-DD)
@@ -106,6 +109,19 @@ Returns committee info, total meetings, date range, and counts by type.`,
   },
 });
 
+export const listCommitteesTool = defineTool({
+  name: 'list_committees',
+  description: `List all available committees/boards with meeting data.
+
+Returns committee IDs, names, meeting counts, and date ranges.
+Use this to see what committees are available before searching.`,
+  schema: {},
+  handler: async () => {
+    const result = await listCommittees();
+    return jsonResponse(result);
+  },
+});
+
 /** All meetings tools */
 export const meetingsTools = [
   searchMeetingMinutesTool,
@@ -113,4 +129,5 @@ export const meetingsTools = [
   listMeetingsTool,
   getMeetingTool,
   getMeetingsOverviewTool,
+  listCommitteesTool,
 ];
