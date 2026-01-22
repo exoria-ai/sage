@@ -22,6 +22,11 @@
     "eslint-config-next",
     "tailwindcss",
     "cheerio",
-    "@types/cheerio"
-  ]
+    "@types/cheerio",
+    "turndown",
+    "@types/turndown"
+  ],
+  "rules": {
+    "duplicates": "off"
+  }
 }

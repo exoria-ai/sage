@@ -221,8 +221,5 @@ Dimensions: ${result.width}x${result.height} | Zoom: ${result.zoom}`,
   },
 });
 
-// Legacy alias for backward compatibility
-export const renderMapTool = captureMapViewTool;
-
 /** All map capture tools */
 export const renderMapTools = [captureMapViewTool];

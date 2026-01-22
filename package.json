@@ -33,7 +33,6 @@
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "sharp": "^0.34.5",
     "zod": "^3.23.0"
   },
   "devDependencies": {
