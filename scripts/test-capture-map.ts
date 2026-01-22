@@ -75,10 +75,19 @@ const testCases: TestCase[] = [
   },
   {
     name: '06-multiple-apns',
-    description: 'Multiple parcels highlighted',
+    description: 'Multiple parcels highlighted (auto-zoom to fit)',
     options: {
       apns: ['0030251020', '0030251010', '0030251030'],
-      zoom: 17,
+      // No zoom specified - should auto-calculate to fit all parcels
+    },
+  },
+  {
+    name: '06b-widely-spaced-apns',
+    description: 'Widely-spaced parcels (Fairfield + Vacaville + Benicia)',
+    options: {
+      // Fairfield (38.25, -122.04), Vacaville (38.35, -121.98), Benicia (38.05, -122.16)
+      apns: ['003-019-303', '013-106-036', '008-911-540'],
+      // No zoom specified - should auto-calculate to fit all
     },
   },
   {

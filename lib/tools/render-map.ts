@@ -385,6 +385,46 @@ async function getParcelExtent(apn: string): Promise<{
 }
 
 /**
+ * Get combined extent of multiple parcels from their APNs
+ */
+async function getMultiParcelExtent(apns: string[]): Promise<{
+  xmin: number;
+  ymin: number;
+  xmax: number;
+  ymax: number;
+  centerLat: number;
+  centerLon: number;
+} | null> {
+  const whereClause = buildApnWhereClause(apns);
+  if (!whereClause) return null;
+
+  try {
+    const params = new URLSearchParams({
+      where: whereClause,
+      returnExtentOnly: 'true',
+      outSR: '4326',
+      f: 'json',
+    });
+
+    const response = await fetch(`${LAYER_URLS.parcels}/query?${params}`);
+    const data = await response.json();
+
+    if (!data.extent) return null;
+
+    return {
+      xmin: data.extent.xmin,
+      ymin: data.extent.ymin,
+      xmax: data.extent.xmax,
+      ymax: data.extent.ymax,
+      centerLat: (data.extent.ymin + data.extent.ymax) / 2,
+      centerLon: (data.extent.xmin + data.extent.xmax) / 2,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Calculate bounding box from center and zoom
  */
 function calculateBboxFromCenter(
@@ -1241,19 +1281,23 @@ export async function captureMapView(args: MapOptions): Promise<CaptureMapResult
       lat = parcelExtent.centerLat;
       lon = parcelExtent.centerLon;
     } else if (apns && apns.length > 0) {
-      // When only apns provided, center on the first one
-      const firstApn = apns[0]!;
-      const parcelExtent = await getParcelExtent(firstApn);
-      if (!parcelExtent) {
+      // Get combined extent of all parcels
+      const combinedExtent = await getMultiParcelExtent(apns);
+      if (!combinedExtent) {
         return {
           success: false,
           error_type: 'APN_NOT_FOUND',
-          message: `Could not find parcel with APN "${firstApn}"`,
-          suggestion: 'Verify the APN format or provide coordinates instead',
+          message: `Could not find parcels with APNs "${apns.join(', ')}"`,
+          suggestion: 'Verify the APN formats',
         };
       }
-      lat = parcelExtent.centerLat;
-      lon = parcelExtent.centerLon;
+      lat = combinedExtent.centerLat;
+      lon = combinedExtent.centerLon;
+
+      // Calculate zoom to fit all parcels (unless explicitly specified)
+      if (!requestedZoom) {
+        zoom = calculateZoomForBbox(combinedExtent, width, height, 0.15);
+      }
     } else if (center) {
       lat = center.latitude;
       lon = center.longitude;
