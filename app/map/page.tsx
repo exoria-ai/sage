@@ -1,9 +1,10 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { WEB_MAPS } from '@/lib/esri/webmaps';
+import { useMapStore } from '@/lib/stores/mapStore';
 
 // Dynamically import MapContainer to avoid SSR issues with ESRI
 const MapContainer = dynamic(
@@ -21,8 +22,13 @@ const MapContainer = dynamic(
   }
 );
 
+// Session storage key for preserving map extent across preset switches
+const MAP_EXTENT_KEY = 'sage-map-extent';
+
 function MapPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const viewState = useMapStore((state) => state.viewState);
 
   // Get webMapId from URL params (e.g., /map?id=abc123 or /map?preset=hazards)
   const webMapId = searchParams.get('id') || undefined;
@@ -32,10 +38,28 @@ function MapPageContent() {
   const highlightApn = searchParams.get('apn') || undefined;
   const highlightAddress = searchParams.get('address') || undefined;
 
-  // Parse view parameters
+  // Parse view parameters from URL
   const centerParam = searchParams.get('center'); // format: "lng,lat"
   const zoomParam = searchParams.get('zoom');
 
+  // Check for saved extent in sessionStorage (from preset switching)
+  // useMemo ensures this only runs once per render and handles the side effect of clearing storage
+  const savedExtent = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const saved = sessionStorage.getItem(MAP_EXTENT_KEY);
+      if (saved) {
+        // Clear it after reading so it's only used once
+        sessionStorage.removeItem(MAP_EXTENT_KEY);
+        return JSON.parse(saved) as { center: { longitude: number; latitude: number }; zoom: number };
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    return null;
+  }, []); // Empty deps - only read once on mount
+
+  // Priority: URL params > saved extent from preset switch
   const initialCenter = centerParam
     ? (() => {
         const parts = centerParam.split(',');
@@ -44,9 +68,11 @@ function MapPageContent() {
         const lat = Number(parts[1]);
         return !isNaN(lng) && !isNaN(lat) ? { longitude: lng, latitude: lat } : undefined;
       })()
-    : undefined;
+    : savedExtent?.center;
 
-  const initialZoom = zoomParam && !isNaN(Number(zoomParam)) ? Number(zoomParam) : undefined;
+  const initialZoom = zoomParam && !isNaN(Number(zoomParam))
+    ? Number(zoomParam)
+    : savedExtent?.zoom;
 
   // Parse route parameters (format: "lng,lat" or "lng,lat,label")
   const originParam = searchParams.get('origin');
@@ -84,10 +110,21 @@ function MapPageContent() {
             value={preset}
             onChange={(e) => {
               const newPreset = e.target.value;
-              const url = new URL(window.location.href);
-              url.searchParams.set('preset', newPreset);
-              url.searchParams.delete('id');
-              window.location.href = url.toString();
+
+              // Save current map extent to sessionStorage before switching
+              if (viewState) {
+                sessionStorage.setItem(MAP_EXTENT_KEY, JSON.stringify({
+                  center: viewState.center,
+                  zoom: viewState.zoom,
+                }));
+              }
+
+              // Build new URL with preserved extent params
+              const params = new URLSearchParams();
+              params.set('preset', newPreset);
+
+              // Use router.push to avoid full page reload (keeps React state)
+              router.push(`/map?${params.toString()}`);
             }}
           >
             <option value="parcels">Parcels</option>
