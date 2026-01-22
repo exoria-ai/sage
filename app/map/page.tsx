@@ -28,7 +28,7 @@ const MAP_EXTENT_KEY = 'sage-map-extent';
 function MapPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const viewState = useMapStore((state) => state.viewState);
+  const mapView = useMapStore((state) => state.mapView);
 
   // Get webMapId from URL params (e.g., /map?id=abc123 or /map?preset=hazards)
   const webMapId = searchParams.get('id') || undefined;
@@ -111,11 +111,14 @@ function MapPageContent() {
             onChange={(e) => {
               const newPreset = e.target.value;
 
-              // Save current map extent to sessionStorage before switching
-              if (viewState) {
+              // Read current extent directly from the ESRI MapView (most up-to-date)
+              if (mapView?.center && mapView?.zoom !== undefined) {
                 sessionStorage.setItem(MAP_EXTENT_KEY, JSON.stringify({
-                  center: viewState.center,
-                  zoom: viewState.zoom,
+                  center: {
+                    longitude: mapView.center.longitude,
+                    latitude: mapView.center.latitude,
+                  },
+                  zoom: mapView.zoom,
                 }));
               }
 
