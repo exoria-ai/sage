@@ -7,6 +7,7 @@ export interface Scenario {
 	title: string;
 	description: string;
 	query: string;
+	toolCalls: string[];
 	result: string;
 }
 
@@ -38,6 +39,7 @@ export const capabilities: CapabilityCategory[] = [
 				title: 'Property Lookup',
 				description: 'Instant fact-checking for property questions.',
 				query: 'What property is at 675 Texas Street in Fairfield?',
+				toolCalls: ['Geocode Address', 'Get Parcel Details'],
 				result: `Property at 675 Texas Street, Fairfield
 
 | Detail | Information |
@@ -61,6 +63,7 @@ This is a government-owned property spanning over 5 acres, zoned for public faci
 				title: 'Notification List Generation',
 				description: 'Automated buffer analysis for discretionary permit applications.',
 				query: 'Generate a 300-foot notification list for APN 004-425-0050.',
+				toolCalls: ['Find Nearby Parcels'],
 				result: `300-Foot Notification List for APN 004-425-0050
 Source Parcel: 004-425-0050
 Buffer Radius: 300 feet
@@ -96,6 +99,7 @@ For official permit notification purposes, contact the Solano County Assessor's 
 				title: 'Jurisdiction Routing',
 				description: 'Catching the common mailing-address-vs-legal-jurisdiction confusion.',
 				query: 'What is the zoning for 2500 Cordelia Road, Fairfield?',
+				toolCalls: ['Geocode Address', 'Get Zoning'],
 				result: `Jurisdiction: Unincorporated Solano County (NOT City of Fairfield).
 Zoning: ASV-20 (Suisun Valley Agriculture, 20-acre minimum).
 
@@ -119,6 +123,7 @@ The mailing address says "Fairfield" but this parcel is outside city limits and 
 				title: 'ADU Regulations',
 				description: 'Summarizing complex development standards.',
 				query: 'What are the setback and size requirements for an ADU in Solano County?',
+				toolCalls: ['Search County Code', 'Get County Code Sections'],
 				result: `ADU Requirements in Solano County
 Based on Solano County Code Section 28.72.10, here are the setback and size requirements for Accessory Dwelling Units (ADUs) and Junior ADUs (JADUs):
 
@@ -150,6 +155,7 @@ Based on Solano County Code Section 28.72.10, here are the setback and size requ
 				title: 'Winery Permit Research',
 				description: 'Multi-step regulatory navigation.',
 				query: 'What permits does a winery need in agricultural zoning?',
+				toolCalls: ['Search County Code', 'Get County Code Sections'],
 				result: `Winery Permits in Solano County Agricultural Zones
 The permit required for a winery depends on its size (annual production) and grape sourcing:
 
@@ -188,6 +194,7 @@ The permit required for a winery depends on its size (annual production) and gra
 				title: 'Agricultural Policy',
 				description: 'Understanding land use restrictions and preservation goals.',
 				query: 'Does the General Plan support subdivisions in agricultural areas?',
+				toolCalls: ['Search General Plan', 'Search General Plan Policies', 'Get General Plan Chunk'],
 				result: `General Plan Policy on Subdivisions in Agricultural Areas
 Short answer: No. The General Plan strongly discourages parcel divisions in agricultural zones and establishes large minimum parcel sizes to preserve farmland.
 
@@ -227,6 +234,7 @@ Short answer: No. The General Plan strongly discourages parcel divisions in agri
 				title: 'Department Analysis',
 				description: 'Understanding organizational capacity and structure.',
 				query: "What is the staffing breakdown for the Sheriff's Office?",
+				toolCalls: ['Get Department'],
 				result: `Sheriff's Office Staffing Breakdown
 The Sheriff's Office has **588 total FTE** (full-time equivalent positions) across 7 divisions:
 
@@ -265,6 +273,7 @@ The **Custody Division** is the largest, accounting for nearly half of the depar
 				title: 'Fire Hazard Assessment',
 				description: 'Determining disclosure requirements and building standards.',
 				query: 'Is the property at 4303 Rockville Heights in a fire hazard zone?',
+				toolCalls: ['Geocode Address', 'Get Fire Hazard Zone'],
 				result: `Yes.
 **Fire Hazard Severity Zone:** Moderate
 **Responsibility Area:** SRA (State Responsibility Area—CAL FIRE jurisdiction)
@@ -280,6 +289,7 @@ The **Custody Division** is the largest, accounting for nearly half of the depar
 				title: 'Flood Zone Check',
 				description: 'Insurance and development constraint analysis.',
 				query: 'What flood zone is 2500 Cordelia Road in?',
+				toolCalls: ['Geocode Address', 'Get Flood Zone'],
 				result: `Flood Zone for 2500 Cordelia Road
 
 | Detail | Information |
@@ -312,6 +322,7 @@ Zone X (shaded) indicates moderate-to-low flood risk—outside the 100-year floo
 				title: 'Service Provider Identification',
 				description: 'Answering "who do I call?" for any property.',
 				query: 'What districts serve the property at 2500 Cordelia Road?',
+				toolCalls: ['Geocode Address', 'Get Special Districts'],
 				result: `Districts Serving 2500 Cordelia Road
 
 | Service | District/Provider |
@@ -344,6 +355,7 @@ This property is in unincorporated Solano County and receives services from thes
 				title: 'Policy History',
 				description: 'Tracking Board decisions on emerging topics.',
 				query: 'When did Solano County approve participation in the GovAI Coalition?',
+				toolCalls: ['Search Meeting Minutes'],
 				result: `GovAI Coalition Approval
 The Solano County Board of Supervisors approved participation in the **GovAI Coalition** on **April 9, 2024**.
 
@@ -371,6 +383,7 @@ The GovAI Coalition is a partnership of government agencies focused on the respo
 				title: 'Interactive Handoff',
 				description: 'Transitioning from AI answers to self-service exploration.',
 				query: 'Show me an interactive map of this property with hazard layers.',
+				toolCalls: ['Get Interactive Map Url'],
 				result: `Interactive Hazard Map for APN 004-425-0050
 Here's an interactive map with hazard layers for the property:
 

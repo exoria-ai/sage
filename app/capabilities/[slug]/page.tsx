@@ -1,4 +1,5 @@
 import { getCapability } from '@/lib/capabilities';
+import { ScenarioDisplay } from '@/components/ScenarioDisplay';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -52,21 +53,16 @@ export default async function CapabilityPage({ params }: PageProps) {
             </div>
             
             {capability.scenarios.map((scenario, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-6 sm:p-8 bg-slate-50/50 border-b border-slate-100">
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">{scenario.title}</h3>
-                  <p className="text-slate-600 mb-6">{scenario.description}</p>
-                  
-                  <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mb-4">
-                    <p className="font-mono text-sm text-slate-500 mb-1">User:</p>
-                    <p className="font-medium text-slate-900">"{scenario.query}"</p>
-                  </div>
-                  
-                  <div className="bg-slate-900 rounded-xl p-4 shadow-inner overflow-x-auto">
-                    <p className="font-mono text-sm text-teal-400 mb-1">SAGE Result:</p>
-                    <p className="font-mono text-sm text-slate-300 leading-relaxed whitespace-pre-wrap font-medium">{scenario.result}</p>
-                  </div>
+              <div key={i} className="mb-8">
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">{scenario.title}</h3>
+                  <p className="text-slate-600">{scenario.description}</p>
                 </div>
+                <ScenarioDisplay
+                  query={scenario.query}
+                  toolCalls={scenario.toolCalls}
+                  result={scenario.result}
+                />
               </div>
             ))}
           </section>
