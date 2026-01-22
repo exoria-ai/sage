@@ -1,8 +1,8 @@
 {
   "mcpServers": {
-    "sage-gis": {
+    "sage-dev": {
       "command": "npx",
-      "args": ["tsx", "src/index.ts"],
+      "args": ["tsx", "scripts/mcp-dev-server.ts"],
       "cwd": "${workspaceFolder}"
     }
   }
