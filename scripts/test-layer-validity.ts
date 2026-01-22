@@ -8,133 +8,10 @@
  * Usage: npx tsx scripts/test-layer-validity.ts
  */
 
-import { SOLANO_AGOL_BASE, SOLANO_SERVICES } from '../lib/config/endpoints';
-
-interface LayerCheck {
-  name: string;
-  url: string;
-  type: 'FeatureServer' | 'MapServer' | 'VectorTileServer' | 'ImageServer';
-  critical: boolean;
-}
-
-// All layers used by capture-map.ts and other tools
-const LAYERS_TO_CHECK: LayerCheck[] = [
-  // Core parcel/address layers
-  {
-    name: 'Parcels (Feature)',
-    url: `${SOLANO_AGOL_BASE}/Parcels_Public_Aumentum/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: true,
-  },
-  {
-    name: 'Parcels (Vector Tile)',
-    url: 'https://vectortileservices7.arcgis.com/KbDaBCmcuKbyQfck/arcgis/rest/services/Parcels_Public_Aumentum_Shapefiles_Vector_Tiles/VectorTileServer',
-    type: 'VectorTileServer',
-    critical: true,
-  },
-  {
-    name: 'Address Points',
-    url: `${SOLANO_AGOL_BASE}/Address_Points/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: true,
-  },
-
-  // Boundary layers
-  {
-    name: 'City Boundary',
-    url: SOLANO_SERVICES.cityBoundary,
-    type: 'FeatureServer',
-    critical: true,
-  },
-  {
-    name: 'County Boundary',
-    url: `${SOLANO_AGOL_BASE}/County_Boundary/FeatureServer/1`,
-    type: 'FeatureServer',
-    critical: true,
-  },
-
-  // Service area layers
-  {
-    name: 'Garbage Service Areas',
-    url: `${SOLANO_AGOL_BASE}/Garbage_Service_Areas/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: false,
-  },
-
-  // Aerial imagery
-  {
-    name: 'Aerial 2025',
-    url: 'https://tiles.arcgis.com/tiles/SCn6czzcqKAFwdGU/arcgis/rest/services/Aerial2025_WGS84/MapServer',
-    type: 'MapServer',
-    critical: false,
-  },
-
-  // Hazard layers
-  {
-    name: 'Fire Hazard Severity Zone',
-    url: `${SOLANO_AGOL_BASE}/FireHazardSeverityZone/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: true,
-  },
-  {
-    name: 'Fire Hazard 2025 Phase 2',
-    url: `${SOLANO_AGOL_BASE}/FireHazardSeverityZone_Phase2_2025/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: false,
-  },
-  {
-    name: 'Fire Hazard April 2024',
-    url: `${SOLANO_AGOL_BASE}/FireHazardSeverityZone_April2024/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: false,
-  },
-  {
-    name: 'FEMA Flood Zones (NFHL)',
-    url: 'https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28',
-    type: 'FeatureServer', // This is layer 28 from NFHL MapServer, which is a Feature Layer
-    critical: true,
-  },
-  {
-    name: 'County Floodplains (Local)',
-    url: `${SOLANO_AGOL_BASE}/Floodplains/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: false,
-  },
-
-  // Planning layers
-  {
-    name: 'County Zoning',
-    url: `${SOLANO_AGOL_BASE}/SolanoCountyZoning_092322/FeatureServer/4`,
-    type: 'FeatureServer',
-    critical: true,
-  },
-  {
-    name: 'BOS Districts',
-    url: `${SOLANO_AGOL_BASE}/BOS_District_Boundaries_2021/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: false,
-  },
-
-  // Infrastructure
-  {
-    name: 'Fire Stations',
-    url: `${SOLANO_AGOL_BASE}/Fire_Stations/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: false,
-  },
-  {
-    name: 'Fire Response Boundary',
-    url: `${SOLANO_AGOL_BASE}/FireResponse_Boundary/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: false,
-  },
-  {
-    name: 'Schools',
-    url: `${SOLANO_AGOL_BASE}/Schools/FeatureServer/0`,
-    type: 'FeatureServer',
-    critical: false,
-  },
-];
+import {
+  LAYER_CATALOG,
+  type LayerDefinition,
+} from '../lib/config/layer-catalog';
 
 interface CheckResult {
   name: string;
@@ -145,17 +22,17 @@ interface CheckResult {
   details?: Record<string, unknown>;
 }
 
-async function checkLayer(layer: LayerCheck): Promise<CheckResult> {
+async function checkLayer(layer: LayerDefinition): Promise<CheckResult> {
   const result: CheckResult = {
-    name: layer.name,
+    name: layer.title,
     url: layer.url,
     valid: false,
-    critical: layer.critical,
+    critical: layer.critical ?? false,
   };
 
   try {
     const response = await fetch(`${layer.url}?f=json`, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
 
     if (!response.ok) {
@@ -179,7 +56,9 @@ async function checkLayer(layer: LayerCheck): Promise<CheckResult> {
           result.valid = true;
           result.details = {
             name: data.name,
-            creationDate: data.creationDate ? new Date(data.creationDate).toISOString() : undefined,
+            creationDate: data.creationDate
+              ? new Date(data.creationDate).toISOString()
+              : undefined,
             maxZoom: data.maxZoom,
           };
         } else {
@@ -203,7 +82,11 @@ async function checkLayer(layer: LayerCheck): Promise<CheckResult> {
 
       case 'MapServer':
         // Check for map server properties
-        if (data.mapName || data.layers || data.singleFusedMapCache !== undefined) {
+        if (
+          data.mapName ||
+          data.layers ||
+          data.singleFusedMapCache !== undefined
+        ) {
           result.valid = true;
           result.details = {
             name: data.mapName || data.name,
@@ -211,15 +94,6 @@ async function checkLayer(layer: LayerCheck): Promise<CheckResult> {
           };
         } else {
           result.error = 'Not a valid map service';
-        }
-        break;
-
-      case 'ImageServer':
-        if (data.serviceDataType || data.pixelType) {
-          result.valid = true;
-          result.details = { name: data.name };
-        } else {
-          result.error = 'Not a valid image service';
         }
         break;
     }
@@ -231,21 +105,29 @@ async function checkLayer(layer: LayerCheck): Promise<CheckResult> {
 }
 
 async function runValidation() {
+  const layers = Object.values(LAYER_CATALOG);
+
   console.log('🔍 Layer Validity Check');
   console.log('='.repeat(70));
-  console.log(`Checking ${LAYERS_TO_CHECK.length} layers...\n`);
+  console.log(`Checking ${layers.length} layers from layer-catalog.ts...\n`);
 
   const results: CheckResult[] = [];
+  const categories = new Set(layers.map((l) => l.category));
 
-  for (const layer of LAYERS_TO_CHECK) {
-    process.stdout.write(`  Checking ${layer.name}... `);
-    const result = await checkLayer(layer);
-    results.push(result);
+  for (const category of categories) {
+    const categoryLayers = layers.filter((l) => l.category === category);
+    console.log(`\n📂 ${category.toUpperCase()} (${categoryLayers.length} layers)`);
 
-    if (result.valid) {
-      console.log('✅');
-    } else {
-      console.log(`❌ ${result.error}`);
+    for (const layer of categoryLayers) {
+      process.stdout.write(`  Checking ${layer.title}... `);
+      const result = await checkLayer(layer);
+      results.push(result);
+
+      if (result.valid) {
+        console.log('✅');
+      } else {
+        console.log(`❌ ${result.error}`);
+      }
     }
   }
 
@@ -253,9 +135,9 @@ async function runValidation() {
   console.log('\n' + '='.repeat(70));
   console.log('📊 Summary\n');
 
-  const valid = results.filter(r => r.valid);
-  const invalid = results.filter(r => !r.valid);
-  const criticalFailures = invalid.filter(r => r.critical);
+  const valid = results.filter((r) => r.valid);
+  const invalid = results.filter((r) => !r.valid);
+  const criticalFailures = invalid.filter((r) => r.critical);
 
   console.log(`✅ Valid layers: ${valid.length}/${results.length}`);
 
@@ -274,7 +156,7 @@ async function runValidation() {
     process.exit(1);
   } else if (invalid.length > 0) {
     console.log('\n⚠️  WARNING: Some non-critical layers are failing.');
-    console.log('   Consider updating these layer URLs.');
+    console.log('   Consider updating these layer URLs in layer-catalog.ts.');
     process.exit(0);
   } else {
     console.log('\n✅ All layers are valid!');
@@ -282,7 +164,7 @@ async function runValidation() {
   }
 }
 
-runValidation().catch(error => {
+runValidation().catch((error) => {
   console.error('Fatal error:', error);
   process.exit(1);
 });
