@@ -9,10 +9,11 @@ import {
 import { WEB_MAPS, getWebMapId } from '@/lib/esri/webmaps';
 import { SOLANO_SERVICES } from '@/lib/esri/webmaps';
 
+import { useLayerPairs } from './hooks/useLayerPairs';
+
 // Note: Config imports not available client-side, use inline constants
 // These values should match lib/config/endpoints.ts and lib/config/defaults.ts
 const ESRI_JS_ASSETS = 'https://js.arcgis.com/4.34/@arcgis/core/assets';
-const ESRI_ROUTE_SERVICE = 'https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World';
 
 // Map styling constants (should match lib/config/defaults.ts)
 const MAP_COLORS = {
@@ -40,26 +41,9 @@ const SOLANO_COUNTY_EXTENT = {
   ymax: 38.538,
 };
 
-const MAP_VIEW_PADDING = { top: 80, bottom: 50, left: 50, right: 50 };
-
-// Layer pairing constants for vector tile optimization
-// Layers with [VECTOR_TILE] suffix are paired with their base FeatureLayer
-// The vector tile handles display, the feature layer handles queries/identify
-const VECTOR_TILE_SUFFIX = '[VECTOR_TILE]';
-
 // Exclusive group suffix - GroupLayers with this suffix will use radio-button behavior
 // (only one child layer visible at a time). Tag is stripped from display name.
 const EXCLUSIVE_GROUP_SUFFIX = '[EXCLUSIVE]';
-
-/**
- * Represents a paired layer configuration where a VectorTileLayer handles
- * display and a FeatureLayer handles queries/identify operations
- */
-interface LayerPair {
-  baseName: string;
-  vectorTileLayer: __esri.VectorTileLayer;
-  featureLayer: __esri.FeatureLayer;
-}
 
 // ESRI imports - these are loaded dynamically client-side only
 import esriConfig from '@arcgis/core/config';
@@ -125,8 +109,10 @@ export function MapContainer({
   const highlightLayerRef = useRef<GraphicsLayer | null>(null);
   const routeLayerRef = useRef<GraphicsLayer | null>(null);
   const identifyButtonRef = useRef<HTMLDivElement | null>(null);
-  const layerPairsRef = useRef<LayerPair[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Layer pair management (VectorTileLayer + FeatureLayer optimization)
+  const { configureLayerPairs, queryPairedLayersAtPoint } = useLayerPairs();
   const [localError, setLocalError] = useState<string | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
 
@@ -559,57 +545,8 @@ export function MapContainer({
           console.log('Priority layers loaded:', priorityLayers.map(l => `${l.title} (${l.type})`));
 
           // Detect and configure vector tile / feature layer pairs
-          // Layers named "X [VECTOR_TILE]" are paired with "X" feature layers
-          // Note: This can run before all layers finish loading since we're just configuring references
-          const layerPairs: LayerPair[] = [];
-
-          // Find all vector tile layers with the suffix
-          const vectorTileLayers = allLayers.filter(
-            (l) => l.type === 'vector-tile' && l.title?.includes(VECTOR_TILE_SUFFIX)
-          ) as __esri.VectorTileLayer[];
-
-          for (const vtLayer of vectorTileLayers) {
-            // Extract base name (remove suffix and trim)
-            const baseName = vtLayer.title!.replace(VECTOR_TILE_SUFFIX, '').trim();
-
-            // Find matching feature layer with same base name
-            const featureLayer = allLayers.find(
-              (l) => l.type === 'feature' && l.title === baseName
-            ) as __esri.FeatureLayer | undefined;
-
-            if (featureLayer) {
-              console.log(`Layer pair detected: "${baseName}" (VectorTile + FeatureLayer)`);
-
-              // Configure the pair:
-              // 1. Vector tile layer handles display - rename it to base name for clean UI
-              vtLayer.title = baseName;
-
-              // 2. Feature layer is hidden from display but kept for queries
-              //    - Set listMode to 'hide' so it doesn't appear in LayerList
-              //    - Set opacity to 0 so it doesn't render, but stays "visible" for queries
-              featureLayer.listMode = 'hide';
-              featureLayer.opacity = 0;
-
-              // 3. Sync visibility: when vector tile visibility changes, update feature layer
-              vtLayer.watch('visible', (visible) => {
-                featureLayer.visible = visible;
-              });
-
-              // Initial sync
-              featureLayer.visible = vtLayer.visible;
-
-              layerPairs.push({
-                baseName,
-                vectorTileLayer: vtLayer,
-                featureLayer,
-              });
-            } else {
-              console.warn(`No matching FeatureLayer found for "${vtLayer.title}"`);
-            }
-          }
-
-          layerPairsRef.current = layerPairs;
-          console.log(`Configured ${layerPairs.length} layer pair(s)`);
+          // This can run before all layers finish loading since we're just configuring references
+          configureLayerPairs(view);
 
           // Configure exclusive groups - GroupLayers tagged with [EXCLUSIVE] get radio-button behavior
           const groupLayers = allLayers.filter((l) => l.type === 'group') as GroupLayer[];
@@ -1042,39 +979,7 @@ export function MapContainer({
 
           // For paired layers: query the hidden FeatureLayer at click point
           // This handles clicks on VectorTileLayer areas (which hitTest doesn't detect)
-          const pairedLayerQueries = layerPairsRef.current
-            .filter((pair) => pair.vectorTileLayer.visible) // Only query if layer is visible
-            .map(async (pair) => {
-              try {
-                const spatialQuery = new Query({
-                  geometry: event.mapPoint,
-                  spatialRelationship: 'intersects',
-                  outFields: ['*'],
-                  returnGeometry: true,
-                });
-
-                const result = await pair.featureLayer.queryFeatures(spatialQuery);
-
-                if (result.features && result.features.length > 0) {
-                  // Return features with the display name (not the hidden layer name)
-                  return result.features.map((f) => {
-                    // Override the layer reference to use the base name for display
-                    const graphic = f.clone();
-                    // Store the base name for popup title
-                    graphic.setAttribute('_layerTitle', pair.baseName);
-                    return graphic;
-                  });
-                }
-                return [];
-              } catch (err) {
-                console.error(`Error querying paired layer "${pair.baseName}":`, err);
-                return [];
-              }
-            });
-
-          // Wait for all paired layer queries
-          const pairedResults = await Promise.all(pairedLayerQueries);
-          const pairedGraphics = pairedResults.flat();
+          const pairedGraphics = await queryPairedLayersAtPoint(event.mapPoint);
 
           // Combine hitTest results with paired layer query results
           // Deduplicate by checking if we already have a feature from the same layer
@@ -1153,6 +1058,8 @@ export function MapContainer({
     setError,
     setSelectedFeatures,
     toggleIdentifyMode,
+    configureLayerPairs,
+    queryPairedLayersAtPoint,
   ]);
 
   // Update identify button state and cursor when identify mode changes
