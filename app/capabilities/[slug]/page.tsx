@@ -62,9 +62,9 @@ export default async function CapabilityPage({ params }: PageProps) {
                     <p className="font-medium text-slate-900">"{scenario.query}"</p>
                   </div>
                   
-                  <div className="bg-slate-900 rounded-xl p-4 shadow-inner">
+                  <div className="bg-slate-900 rounded-xl p-4 shadow-inner overflow-x-auto">
                     <p className="font-mono text-sm text-teal-400 mb-1">SAGE Result:</p>
-                    <p className="font-mono text-sm text-slate-300 leading-relaxed">{scenario.result}</p>
+                    <p className="font-mono text-sm text-slate-300 leading-relaxed whitespace-pre-wrap font-medium">{scenario.result}</p>
                   </div>
                 </div>
               </div>

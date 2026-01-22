@@ -28,23 +28,56 @@ export const capabilities: CapabilityCategory[] = [
 		description: 'The foundation of county GIS. Direct access to Assessor data, boundaries, and ownership information for 152,000+ parcels across seven cities and unincorporated areas.',
 		source: 'Solano County Assessor / Aumentum System',
 		tools: [
-			{ name: 'get_parcel_details', description: 'Retrieve comprehensive property info: APN, address, acreage, lot size, use codes, zoning, assessed values, building characteristics, and tax links.' },
-			{ name: 'geocode_address', description: 'Convert street addresses to coordinates and APNs. Handles fuzzy matching and suggests alternatives when exact match unavailable.' },
-			{ name: 'search_parcels', description: 'Find parcels matching criteria: zoning type, acreage range, assessed value, year built, amenities (pool, solar), Williamson Act status.' },
+			{ name: 'get_parcel_details', description: 'Retrieve comprehensive property info including APN, address, acreage, use codes, and assessed values.' },
+			{ name: 'geocode_address', description: 'Convert street addresses to coordinates and APNs with fuzzy matching.' },
+			{ name: 'search_parcels', description: 'Find parcels matching specific criteria (e.g., "Agricultural land over 20 acres").' },
 			{ name: 'find_nearby_parcels', description: 'Buffer analysis for notification lists. Returns all parcels within specified radius with owner info and distances.' }
 		],
 		scenarios: [
 			{
-				title: 'Government Property Lookup',
-				description: 'Identifying public facilities and their tax status.',
+				title: 'Property Lookup',
+				description: 'Instant fact-checking for property questions.',
 				query: 'What property is at 675 Texas Street in Fairfield?',
-				result: 'APN: 003-025-1020. Use: Governmental & Miscellaneous (Code 9800). Size: 5.28 acres. Assessed Value: $0 (Government Exempt). Zoning: Public Facilities. This is a County-owned parcel in the Fairfield civic center area.'
+				result: `Property at 675 Texas Street, Fairfield
+
+| Detail | Information |
+| :--- | :--- |
+| **APN** | 003-025-1020 |
+| **Situs Address** | 601 Texas Street, Fairfield |
+| **Acreage** | 5.28 acres (240,015 sq ft) |
+| **Use** | Governmental & Miscellaneous |
+| **Zoning** | Public Facilities |
+| **Assessed Value** | $0 (government-owned, tax-exempt) |
+| **Tax Rate Area** | 3104 (Fairfield City) |
+
+This is a government-owned property spanning over 5 acres, zoned for public facilities. The $0 assessed value indicates it's a tax-exempt public property. This address is part of the Solano County Government Center complex in downtown Fairfield, which houses various county administrative offices.
+
+**Useful Links:**
+• Property Details
+• Tax Map
+• Tax Information`
 			},
 			{
 				title: 'Notification List Generation',
 				description: 'Automated buffer analysis for discretionary permit applications.',
 				query: 'Generate a 300-foot notification list for APN 004-425-0050.',
-				result: '3 parcels within 300ft buffer. Nearest: 004-631-0120 (137ft, 0.49 acres). Largest neighbor: 004-424-0010 (237ft, 62 acres agricultural). All addresses and distances compiled for mailing labels.'
+				result: `300-Foot Notification List for APN 004-425-0050
+Source Parcel: 004-425-0050
+Buffer Radius: 300 feet
+Total Parcels Found: 3
+
+| APN | Situs Address | Owner | City | Acreage | Distance (ft) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 004-631-0120 | — | Not Available | Unincorporated | 0.49 | 137 |
+| 004-424-0010 | — | Not Available | Unincorporated | 62.06 | 237 |
+| 004-425-0080 | 2543 Cordelia Road | Not Available | Unincorporated | 21.71 | 272 |
+
+**Notes:**
+• This is a rural area near Cordelia Road with only 3 parcels within 300 feet
+• Owner names are not available in the public dataset - you'll need to obtain current owner/mailing address information from the Solano County Assessor's Office for official notification purposes
+• All neighboring parcels are in unincorporated Solano County
+
+For official permit notification purposes, contact the Solano County Assessor's Office to obtain the current property owner names and mailing addresses for these APNs.`
 			}
 		]
 	},
@@ -63,7 +96,10 @@ export const capabilities: CapabilityCategory[] = [
 				title: 'Jurisdiction Routing',
 				description: 'Catching the common mailing-address-vs-legal-jurisdiction confusion.',
 				query: 'What is the zoning for 2500 Cordelia Road, Fairfield?',
-				result: 'Jurisdiction: Unincorporated Solano County (NOT City of Fairfield). Zoning: ASV-20 (Suisun Valley Agriculture, 20-acre minimum). The mailing address says "Fairfield" but this parcel is outside city limits and subject to County zoning regulations.'
+				result: `Jurisdiction: Unincorporated Solano County (NOT City of Fairfield).
+Zoning: ASV-20 (Suisun Valley Agriculture, 20-acre minimum).
+
+The mailing address says "Fairfield" but this parcel is outside city limits and subject to County zoning regulations.`
 			}
 		]
 	},
@@ -81,15 +117,57 @@ export const capabilities: CapabilityCategory[] = [
 		scenarios: [
 			{
 				title: 'ADU Regulations',
-				description: 'Navigating complex dwelling unit standards.',
+				description: 'Summarizing complex development standards.',
 				query: 'What are the setback and size requirements for an ADU in Solano County?',
-				result: 'Per Section 28.72.10: Side/rear setbacks: 4 feet minimum. Attached ADU: max 50% of primary dwelling, up to 1,200 sq ft. Detached ADU in R-R district: up to 1,500 sq ft. Detached in R-TC: 850 sq ft (or 1,000 if 2+ bedrooms). Minimum size: 380 sq ft (or 220 sq ft efficiency unit). No additional setback required when converting existing garage.'
+				result: `ADU Requirements in Solano County
+Based on Solano County Code Section 28.72.10, here are the setback and size requirements for Accessory Dwelling Units (ADUs) and Junior ADUs (JADUs):
+
+**Setbacks**
+| Setback | Requirement |
+| :--- | :--- |
+| Front | Per the applicable zoning district (Table 28.31B for R-R or 28.32C for R-TC) |
+| Side | 4 feet minimum |
+| Rear | 4 feet minimum |
+
+*Exception: No additional setback is required when converting existing living area or a residential accessory structure.*
+
+**Size Requirements**
+| ADU Type | Size Limits |
+| :--- | :--- |
+| Attached ADU | Max 50% of primary dwelling floor area, not to exceed 1,200 sq ft |
+| Detached ADU (R-TC) | Max 850 sq ft (1 bedroom) or 1,000 sq ft (2+ bedrooms) |
+| Detached ADU (R-R) | Max 1,500 sq ft |
+| Junior ADU | Max 500 sq ft |
+| Minimum size | 380 sq ft (or efficiency unit) |
+
+**Other Key Requirements**
+• 1 parking space required per ADU (unless within ½ mile of transit)
+• ADUs are allowed by right in R-R and R-TC zoning districts
+• Owner occupancy is not required for ADUs
+• ADUs cannot be sold separately from the primary dwelling`
 			},
 			{
 				title: 'Winery Permit Research',
 				description: 'Multi-step regulatory navigation.',
 				query: 'What permits does a winery need in agricultural zoning?',
-				result: 'Found 7 relevant sections. Wineries are classified by production volume (Small/Medium/Large) per Section 28.01. Section 28.21.20 shows permit requirements vary by district: Small winery on A-40 may be allowed by-right (A) or Administrative Permit (AP). Section 28.71.20 details agricultural processing standards. Section 28.73.30 covers special events—hosting weddings requires separate "Special Events Facility" approval.'
+				result: `Winery Permits in Solano County Agricultural Zones
+The permit required for a winery depends on its size (annual production) and grape sourcing:
+
+**Permit Requirements by Winery Size**
+| Winery Type | A-20, A-40, A-80, A-160 Zones | Key Conditions |
+| :--- | :--- | :--- |
+| Small Winery (≤ 20k gal) | **Allowed by Right** (no permit) | Must source ≥25% of grapes from Solano County |
+| Medium Winery (20k-100k) | **Administrative Permit (AP)** or MUP | MUP required if no direct access from public road |
+| Large Winery (> 100k) | **Use Permit (UP)** | Discretionary approval required |
+| Winery with <25% local grapes | **Use Permit (UP)** | Regardless of size |
+
+**Key Requirements**
+• **Grape Sourcing:** Small wineries must source at least 25% of grapes locally.
+• **Reporting:** Annual reporting of total gallons produced required.
+• **Tasting Rooms:** Max size varies (1,000 sq ft for Small, 2,000 sq ft for Medium/Large).
+• **Special Events:** Medium/Large wineries may host events per permit; Small wineries need Sheriff notification.
+
+*Summary: Small local wineries (under 20k gallons) operate by right. Larger operations need discretionary permits.*`
 			}
 		]
 	},
@@ -110,7 +188,24 @@ export const capabilities: CapabilityCategory[] = [
 				title: 'Agricultural Policy',
 				description: 'Understanding land use restrictions and preservation goals.',
 				query: 'Does the General Plan support subdivisions in agricultural areas?',
-				result: 'Chapter 3 (Agriculture) establishes strong preservation policies. Policy AG.P-4 requires farmland conversion mitigation for any General Plan amendment changing agricultural to non-agricultural use OR any development permit changing land from production agriculture. The Tri-City and County Cooperative Plan (1994) guides protection of open space and agricultural lands in the Fairfield-Vacaville-Benicia corridor.'
+				result: `General Plan Policy on Subdivisions in Agricultural Areas
+Short answer: No. The General Plan strongly discourages parcel divisions in agricultural zones and establishes large minimum parcel sizes to preserve farmland.
+
+**Minimum Parcel Sizes (Table AG-3)**
+| Agricultural Region | Minimum Parcel Size |
+| :--- | :--- |
+| Suisun Valley | 20 acres |
+| Green Valley | 20 acres |
+| Winters / Dixon Ridge | 40 acres |
+| Montezuma Hills | 160 acres |
+| Jepson Prairie | 160 acres |
+
+**Key Policies**
+• **Policy AG.P-31:** Parcel sizes must conform to these minimums.
+• **Policy AG.P-28:** Agriculture is to be the predominant land use in these regions.
+• **Policy AG.P-32:** Redesignation to rural residential is extremely limited and requires finding that land is *unsuitable* for agriculture.
+
+*Summary: The General Plan's approach to agricultural lands is preservation, not subdivision.*`
 			}
 		]
 	},
@@ -132,7 +227,26 @@ export const capabilities: CapabilityCategory[] = [
 				title: 'Department Analysis',
 				description: 'Understanding organizational capacity and structure.',
 				query: "What is the staffing breakdown for the Sheriff's Office?",
-				result: "Total FTE: 588 across 7 divisions. Custody Division: 287 FTE (largest). Field Operations: 171 FTE. Support Services: 56 FTE. Animal Care Services: 29 FTE. Emergency Services: 29 FTE. Top positions: 247 Correctional Officers, 115 Deputy Sheriffs, 30 Custody Sergeants, 24 Sheriff's Security Officers."
+				result: `Sheriff's Office Staffing Breakdown
+The Sheriff's Office has **588 total FTE** (full-time equivalent positions) across 7 divisions:
+
+**By Division**
+| Division | FTE |
+| :--- | :--- |
+| Custody Division | 287 |
+| Field Operations Division | 171 |
+| Support Services Division | 56 |
+| Animal Care Services | 29 |
+| Emergency Services Division | 29 |
+| Compliance Services Division | 14 |
+
+**Top Positions**
+• **Correctional Officer:** 247 FTE
+• **Deputy Sheriff:** 115 FTE
+• **Custody Sergeant:** 30 FTE
+• **Sheriff's Security Officer:** 24 FTE
+
+The **Custody Division** is the largest, accounting for nearly half of the department's staff. **Field Operations** is the second largest, focusing on patrol and investigative duties.`
 			}
 		]
 	},
@@ -151,13 +265,34 @@ export const capabilities: CapabilityCategory[] = [
 				title: 'Fire Hazard Assessment',
 				description: 'Determining disclosure requirements and building standards.',
 				query: 'Is the property at 4303 Rockville Heights in a fire hazard zone?',
-				result: 'Yes. Fire Hazard Severity Zone: Moderate. Responsibility Area: SRA (State Responsibility Area—CAL FIRE jurisdiction). Requirements: 100ft defensible space per PRC 4291, fire-resistant materials recommended, real estate disclosure required. Note: FHSZ maps fire behavior potential (hazard), not probability (risk).'
+				result: `Yes.
+**Fire Hazard Severity Zone:** Moderate
+**Responsibility Area:** SRA (State Responsibility Area—CAL FIRE jurisdiction)
+
+**Requirements:**
+• 100ft defensible space per PRC 4291
+• Fire-resistant materials recommended
+• Real estate disclosure required
+
+*Note: FHSZ maps fire behavior potential (hazard), not probability (risk).*`
 			},
 			{
 				title: 'Flood Zone Check',
 				description: 'Insurance and development constraint analysis.',
 				query: 'What flood zone is 2500 Cordelia Road in?',
-				result: 'Zone X (0.2% Annual Chance Flood Hazard). Risk Level: Low—outside 500-year floodplain. Not a Special Flood Hazard Area (SFHA). Flood insurance NOT required for federally-backed mortgage, but available at preferred rates. Note: Low risk is not no risk.'
+				result: `Flood Zone for 2500 Cordelia Road
+
+| Detail | Information |
+| :--- | :--- |
+| **Address** | 2500 Cordelia Road (matched to 2503 Cordelia Road) |
+| **APN** | 004-425-0050 |
+| **FEMA Flood Zone** | Zone X (0.2% Annual Chance Flood Hazard) |
+| **Risk Level** | Low |
+| **Special Flood Hazard Area** | No |
+| **Insurance Required** | No |
+
+**What This Means**
+Zone X (shaded) indicates moderate-to-low flood risk—outside the 100-year floodplain. Flood insurance is not required for federally-backed mortgages but is available at preferred rates.`
 			}
 		]
 	},
@@ -177,7 +312,18 @@ export const capabilities: CapabilityCategory[] = [
 				title: 'Service Provider Identification',
 				description: 'Answering "who do I call?" for any property.',
 				query: 'What districts serve the property at 2500 Cordelia Road?',
-				result: 'Fire: Suisun Fire Protection District. Water: Solano Irrigation District (SID). School: Fairfield-Suisun Unified School District. Garbage: Republic Services. Cemetery: Solano Cemetery District. Supervisor: District 2. This property is in unincorporated county but served by multiple special districts.'
+				result: `Districts Serving 2500 Cordelia Road
+
+| Service | District/Provider |
+| :--- | :--- |
+| **Fire Protection** | Suisun Fire Protection District |
+| **Water** | Solano Irrigation District |
+| **School District** | Fairfield-Suisun Unified School District |
+| **Board of Supervisors** | District 2 |
+| **Garbage/Waste** | Republic Services |
+| **Cemetery** | Solano Cemetery District |
+
+This property is in unincorporated Solano County and receives services from these special districts rather than a city.`
 			}
 		]
 	},
@@ -198,7 +344,12 @@ export const capabilities: CapabilityCategory[] = [
 				title: 'Policy History',
 				description: 'Tracking Board decisions on emerging topics.',
 				query: 'When did Solano County approve participation in the GovAI Coalition?',
-				result: 'April 9, 2024. Item 24-251: "Authorize the Chief Information Officer to execute the GovAI Coalition registration agreement." Status: Approved. This authorized County participation in the multi-jurisdictional AI governance initiative.'
+				result: `GovAI Coalition Approval
+The Solano County Board of Supervisors approved participation in the **GovAI Coalition** on **April 9, 2024**.
+
+**Item 24-251** authorized the Chief Information Officer to execute the GovAI Coalition registration agreement. The item was approved on the consent calendar.
+
+The GovAI Coalition is a partnership of government agencies focused on the responsible adoption and use of artificial intelligence technologies in public sector operations.`
 			}
 		]
 	},
@@ -217,16 +368,18 @@ export const capabilities: CapabilityCategory[] = [
 		],
 		scenarios: [
 			{
-				title: 'Notification Map',
-				description: 'Visual documentation for public hearings.',
-				query: 'Create a 300-foot buffer map for APN 004-425-0050.',
-				result: 'Map generated showing: subject parcel (orange fill), 300ft buffer ring (dashed line), neighboring parcels (blue highlight), all APNs labeled. Suitable for discretionary permit notification documentation.'
-			},
-			{
 				title: 'Interactive Handoff',
 				description: 'Transitioning from AI answers to self-service exploration.',
 				query: 'Show me an interactive map of this property with hazard layers.',
-				result: 'URL generated: Opens interactive map centered on parcel with Hazards preset (fire severity, flood zones, fault lines enabled). User can pan, zoom, toggle layers, and click parcels for details.'
+				result: `Interactive Hazard Map for APN 004-425-0050
+Here's an interactive map with hazard layers for the property:
+
+**[Open Interactive Hazard Map](#)**
+
+**This map includes:**
+• FEMA Flood Zones
+• CAL FIRE Severity Zones
+• Parcel boundaries with the subject property highlighted`
 			}
 		]
 	}
