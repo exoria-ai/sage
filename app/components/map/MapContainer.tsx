@@ -376,17 +376,61 @@ export function MapContainer({
         // Close any open popup
         view.closePopup();
 
-        // Create and swap to new WebMap
+        // Create new WebMap and load it BEFORE assigning to view
+        // This allows us to configure layer names before LayerList sees them
         const newWebMap = new WebMap({
           portalItem: {
             id: effectiveWebMapId,
           },
         });
 
-        // Swap the map (preserves MapView, widgets, event listeners)
+        // Load the WebMap (this populates allLayers with layer metadata)
+        await newWebMap.load();
+
+        if (!isMounted) return;
+
+        // Configure layer names on the WebMap BEFORE assigning to view
+        // This ensures LayerList sees clean names from the start
+        const allLayers = newWebMap.allLayers.toArray();
+
+        // Configure layer pairs (handles [VECTOR_TILE] tag)
+        // We need to do this on the WebMap directly, not via configureLayerPairs which expects a view
+        const vectorTileLayers = allLayers.filter(
+          (l) => l.type === 'vector-tile' && l.title?.includes('[VECTOR_TILE]')
+        ) as __esri.VectorTileLayer[];
+
+        for (const vtLayer of vectorTileLayers) {
+          const baseName = vtLayer.title!.replace('[VECTOR_TILE]', '').trim();
+          const featureLayer = allLayers.find(
+            (l) => l.type === 'feature' && l.title === baseName
+          ) as __esri.FeatureLayer | undefined;
+
+          if (featureLayer) {
+            console.log(`Layer pair detected: "${baseName}" (VectorTile + FeatureLayer)`);
+            vtLayer.title = baseName;
+            featureLayer.listMode = 'hide';
+            featureLayer.opacity = 0;
+            vtLayer.watch('visible', (visible) => {
+              featureLayer.visible = visible;
+            });
+            featureLayer.visible = vtLayer.visible;
+          }
+        }
+
+        // Configure exclusive groups (handles [EXCLUSIVE] tag)
+        const groupLayers = allLayers.filter((l) => l.type === 'group') as GroupLayer[];
+        for (const groupLayer of groupLayers) {
+          if (groupLayer.title?.includes(EXCLUSIVE_GROUP_SUFFIX)) {
+            groupLayer.visibilityMode = 'exclusive';
+            groupLayer.title = groupLayer.title.replace(EXCLUSIVE_GROUP_SUFFIX, '').trim();
+            console.log(`Configured exclusive group: "${groupLayer.title}"`);
+          }
+        }
+
+        // Now swap the map (LayerList will see clean names)
         view.map = newWebMap;
 
-        // Wait for new map to load
+        // Wait for view to update with new map
         await view.when();
 
         if (!isMounted) return;
@@ -399,9 +443,18 @@ export function MapContainer({
 
         prevWebMapIdRef.current = effectiveWebMapId;
 
-        // Load the new map's layers
-        const allLayers = view.map.allLayers.toArray();
+        // Reconfigure layer pairs in the hook (for query functionality)
+        configureLayerPairs(view);
 
+        // Re-add graphics layers to new map
+        if (highlightLayerRef.current) {
+          view.map.add(highlightLayerRef.current);
+        }
+        if (routeLayerRef.current) {
+          view.map.add(routeLayerRef.current);
+        }
+
+        // Load layers in background for better performance
         const isBasemapLayer = (layer: __esri.Layer) => {
           if (layer.type === 'tile') return true;
           if (layer.type === 'vector-tile') {
@@ -428,8 +481,7 @@ export function MapContainer({
         const priorityLayers = allLayers.filter(l => isBasemapLayer(l) || isCriticalLayer(l));
         const deferredLayers = allLayers.filter(l => !isBasemapLayer(l) && !isCriticalLayer(l));
 
-        console.log(`Loading ${priorityLayers.length} priority layers, deferring ${deferredLayers.length}`);
-
+        // Load priority layers
         await Promise.all(
           priorityLayers.map(async (layer) => {
             if (layer.load) {
@@ -442,31 +494,7 @@ export function MapContainer({
           })
         );
 
-        // Reconfigure layer pairs for new map (handles [VECTOR_TILE] tag)
-        // Do this BEFORE deferred loading so LayerList shows clean names
-        configureLayerPairs(view);
-
-        // Configure exclusive groups (handles [EXCLUSIVE] tag)
-        // Re-fetch layers in case titles changed during pair configuration
-        const layersAfterConfig = view.map.allLayers.toArray();
-        const groupLayers = layersAfterConfig.filter((l) => l.type === 'group') as GroupLayer[];
-        for (const groupLayer of groupLayers) {
-          if (groupLayer.title?.includes(EXCLUSIVE_GROUP_SUFFIX)) {
-            groupLayer.visibilityMode = 'exclusive';
-            groupLayer.title = groupLayer.title.replace(EXCLUSIVE_GROUP_SUFFIX, '').trim();
-            console.log(`Configured exclusive group: "${groupLayer.title}"`);
-          }
-        }
-
-        // Re-add graphics layers to new map
-        if (highlightLayerRef.current) {
-          view.map.add(highlightLayerRef.current);
-        }
-        if (routeLayerRef.current) {
-          view.map.add(routeLayerRef.current);
-        }
-
-        // Load deferred layers in background AFTER configuration
+        // Load deferred layers in background
         if (deferredLayers.length > 0) {
           (async () => {
             for (const layer of deferredLayers) {
