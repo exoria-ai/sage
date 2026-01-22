@@ -40,6 +40,10 @@ export interface InitialMapViewOptions {
   apn?: string;
   /** Address to geocode and highlight */
   address?: string;
+  /** Initial center point (from URL params) */
+  center?: { longitude: number; latitude: number };
+  /** Initial zoom level (from URL params) */
+  zoom?: number;
 }
 
 /**
@@ -59,12 +63,15 @@ export async function initializeMapView(
   highlightLayer: GraphicsLayer,
   options: InitialMapViewOptions
 ): Promise<void> {
-  const { apn, address } = options;
+  const { apn, address, center, zoom } = options;
 
   if (apn) {
     await highlightByApn(view, highlightLayer, apn);
   } else if (address) {
     await highlightByAddress(view, highlightLayer, address);
+  } else if (center) {
+    // Use provided center/zoom from URL params
+    await zoomToCenter(view, center, zoom);
   } else {
     await zoomToCountyExtent(view);
   }
@@ -185,6 +192,23 @@ async function highlightByAddress(
   } catch (err) {
     console.error('Error geocoding address:', err);
   }
+}
+
+/**
+ * Zoom to a specific center point with optional zoom level
+ */
+async function zoomToCenter(
+  view: MapView,
+  center: { longitude: number; latitude: number },
+  zoom?: number
+): Promise<void> {
+  const effectiveZoom = zoom ?? 12; // Default to zoom 12 if not specified
+  console.log(`Setting view to center: ${center.longitude}, ${center.latitude} at zoom ${effectiveZoom}`);
+  await view.goTo({
+    center: [center.longitude, center.latitude],
+    zoom: effectiveZoom,
+  });
+  console.log('Finished setting custom center/zoom');
 }
 
 /**

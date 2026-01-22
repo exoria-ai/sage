@@ -36,6 +36,9 @@ interface MapContainerProps {
   webMapId?: string;
   preset?: keyof typeof WEB_MAPS;
   className?: string;
+  // Initial view positioning (from URL params)
+  center?: { longitude: number; latitude: number };
+  zoom?: number;
   // Feature to highlight on load
   highlightApn?: string;
   highlightAddress?: string;
@@ -48,6 +51,8 @@ export function MapContainer({
   webMapId,
   preset = 'base',
   className = '',
+  center,
+  zoom,
   highlightApn,
   highlightAddress,
   routeOrigin,
@@ -179,6 +184,8 @@ export function MapContainer({
         await initializeMapView(view, highlightLayer, {
           apn: highlightApn,
           address: highlightAddress,
+          center,
+          zoom,
         });
 
         // Display route if origin and destination are provided

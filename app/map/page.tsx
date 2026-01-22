@@ -27,6 +27,21 @@ function MapPageContent() {
   const highlightApn = searchParams.get('apn') || undefined;
   const highlightAddress = searchParams.get('address') || undefined;
 
+  // Parse center parameter (format: "lng,lat")
+  const centerParam = searchParams.get('center');
+  const center = (() => {
+    if (!centerParam) return undefined;
+    const parts = centerParam.split(',');
+    if (parts.length < 2) return undefined;
+    const lng = Number(parts[0]);
+    const lat = Number(parts[1]);
+    return !isNaN(lng) && !isNaN(lat) ? { longitude: lng, latitude: lat } : undefined;
+  })();
+
+  // Parse zoom parameter
+  const zoomParam = searchParams.get('zoom');
+  const zoom = zoomParam ? Number(zoomParam) : undefined;
+
   // Parse route parameters (format: "lng,lat" or "lng,lat,label")
   const originParam = searchParams.get('origin');
   const destinationParam = searchParams.get('destination');
@@ -81,6 +96,8 @@ function MapPageContent() {
           webMapId={webMapId}
           preset={preset}
           className="absolute inset-0"
+          center={center}
+          zoom={zoom}
           highlightApn={highlightApn}
           highlightAddress={highlightAddress}
           routeOrigin={routeOrigin}
