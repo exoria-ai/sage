@@ -87,6 +87,7 @@ import Extent from '@arcgis/core/geometry/Extent';
 
 // ESRI CSS - must be imported for proper styling
 import '@arcgis/core/assets/esri/themes/light/main.css';
+import { MapLoadingSpinner } from './MapLoadingSpinner';
 
 // Configure ESRI assets path - use CDN for reliable asset loading
 esriConfig.assetsPath = ESRI_JS_ASSETS;
@@ -489,14 +490,19 @@ export function MapContainer({
           const allLayers = view.map.allLayers.toArray();
 
           // Categorize layers by priority
-          const isBasemapLayer = (layer: __esri.Layer) =>
-            layer.type === 'tile' ||
-            layer.type === 'vector-tile' && (
-              layer.title?.toLowerCase().includes('basemap') ||
-              layer.title?.toLowerCase().includes('topographic') ||
-              layer.title?.toLowerCase().includes('hillshade') ||
-              layer.title?.toLowerCase().includes('world')
-            );
+          const isBasemapLayer = (layer: __esri.Layer) => {
+            if (layer.type === 'tile') return true;
+            if (layer.type === 'vector-tile') {
+              const title = layer.title?.toLowerCase() || '';
+              return (
+                title.includes('basemap') ||
+                title.includes('topographic') ||
+                title.includes('hillshade') ||
+                title.includes('world')
+              );
+            }
+            return false;
+          };
 
           const isCriticalLayer = (layer: __esri.Layer) => {
             const title = layer.title?.toLowerCase() || '';
@@ -1232,14 +1238,7 @@ export function MapContainer({
   return (
     <div className={`${className}`} style={{ minHeight: '400px' }}>
       {/* Loading overlay - shows until priority layers are loaded */}
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading map...</p>
-          </div>
-        </div>
-      )}
+      {isLoading && <MapLoadingSpinner stage="init" variant="overlay" />}
 
       {/* Route info overlay */}
       {routeInfo && (

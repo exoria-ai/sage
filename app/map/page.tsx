@@ -4,20 +4,14 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { WEB_MAPS } from '@/lib/esri/webmaps';
+import { MapLoadingSpinner } from '@/app/components/map/MapLoadingSpinner';
 
 // Dynamically import MapContainer to avoid SSR issues with ESRI
 const MapContainer = dynamic(
   () => import('@/app/components/map/MapContainer').then((mod) => mod.MapContainer),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading SAGE Interactive Map...</p>
-        </div>
-      </div>
-    ),
+    loading: () => <MapLoadingSpinner stage="import" />,
   }
 );
 
@@ -112,16 +106,7 @@ function MapPageContent() {
 
 export default function MapPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center h-screen bg-gray-100">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<MapLoadingSpinner stage="suspense" />}>
       <MapPageContent />
     </Suspense>
   );
