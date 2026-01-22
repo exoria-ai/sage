@@ -60,3 +60,6 @@ data/budget/*.db
 data/budget/*.pdf
 docs/*.pdf
 test-output/
+
+# Meeting minutes source PDFs (scraped for ingestion)
+data/meetings/*/pdfs/
