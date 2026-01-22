@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseAPN } from './apn';
+import { parseAPN, normalizeApnForQuery } from './apn';
 
 describe('parseAPN', () => {
   describe('9-digit to 10-digit conversion', () => {
@@ -167,6 +167,41 @@ describe('parseAPN', () => {
       expect(result).not.toBeNull();
       expect(result!.formatted).toBe('999-999-999');
       expect(result!.numeric).toBe('9999999990');
+    });
+  });
+});
+
+describe('normalizeApnForQuery', () => {
+  describe('9-digit conversion', () => {
+    it('adds trailing 0 to 9-digit APN with dashes', () => {
+      expect(normalizeApnForQuery('003-025-102')).toBe('0030251020');
+    });
+
+    it('adds trailing 0 to 9-digit APN without dashes', () => {
+      expect(normalizeApnForQuery('003025102')).toBe('0030251020');
+    });
+
+    it('handles spaces', () => {
+      expect(normalizeApnForQuery('003 025 102')).toBe('0030251020');
+    });
+  });
+
+  describe('10-digit passthrough', () => {
+    it('preserves 10-digit APN', () => {
+      expect(normalizeApnForQuery('0030251020')).toBe('0030251020');
+    });
+
+    it('strips dashes from 10-digit APN', () => {
+      expect(normalizeApnForQuery('003-025-1020')).toBe('0030251020');
+    });
+  });
+
+  describe('non-standard input', () => {
+    it('passes through non-9-digit values unchanged (after stripping)', () => {
+      // 8 digits - not modified
+      expect(normalizeApnForQuery('12345678')).toBe('12345678');
+      // 11 digits - not modified
+      expect(normalizeApnForQuery('12345678901')).toBe('12345678901');
     });
   });
 });

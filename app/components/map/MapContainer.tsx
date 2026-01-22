@@ -1,39 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { WEB_MAPS, getWebMapId } from '@/lib/esri/webmaps';
-import { SOLANO_SERVICES } from '@/lib/esri/webmaps';
-
+import { WEB_MAPS, getWebMapId, SOLANO_SERVICES } from '@/lib/esri/webmaps';
+import { normalizeApnForQuery } from '@/lib/utils/apn';
 import { useLayerPairs } from './hooks/useLayerPairs';
+import { initializeMapView } from './hooks/useInitialMapView';
+import { displayRoute, type RouteStop } from './hooks/useRouteDisplay';
 
 // Note: Config imports not available client-side, use inline constants
 // These values should match lib/config/endpoints.ts and lib/config/defaults.ts
 const ESRI_JS_ASSETS = 'https://js.arcgis.com/4.34/@arcgis/core/assets';
 
-// Map styling constants (should match lib/config/defaults.ts)
-const MAP_COLORS = {
-  highlightOutline: [255, 165, 0] as [number, number, number], // Orange outline for selected parcels
-  routeLine: [0, 100, 255, 0.9] as [number, number, number, number],
-  originMarker: [34, 197, 94] as [number, number, number],
-  destinationMarker: [239, 68, 68] as [number, number, number],
-  markerOutline: [255, 255, 255] as [number, number, number],
-};
-
-const MAP_DEFAULTS = {
-  highlightZoom: 18,
-  centerOnlyZoom: 15,
+// Map styling constants
+const MAP_STYLES = {
+  highlightOutline: [255, 165, 0] as [number, number, number], // Orange
   highlightOutlineWidth: 3,
-  routeLineWidth: 5,
-  markerSize: 14,
-  markerOutlineWidth: 2,
-};
-
-// Solano County extent (WGS84) - used for consistent initial map view across all presets
-const SOLANO_COUNTY_EXTENT = {
-  xmin: -122.409,
-  ymin: 38.031,
-  xmax: -121.592,
-  ymax: 38.538,
 };
 
 // Exclusive group suffix - GroupLayers with this suffix will use radio-button behavior
@@ -56,13 +37,8 @@ import Graphic from '@arcgis/core/Graphic';
 import Search from '@arcgis/core/widgets/Search';
 import LayerSearchSource from '@arcgis/core/widgets/Search/LayerSearchSource';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
-import SimpleLineSymbol from '@arcgis/core/symbols/SimpleLineSymbol';
-import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol';
 import * as query from '@arcgis/core/rest/query';
 import Query from '@arcgis/core/rest/support/Query';
-import Point from '@arcgis/core/geometry/Point';
-import Polyline from '@arcgis/core/geometry/Polyline';
-import Extent from '@arcgis/core/geometry/Extent';
 
 // ESRI CSS - must be imported for proper styling
 import '@arcgis/core/assets/esri/themes/light/main.css';
@@ -70,13 +46,6 @@ import { MapLoadingSpinner } from './MapLoadingSpinner';
 
 // Configure ESRI assets path - use CDN for reliable asset loading
 esriConfig.assetsPath = ESRI_JS_ASSETS;
-
-// Route endpoint coordinates
-interface RouteStop {
-  latitude: number;
-  longitude: number;
-  label?: string;
-}
 
 interface MapContainerProps {
   webMapId?: string;
@@ -135,284 +104,6 @@ export function MapContainer({
     }
 
     let isMounted = true;
-
-    // Highlight symbol for parcels - outline only, no fill to avoid obscuring the parcel
-    const highlightSymbol = new SimpleFillSymbol({
-      color: [0, 0, 0, 0], // Transparent fill
-      outline: {
-        color: [255, 165, 0], // Orange outline
-        width: 3,
-      },
-    });
-
-    /**
-     * Handle initial view positioning and feature highlighting based on URL params
-     */
-    const handleInitialView = async (view: MapView, highlightLayer: GraphicsLayer) => {
-      // Priority: APN > Address > Center/Zoom
-
-      if (highlightApn) {
-        // Query parcel by APN and zoom to it
-        try {
-          console.log('Querying parcel by APN:', highlightApn);
-          // Normalize APN: strip dashes/spaces, add trailing 0 if 9 digits
-          // Solano County parcelids are always 10 digits ending in 0
-          let normalizedApn = highlightApn.replace(/[-\s]/g, '');
-          if (/^\d{9}$/.test(normalizedApn)) {
-            normalizedApn = normalizedApn + '0';
-          }
-          const queryTask = new Query({
-            where: `parcelid = '${normalizedApn}'`,
-            outFields: ['*'],
-            returnGeometry: true,
-          });
-
-          const result = await query.executeQueryJSON(SOLANO_SERVICES.parcels, queryTask);
-
-          if (result.features && result.features.length > 0) {
-            const feature = result.features[0]!;
-
-            // Add highlight graphic
-            const graphic = new Graphic({
-              geometry: feature.geometry ?? undefined,
-              symbol: highlightSymbol,
-              attributes: feature.attributes ?? {},
-            });
-            highlightLayer.add(graphic);
-
-            // Zoom to the parcel with some padding
-            if (feature.geometry) {
-              await view.goTo({
-                target: feature.geometry,
-                zoom: MAP_DEFAULTS.highlightZoom,
-              });
-            }
-            console.log('Highlighted parcel:', feature.attributes ?? {});
-          } else {
-            console.warn('No parcel found for APN:', highlightApn);
-          }
-        } catch (err) {
-          console.error('Error querying parcel by APN:', err);
-        }
-      } else if (highlightAddress) {
-        // Geocode address and zoom to it
-        try {
-          console.log('Geocoding address:', highlightAddress);
-          const queryTask = new Query({
-            where: `UPPER(fulladdress) LIKE UPPER('%${highlightAddress.replace(/'/g, "''")}%')`,
-            outFields: ['*'],
-            returnGeometry: true,
-            num: 1,
-          });
-
-          const result = await query.executeQueryJSON(SOLANO_SERVICES.addressPoints, queryTask);
-
-          if (result.features && result.features.length > 0) {
-            const feature = result.features[0]!;
-            const attrs = feature.attributes ?? {};
-            const apn = attrs.APN || attrs.apn;
-
-            // If we got an APN from the address, query the parcel to highlight it
-            if (apn) {
-              // Normalize APN: strip dashes/spaces, add trailing 0 if 9 digits
-              let normalizedApn = String(apn).replace(/[-\s]/g, '');
-              if (/^\d{9}$/.test(normalizedApn)) {
-                normalizedApn = normalizedApn + '0';
-              }
-              const parcelQuery = new Query({
-                where: `parcelid = '${normalizedApn}'`,
-                outFields: ['*'],
-                returnGeometry: true,
-              });
-
-              const parcelResult = await query.executeQueryJSON(SOLANO_SERVICES.parcels, parcelQuery);
-
-              if (parcelResult.features && parcelResult.features.length > 0) {
-                const parcelFeature = parcelResult.features[0]!;
-                const graphic = new Graphic({
-                  geometry: parcelFeature.geometry ?? undefined,
-                  symbol: highlightSymbol,
-                  attributes: parcelFeature.attributes ?? {},
-                });
-                highlightLayer.add(graphic);
-
-                if (parcelFeature.geometry) {
-                  await view.goTo({
-                    target: parcelFeature.geometry,
-                    zoom: MAP_DEFAULTS.highlightZoom,
-                  });
-                }
-                console.log('Highlighted parcel for address:', attrs);
-                return;
-              }
-            }
-
-            // Fallback: just zoom to the address point
-            if (feature.geometry) {
-              await view.goTo({
-                target: feature.geometry,
-                zoom: MAP_DEFAULTS.highlightZoom,
-              });
-            }
-            console.log('Found address:', attrs);
-          } else {
-            console.warn('No address found for:', highlightAddress);
-          }
-        } catch (err) {
-          console.error('Error geocoding address:', err);
-        }
-      } else {
-        // Default: fit the entire Solano County extent in view
-        // This ensures consistent initial view across all map presets
-        console.log('Setting default Solano County extent');
-        const countyExtent = new Extent({
-          xmin: SOLANO_COUNTY_EXTENT.xmin,
-          ymin: SOLANO_COUNTY_EXTENT.ymin,
-          xmax: SOLANO_COUNTY_EXTENT.xmax,
-          ymax: SOLANO_COUNTY_EXTENT.ymax,
-          spatialReference: { wkid: 4326 },
-        });
-        await view.goTo(countyExtent);
-        console.log('Finished setting Solano County extent');
-      }
-    };
-
-    /**
-     * Display a route between two points on the map using direct REST API
-     * (bypasses ESRI JS SDK authentication to use our OAuth token)
-     */
-    const displayRoute = async (
-      view: MapView,
-      routeLayer: GraphicsLayer,
-      origin: RouteStop,
-      destination: RouteStop
-    ) => {
-      try {
-        console.log('Fetching route from', origin, 'to', destination);
-
-        // Create point objects for display
-        const originPoint = new Point({
-          longitude: origin.longitude,
-          latitude: origin.latitude,
-        });
-
-        const destinationPoint = new Point({
-          longitude: destination.longitude,
-          latitude: destination.latitude,
-        });
-
-        // Call server-side route proxy (handles OAuth token and Referer header)
-        const routeResponse = await fetch('/api/arcgis-route', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ origin, destination }),
-        });
-
-        const routeData = await routeResponse.json();
-
-        if (routeData.error) {
-          console.error('Routing API error:', routeData.error);
-          return;
-        }
-
-        // Display the route
-        if (routeData.routes?.features?.length > 0) {
-          const routeFeature = routeData.routes.features[0];
-          const routePaths = routeFeature.geometry.paths;
-
-          // Create polyline from route paths
-          const routeGeometry = new Polyline({
-            paths: routePaths,
-            spatialReference: { wkid: 4326 },
-          });
-
-          // Route line symbol - blue
-          const routeSymbol = new SimpleLineSymbol({
-            color: [0, 100, 255, 0.9],
-            width: 5,
-            style: 'solid',
-            cap: 'round',
-            join: 'round',
-          });
-
-          // Add route to map
-          const routeGraphic = new Graphic({
-            geometry: routeGeometry,
-            symbol: routeSymbol,
-          });
-          routeLayer.add(routeGraphic);
-
-          // Origin marker - green
-          const originSymbol = new SimpleMarkerSymbol({
-            color: [34, 197, 94],
-            size: 14,
-            outline: {
-              color: [255, 255, 255],
-              width: 2,
-            },
-          });
-          routeLayer.add(
-            new Graphic({
-              geometry: originPoint,
-              symbol: originSymbol,
-              attributes: { type: 'origin', label: origin.label || 'Start' },
-            })
-          );
-
-          // Destination marker - red
-          const destinationSymbol = new SimpleMarkerSymbol({
-            color: [239, 68, 68],
-            size: 14,
-            outline: {
-              color: [255, 255, 255],
-              width: 2,
-            },
-          });
-          routeLayer.add(
-            new Graphic({
-              geometry: destinationPoint,
-              symbol: destinationSymbol,
-              attributes: { type: 'destination', label: destination.label || 'End' },
-            })
-          );
-
-          // Get route info from attributes
-          const attrs = routeFeature.attributes;
-          const totalMiles = attrs?.Total_Miles || attrs?.Total_Length || attrs?.Shape_Length / 1609.34 || 0;
-          const totalMinutes = attrs?.Total_TravelTime || attrs?.Total_Time || 0;
-
-          // Format duration
-          let durationText: string;
-          if (totalMinutes < 60) {
-            durationText = `${Math.round(totalMinutes)} min`;
-          } else {
-            const hours = Math.floor(totalMinutes / 60);
-            const mins = Math.round(totalMinutes % 60);
-            durationText = mins > 0 ? `${hours} hr ${mins} min` : `${hours} hr`;
-          }
-
-          setRouteInfo({
-            distance: `${totalMiles.toFixed(1)} mi`,
-            duration: durationText,
-          });
-
-          // Zoom to show the entire route
-          await view.goTo({
-            target: routeGeometry,
-            padding: { top: 80, bottom: 50, left: 50, right: 50 },
-          });
-
-          console.log('Route displayed:', {
-            distance: totalMiles.toFixed(2) + ' miles',
-            duration: durationText,
-          });
-        }
-      } catch (err) {
-        console.error('Error displaying route:', err);
-      }
-    };
 
     const initializeMap = async () => {
       try {
@@ -571,11 +262,17 @@ export function MapContainer({
         routeLayerRef.current = routeLayer;
 
         // Handle initial view positioning and feature highlighting
-        await handleInitialView(view, highlightLayer);
+        await initializeMapView(view, highlightLayer, {
+          apn: highlightApn,
+          address: highlightAddress,
+        });
 
         // Display route if origin and destination are provided
         if (routeOrigin && routeDestination) {
-          await displayRoute(view, routeLayer, routeOrigin, routeDestination);
+          const routeInfo = await displayRoute(view, routeLayer, routeOrigin, routeDestination);
+          if (routeInfo) {
+            setRouteInfo(routeInfo);
+          }
         }
 
         setIsLoading(false);
@@ -762,11 +459,7 @@ export function MapContainer({
             // Override getResults to normalize APN format before querying
             getResults: (async (params: __esri.GetResultsHandlerParams) => {
               const searchText = String(params.suggestResult?.text || '');
-              // Normalize: strip dashes/spaces, pad to 10 digits if 9
-              let normalized = searchText.replace(/[-\s]/g, '');
-              if (/^\d{9}$/.test(normalized)) {
-                normalized = normalized + '0'; // Add trailing zero for 9-digit APNs
-              }
+              const normalized = normalizeApnForQuery(searchText);
 
               // Query with normalized value
               const searchQuery = new Query({
@@ -793,11 +486,7 @@ export function MapContainer({
             // Override getSuggestions to normalize APN format for suggestions
             getSuggestions: (async (params: __esri.GetSuggestionsParametersParams) => {
               const searchText = String(params.suggestTerm || '');
-              // Normalize: strip dashes/spaces, pad to 10 digits if 9
-              let normalized = searchText.replace(/[-\s]/g, '');
-              if (/^\d{9}$/.test(normalized)) {
-                normalized = normalized + '0';
-              }
+              const normalized = normalizeApnForQuery(searchText);
 
               // Query for suggestions
               const suggestQuery = new Query({
@@ -833,8 +522,8 @@ export function MapContainer({
             symbol: new SimpleFillSymbol({
               color: [0, 0, 0, 0], // Transparent fill
               outline: {
-                color: MAP_COLORS.highlightOutline,
-                width: MAP_DEFAULTS.highlightOutlineWidth,
+                color: MAP_STYLES.highlightOutline,
+                width: MAP_STYLES.highlightOutlineWidth,
               },
             }),
           });
