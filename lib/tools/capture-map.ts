@@ -176,7 +176,8 @@ const DEFAULT_ZOOM = MAP_DEFAULTS.zoom;
 const LAYER_URLS = {
   parcels: `${SOLANO_AGOL_BASE}/Parcels_Public_Aumentum/FeatureServer/0`,
   // Vector tile layer includes APN labels at appropriate zoom levels
-  parcelsVectorTile: 'https://vectortileservices7.arcgis.com/KbDaBCmcuKbyQfck/arcgis/rest/services/Parcels_Public_Aumentum_Vector_Tile/VectorTileServer',
+  // Updated Dec 2025: Old layer (Parcels_Public_Aumentum_Vector_Tile) was retired
+  parcelsVectorTile: 'https://vectortileservices7.arcgis.com/KbDaBCmcuKbyQfck/arcgis/rest/services/Parcels_Public_Aumentum_Shapefiles_Vector_Tiles/VectorTileServer',
   addressPoints: `${SOLANO_AGOL_BASE}/Address_Points/FeatureServer/0`,
   cityBoundary: SOLANO_SERVICES.cityBoundary,
   countyBoundary: `${SOLANO_AGOL_BASE}/County_Boundary/FeatureServer/1`,
