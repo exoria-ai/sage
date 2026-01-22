@@ -32,6 +32,14 @@ const MAP_DEFAULTS = {
   markerOutlineWidth: 2,
 };
 
+// Solano County extent (WGS84) - used for consistent initial map view across all presets
+const SOLANO_COUNTY_EXTENT = {
+  xmin: -122.409,
+  ymin: 38.031,
+  xmax: -121.592,
+  ymax: 38.538,
+};
+
 const MAP_VIEW_PADDING = { top: 80, bottom: 50, left: 50, right: 50 };
 
 // Layer pairing constants for vector tile optimization
@@ -75,6 +83,7 @@ import * as query from '@arcgis/core/rest/query';
 import Query from '@arcgis/core/rest/support/Query';
 import Point from '@arcgis/core/geometry/Point';
 import Polyline from '@arcgis/core/geometry/Polyline';
+import Extent from '@arcgis/core/geometry/Extent';
 
 // ESRI CSS - must be imported for proper styling
 import '@arcgis/core/assets/esri/themes/light/main.css';
@@ -93,9 +102,6 @@ interface MapContainerProps {
   webMapId?: string;
   preset?: keyof typeof WEB_MAPS;
   className?: string;
-  // URL parameter options for initial view
-  initialCenter?: { longitude: number; latitude: number };
-  initialZoom?: number;
   // Feature to highlight on load
   highlightApn?: string;
   highlightAddress?: string;
@@ -108,8 +114,6 @@ export function MapContainer({
   webMapId,
   preset = 'base',
   className = '',
-  initialCenter,
-  initialZoom,
   highlightApn,
   highlightAddress,
   routeOrigin,
@@ -202,7 +206,7 @@ export function MapContainer({
             if (feature.geometry) {
               await view.goTo({
                 target: feature.geometry,
-                zoom: initialZoom || 18,
+                zoom: MAP_DEFAULTS.highlightZoom,
               });
             }
             console.log('Highlighted parcel:', feature.attributes ?? {});
@@ -257,7 +261,7 @@ export function MapContainer({
                 if (parcelFeature.geometry) {
                   await view.goTo({
                     target: parcelFeature.geometry,
-                    zoom: initialZoom || 18,
+                    zoom: MAP_DEFAULTS.highlightZoom,
                   });
                 }
                 console.log('Highlighted parcel for address:', attrs);
@@ -269,7 +273,7 @@ export function MapContainer({
             if (feature.geometry) {
               await view.goTo({
                 target: feature.geometry,
-                zoom: initialZoom || 18,
+                zoom: MAP_DEFAULTS.highlightZoom,
               });
             }
             console.log('Found address:', attrs);
@@ -279,15 +283,19 @@ export function MapContainer({
         } catch (err) {
           console.error('Error geocoding address:', err);
         }
-      } else if (initialCenter) {
-        // Just zoom to the specified center/zoom
-        await view.goTo({
-          center: [initialCenter.longitude, initialCenter.latitude],
-          zoom: initialZoom || 15,
+      } else {
+        // Default: fit the entire Solano County extent in view
+        // This ensures consistent initial view across all map presets
+        console.log('Setting default Solano County extent');
+        const countyExtent = new Extent({
+          xmin: SOLANO_COUNTY_EXTENT.xmin,
+          ymin: SOLANO_COUNTY_EXTENT.ymin,
+          xmax: SOLANO_COUNTY_EXTENT.xmax,
+          ymax: SOLANO_COUNTY_EXTENT.ymax,
+          spatialReference: { wkid: 4326 },
         });
-      } else if (initialZoom) {
-        // Just set zoom level
-        await view.goTo({ zoom: initialZoom });
+        await view.goTo(countyExtent);
+        console.log('Finished setting Solano County extent');
       }
     };
 
