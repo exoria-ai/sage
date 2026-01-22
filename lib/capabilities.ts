@@ -393,13 +393,24 @@ This property is in unincorporated Solano County and receives services from thes
 		],
 		scenarios: [
 			{
-				title: 'GovAI Coalition Approval',
-				description: 'Finding when the Board approved a specific initiative.',
-				query: 'When did Solano County approve participation in the GovAI Coalition?',
-				toolCalls: ['Search Meeting Minutes', 'Get Meeting'],
-				result: `**April 9, 2024** — Item 24-251, approved on consent calendar.
+				title: '2025 GIS Initiatives',
+				description: 'Research across Board of Supervisors and ReGIS consortium meetings.',
+				query: 'Search 2025 Board meetings for GIS-related initiatives and projects.',
+				toolCalls: ['Search Meeting Minutes', 'List Meetings', 'Get Meeting'],
+				result: `**Major Projects**
+• **3DHP Grant** (June 2025) — $634K federal grant for elevation-derived hydrography covering 4,000+ sq mi of Northern California watersheds
+• **2025 Aerial Imagery** — Full county capture completed; 2023 LiDAR now in USGS National Maps
+• **Land Use & Zoning App** (Oct 2025) — New portal app with 16 maps and 8 dashboards, topology-aligned to city boundaries
 
-The Board authorized the CIO to execute the GovAI Coalition registration agreement—a partnership of government agencies focused on responsible AI adoption in public sector operations.`
+**ReGIS Consortium Updates**
+• New governance: Solutions Committee (technical users) + Steering Committee (department heads)
+• ArcGIS Urban study modeling winery buildout in Suisun Valley
+• Fire response time analysis underway in Vacaville and Suisun City
+• FME Flow tool exploration for AI-powered permit data transformation
+
+**Training & Outreach**
+• GIS Day 2025 partnering with Office of Education for middle/high school presentations
+• Intro to ArcGIS Pro training sessions in Feb and May`
 			}
 		]
 	},
