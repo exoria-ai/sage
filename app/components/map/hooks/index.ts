@@ -6,3 +6,6 @@ export type { InitialMapViewOptions } from './useInitialMapView';
 
 export { displayRoute } from './useRouteDisplay';
 export type { RouteStop, RouteInfo } from './useRouteDisplay';
+
+export { addMapWidgets } from './useMapWidgets';
+export type { AddWidgetsOptions } from './useMapWidgets';

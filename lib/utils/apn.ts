@@ -68,21 +68,24 @@ export function parseAPN(apn: string): ParsedAPN | null {
 }
 
 /**
- * Normalize an APN string to 10-digit database format.
+ * Normalize an APN string to 10-digit database format for safe SQL queries.
  *
  * This is a simpler alternative to parseAPN() when you only need the
- * numeric value for database queries and don't need validation.
+ * numeric value for database queries and don't need full validation.
  *
  * - Strips dashes and spaces
  * - Adds trailing 0 if 9 digits (converts human format to database format)
+ * - Returns ONLY digits to prevent SQL injection
  *
  * @example
  * normalizeApnForQuery('003-025-102')  // '0030251020'
  * normalizeApnForQuery('0030251020')   // '0030251020'
  * normalizeApnForQuery('003025102')    // '0030251020'
+ * normalizeApnForQuery("'; DROP TABLE")  // '' (invalid chars stripped)
  */
 export function normalizeApnForQuery(apn: string): string {
-  let normalized = apn.replace(/[-\s]/g, '');
+  // Strip everything except digits to prevent SQL injection
+  let normalized = apn.replace(/[^0-9]/g, '');
   if (/^\d{9}$/.test(normalized)) {
     normalized = normalized + '0';
   }

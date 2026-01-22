@@ -204,4 +204,22 @@ describe('normalizeApnForQuery', () => {
       expect(normalizeApnForQuery('12345678901')).toBe('12345678901');
     });
   });
+
+  describe('SQL injection prevention', () => {
+    it('strips SQL injection characters', () => {
+      expect(normalizeApnForQuery("'; DROP TABLE--")).toBe('');
+      expect(normalizeApnForQuery("003-025-102'; DELETE")).toBe('0030251020');
+      expect(normalizeApnForQuery('003025102" OR "1"="1')).toBe('00302510211');
+    });
+
+    it('strips all non-digit characters', () => {
+      expect(normalizeApnForQuery('abc003def025ghi102')).toBe('0030251020');
+      expect(normalizeApnForQuery('003!@#$%^&*()025102')).toBe('0030251020');
+    });
+
+    it('returns empty string for all-invalid input', () => {
+      expect(normalizeApnForQuery('SELECT * FROM')).toBe('');
+      expect(normalizeApnForQuery('--; DROP')).toBe('');
+    });
+  });
 });
