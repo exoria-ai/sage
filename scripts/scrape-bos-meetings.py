@@ -2,7 +2,7 @@
 """
 Scrape Solano County Board of Supervisors meeting documents from Granicus.
 
-Downloads agendas and minutes PDFs for 2025-2026 meetings.
+Downloads agendas and minutes PDFs for 2024-2026 meetings.
 """
 
 import os
@@ -54,8 +54,8 @@ def parse_granicus_page(session: requests.Session) -> list[dict]:
             meeting_date = date_match.group(1)
             year = int(meeting_date[:4])
 
-            # Only process 2025-2026 meetings
-            if year < 2025:
+            # Only process 2024-2026 meetings
+            if year < 2024:
                 continue
 
             # Check for Special Meeting designation
@@ -106,7 +106,7 @@ def parse_granicus_page(session: requests.Session) -> list[dict]:
             seen.add(m['clip_id'])
             unique_meetings.append(m)
 
-    print(f"Found {len(unique_meetings)} BOS meetings for 2025-2026")
+    print(f"Found {len(unique_meetings)} BOS meetings for 2024-2026")
     return unique_meetings
 
 
