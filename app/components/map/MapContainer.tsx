@@ -1,11 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import {
-  useMapStore,
-  type MapViewState,
-  type LayerInfo,
-} from '@/lib/stores/mapStore';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { WEB_MAPS, getWebMapId } from '@/lib/esri/webmaps';
 import { SOLANO_SERVICES } from '@/lib/esri/webmaps';
 
@@ -109,24 +104,22 @@ export function MapContainer({
   const highlightLayerRef = useRef<GraphicsLayer | null>(null);
   const routeLayerRef = useRef<GraphicsLayer | null>(null);
   const identifyButtonRef = useRef<HTMLDivElement | null>(null);
+  const identifyModeActiveRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Layer pair management (VectorTileLayer + FeatureLayer optimization)
   const { configureLayerPairs, queryPairedLayersAtPoint } = useLayerPairs();
   const [localError, setLocalError] = useState<string | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
+  const [identifyModeActive, setIdentifyModeActive] = useState(false);
 
-  const {
-    setMapView,
-    setWebMapId,
-    setViewState,
-    setLayers,
-    setIsReady,
-    setError,
-    setSelectedFeatures,
-    identifyModeActive,
-    toggleIdentifyMode,
-  } = useMapStore();
+  const toggleIdentifyMode = useCallback(() => {
+    setIdentifyModeActive((prev) => {
+      const newValue = !prev;
+      identifyModeActiveRef.current = newValue;
+      return newValue;
+    });
+  }, []);
 
   // Determine which Web Map ID to use
   const effectiveWebMapId = webMapId || getWebMapId(preset) || '';
@@ -136,9 +129,7 @@ export function MapContainer({
 
     // Don't initialize if no Web Map ID is available
     if (!effectiveWebMapId) {
-      const errorMsg = 'No Web Map ID configured. Please provide a webMapId or configure a preset.';
-      setError(errorMsg);
-      setLocalError(errorMsg);
+      setLocalError('No Web Map ID configured. Please provide a webMapId or configure a preset.');
       setIsLoading(false);
       return;
     }
@@ -426,7 +417,7 @@ export function MapContainer({
     const initializeMap = async () => {
       try {
         setIsLoading(true);
-        setError(null);
+        setLocalError(null);
 
         // Create the Web Map
         const webMap = new WebMap({
@@ -587,29 +578,17 @@ export function MapContainer({
           await displayRoute(view, routeLayer, routeOrigin, routeDestination);
         }
 
-        // Store the view reference for MCP tools
-        setMapView(view);
-        setWebMapId(effectiveWebMapId);
-        setIsReady(true);
         setIsLoading(false);
 
         // Add widgets
         addWidgets(view);
-
-        // Sync initial view state
-        syncViewState(view);
-
-        // Sync layer list
-        syncLayers(view);
 
         // Set up event listeners
         setupEventListeners(view);
       } catch (error) {
         console.error('Failed to initialize map:', error);
         if (isMounted) {
-          const errorMsg = error instanceof Error ? error.message : 'Failed to load map';
-          setError(errorMsg);
-          setLocalError(errorMsg);
+          setLocalError(error instanceof Error ? error.message : 'Failed to load map');
           setIsLoading(false);
         }
       }
@@ -916,51 +895,13 @@ export function MapContainer({
       view.ui.add(identifyButton, 'top-left');
     };
 
-    const syncViewState = (view: MapView) => {
-      // Guard against null/undefined values during map initialization
-      if (!view.center || view.zoom === undefined) return;
-
-      const state: MapViewState = {
-        center: {
-          longitude: view.center.longitude ?? 0,
-          latitude: view.center.latitude ?? 0,
-        },
-        zoom: view.zoom ?? 10,
-        rotation: view.rotation ?? 0,
-        scale: view.scale ?? 0,
-      };
-      setViewState(state);
-    };
-
-    const syncLayers = (view: MapView) => {
-      if (!view.map?.allLayers) return;
-
-      const layers: LayerInfo[] = [];
-      view.map.allLayers.forEach((layer) => {
-        layers.push({
-          id: layer.id,
-          title: layer.title || layer.id,
-          visible: layer.visible,
-          opacity: layer.opacity,
-          type: layer.type,
-        });
-      });
-      setLayers(layers);
-    };
-
     const setupEventListeners = (view: MapView) => {
-      // Sync view state on move
-      view.watch(['center', 'zoom', 'rotation', 'scale'], () => {
-        syncViewState(view);
-      });
-
       // Handle click for feature identification
+      // Note: We need to get the current identifyModeActive value via a ref
+      // since this callback is created once during initialization
       view.on('click', async (event) => {
-        // Check identify mode from store (use getState for current value)
-        const { identifyModeActive: isIdentifyActive } = useMapStore.getState();
-
         // Only identify when identify mode is active
-        if (!isIdentifyActive) {
+        if (!identifyModeActiveRef.current) {
           return;
         }
 
@@ -1000,39 +941,17 @@ export function MapContainer({
           }
 
           if (allGraphics.length > 0) {
-            // Build features for Zustand store
-            const features = allGraphics.map((graphic) => {
-              const layerTitle =
-                graphic.getAttribute('_layerTitle') ||
-                graphic.layer?.title ||
-                'Unknown Layer';
-              return {
-                layerId: String(graphic.layer?.id || 'paired-layer'),
-                layerTitle,
-                attributes: graphic.attributes || {},
-                geometry: graphic.geometry,
-              };
-            });
-
-            setSelectedFeatures(features);
-
             // Open popup with identified features
             view.openPopup({
               location: event.mapPoint,
               features: allGraphics,
             });
           } else {
-            setSelectedFeatures([]);
             view.closePopup();
           }
         } catch (error) {
           console.error('Error during identify:', error);
         }
-      });
-
-      // Sync layers when they change
-      view.map?.allLayers?.on('change', () => {
-        syncLayers(view);
       });
     };
 
@@ -1045,21 +964,16 @@ export function MapContainer({
         viewRef.current.destroy();
         viewRef.current = null;
       }
-      setMapView(null);
-      setIsReady(false);
     };
   }, [
     effectiveWebMapId,
-    setMapView,
-    setWebMapId,
-    setViewState,
-    setLayers,
-    setIsReady,
-    setError,
-    setSelectedFeatures,
-    toggleIdentifyMode,
     configureLayerPairs,
     queryPairedLayersAtPoint,
+    highlightApn,
+    highlightAddress,
+    routeOrigin,
+    routeDestination,
+    toggleIdentifyMode,
   ]);
 
   // Update identify button state and cursor when identify mode changes
