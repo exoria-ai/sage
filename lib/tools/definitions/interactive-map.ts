@@ -9,6 +9,7 @@
 import { z } from 'zod';
 import { defineTool, jsonResponse, ToolResponse } from '../types';
 import { env } from '@/lib/config';
+import { parseAPN } from '@/lib/utils/apn';
 
 /** Available map presets */
 const MAP_PRESETS = ['parcels', 'planning', 'hazards'] as const;
@@ -182,11 +183,26 @@ Custom view:
     origin,
     destination,
   }): Promise<ToolResponse> => {
+    // Validate APN format if provided (fail fast with helpful error)
+    let normalizedApn = apn;
+    if (apn) {
+      const parsed = parseAPN(apn);
+      if (!parsed) {
+        return jsonResponse({
+          success: false,
+          message: `Invalid APN format: "${apn}"`,
+          suggestion: 'APN should be 9-10 digits, optionally with dashes (e.g., "003-025-102" or "0030251020")',
+        });
+      }
+      // Use the canonical formatted version for consistency
+      normalizedApn = parsed.formatted;
+    }
+
     // Build the URL
     const url = buildMapUrl({
       preset,
       webMapId,
-      apn,
+      apn: normalizedApn,
       address,
       center,
       zoom,
@@ -200,8 +216,8 @@ Custom view:
     const presetName = preset || 'parcels';
     features.push(`**Preset**: ${presetName} - ${PRESET_DESCRIPTIONS[presetName as keyof typeof PRESET_DESCRIPTIONS]}`);
 
-    if (apn) {
-      features.push(`**Highlighted Parcel**: ${apn}`);
+    if (normalizedApn) {
+      features.push(`**Highlighted Parcel**: ${normalizedApn}`);
     } else if (address) {
       features.push(`**Highlighted Address**: ${address}`);
     }
