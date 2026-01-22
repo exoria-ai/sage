@@ -36,28 +36,69 @@ export const capabilities: CapabilityCategory[] = [
 		],
 		scenarios: [
 			{
-				title: 'Property Lookup',
-				description: 'Instant fact-checking for property questions.',
-				query: 'What property is at 675 Texas Street in Fairfield?',
-				toolCalls: ['Geocode Address', 'Get Parcel Details'],
-				result: `Property at 675 Texas Street, Fairfield
-
-| Detail | Information |
+				title: 'Agritourism Feasibility',
+				description: 'Comprehensive property profile for development evaluation.',
+				query: 'Give me a property profile for 4300 Suisun Valley Road for agritourism.',
+				toolCalls: ['Geocode Address', 'Get Parcel Details', 'Get Zoning', 'Get Flood Zone', 'Get Fire Hazard Zone', 'Get Special Districts', 'Search County Code', 'Search General Plan', 'Capture Map View'],
+				result: `**Property Overview**
+| Attribute | Value |
 | :--- | :--- |
-| **APN** | 003-025-1020 |
-| **Situs Address** | 601 Texas Street, Fairfield |
-| **Acreage** | 5.28 acres (240,015 sq ft) |
-| **Use** | Governmental & Miscellaneous |
-| **Zoning** | Public Facilities |
-| **Assessed Value** | $0 (government-owned, tax-exempt) |
-| **Tax Rate Area** | 3104 (Fairfield City) |
+| **APN** | 002-703-0010 |
+| **Acreage** | 80.1 acres |
+| **Zoning** | ASV-20 (Suisun Valley Agriculture) |
+| **Flood Zone** | Zone A (High Risk SFHA) |
+| **Fire Hazard** | Non-FHSZ |
 
-This is a government-owned property spanning over 5 acres, zoned for public facilities. The $0 assessed value indicates it's a tax-exempt public property. This address is part of the Solano County Government Center complex in downtown Fairfield, which houses various county administrative offices.
+**Existing Improvements:** 22,032 sq ft estate (2002), 6 bed/8.5 bath, plus 49,727 sq ft outbuildings. Trees & vines assessed at $361K.
 
-**Useful Links:**
-• Property Details
-• Tax Map
-• Tax Information`
+**Agritourism Opportunities (ASV-20 Zone)**
+| Use | Permit Required |
+| :--- | :--- |
+| Agricultural Homestay | Administrative Permit |
+| Small Winery (<20k gal) | Allowed by Right |
+| Tasting Room | Administrative Permit |
+| Farm Stand (<1,000 sf) | Allowed by Right |
+| Special Events Facility | Minor Use Permit |
+
+**Key Requirements:** All agritourism must be incidental to agriculture; 300-ft setbacks for event facilities; hours 10am-10pm; food service requires Environmental Health permit.
+
+**Flood Zone Impact:** Zone A requires flood insurance and Base Flood Elevation determination for any new construction.
+
+The General Plan explicitly supports agritourism in Suisun Valley. The existing large structure and active agricultural production position this property well for agricultural homestay, winery, or event facility uses.`
+			},
+			{
+				title: 'Policy Lookup by APN',
+				description: 'Comprehensive zoning and land use policy research from a parcel number.',
+				query: 'I have 80 acres near Dixon—what policies apply? [APN: 014-218-0100]',
+				toolCalls: ['Get Parcel Details', 'Get Zoning', 'Get Flood Zone', 'Get Fire Hazard Zone', 'Get Special Districts', 'Search General Plan Policies', 'Search County Code'],
+				result: `**Property:** 6156 Clark Road, Dixon (APN 014-218-0100)
+**Acreage:** 79.19 acres | **Zoning:** A-80 (Exclusive Agricultural)
+**Jurisdiction:** Unincorporated Solano County (not City of Dixon)
+
+**Permitted Uses (No Permit Required)**
+Crop production, grazing, primary dwelling (min 1,000 sf), secondary dwelling (max 2,400 sf), agricultural accessory buildings
+
+**Uses Requiring Permits**
+| Use | Permit Type |
+| :--- | :--- |
+| Agricultural employee housing | Administrative Permit |
+| Agritourism events | Minor Use Permit |
+| Winery (<25% local grapes) | Use Permit |
+| Large animal operations | Use Permit |
+
+**Development Standards (A-80)**
+| Standard | Requirement |
+| :--- | :--- |
+| Minimum lot size | 80 acres |
+| Front setback | 30 ft (50 ft from centerline) |
+| Side/Rear setbacks | 20 ft / 25 ft |
+| Height limit | 35 ft (50 ft for ag processing) |
+
+**Hazards:** Zone X (minimal flood risk), Non-FHSZ (no fire hazard designation)
+
+**Service Districts:** Dixon Fire District, Vacaville Unified School District, Recology garbage service, Supervisor District 5
+
+**Key Policy Note:** At 79 acres, this parcel is just under the 80-acre minimum—limiting subdivision potential in A-80 zoning. General Plan Policy AG.P-31 requires conformance with minimum parcel sizes.`
 			},
 			{
 				title: 'Notification List Generation',
