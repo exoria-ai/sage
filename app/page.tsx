@@ -157,9 +157,9 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Deeply Connected</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Explore System Capabilities</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Direct access to 40+ tools across 11 functional categories.
+              Browse the catalog of 40+ tools across 11 functional categories.
             </p>
           </div>
 
@@ -284,16 +284,18 @@ function SystemCard({ title, count, icon, slug }: { title: string; count: string
   return (
     <Link 
       href={`/capabilities/${slug}`}
-      className="bg-slate-50 rounded-xl p-4 border border-slate-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all hover:-translate-y-0.5 group block"
+      className="bg-slate-50 rounded-xl p-4 border border-slate-100 hover:border-teal-200 hover:bg-teal-50/50 transition-all hover:-translate-y-0.5 group block h-full flex flex-col justify-between"
     >
-      <div className="flex items-center gap-3 mb-1">
-        <span className="text-xl group-hover:scale-110 transition-transform">{icon}</span>
-        <h4 className="font-semibold text-slate-900 text-sm">{title}</h4>
+      <div>
+        <div className="flex items-center gap-3 mb-1">
+          <span className="text-xl group-hover:scale-110 transition-transform">{icon}</span>
+          <h4 className="font-semibold text-slate-900 text-sm">{title}</h4>
+        </div>
+        <p className="text-xs text-slate-500 pl-8">{count}</p>
       </div>
-      <p className="text-xs text-slate-500 pl-8">{count}</p>
-      <div className="mt-3 pl-8 flex items-center gap-1 text-xs text-teal-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-        <span>Explore details</span>
-        <span>→</span>
+      <div className="mt-4 pl-8 flex items-center gap-1 text-xs text-teal-600 font-bold group-hover:text-teal-700 transition-colors">
+        <span>View examples</span>
+        <span className="transition-transform group-hover:translate-x-1">→</span>
       </div>
     </Link>
   );
