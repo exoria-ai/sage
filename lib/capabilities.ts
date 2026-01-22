@@ -393,16 +393,13 @@ This property is in unincorporated Solano County and receives services from thes
 		],
 		scenarios: [
 			{
-				title: 'Policy History',
-				description: 'Tracking Board decisions on emerging topics.',
+				title: 'GovAI Coalition Approval',
+				description: 'Finding when the Board approved a specific initiative.',
 				query: 'When did Solano County approve participation in the GovAI Coalition?',
-				toolCalls: ['Search Meeting Minutes'],
-				result: `GovAI Coalition Approval
-The Solano County Board of Supervisors approved participation in the **GovAI Coalition** on **April 9, 2024**.
+				toolCalls: ['Search Meeting Minutes', 'Get Meeting'],
+				result: `**April 9, 2024** — Item 24-251, approved on consent calendar.
 
-**Item 24-251** authorized the Chief Information Officer to execute the GovAI Coalition registration agreement. The item was approved on the consent calendar.
-
-The GovAI Coalition is a partnership of government agencies focused on the responsible adoption and use of artificial intelligence technologies in public sector operations.`
+The Board authorized the CIO to execute the GovAI Coalition registration agreement—a partnership of government agencies focused on responsible AI adoption in public sector operations.`
 			}
 		]
 	},
