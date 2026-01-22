@@ -145,9 +145,9 @@ export default function Home() {
             />
             <ScenarioCard
               icon="⚡"
-              title="Workflow Automation"
-              question="Generate a notification list for all owners within 300ft of this parcel."
-              result="Runs a buffer analysis, executes a spatial query against 152k parcels, collects owner names/addresses, and formats them for mailing labels. Turns a 20-minute task into 10 seconds."
+              title="Multi-Source Analysis"
+              question="Give me a complete property profile for 4300 Suisun Valley Road."
+              result="Pulls parcel data, zoning, flood zone, fire hazard, special districts, and relevant General Plan policies in one query. Synthesizes 6 data sources into a single assessment."
             />
           </div>
         </div>
