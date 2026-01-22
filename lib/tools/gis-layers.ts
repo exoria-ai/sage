@@ -9,7 +9,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 
 // Types matching the gis-layers.json schema
-interface FieldInfo {
+export interface FieldInfo {
   name: string;
   alias: string;
   type: string;
@@ -17,13 +17,28 @@ interface FieldInfo {
   isPrimary?: boolean;
 }
 
-interface GISLayer {
+/** Available download format for a GIS dataset */
+export interface DownloadOption {
+  /** File format type */
+  format: 'shapefile' | 'geodatabase' | 'geojson' | 'csv' | 'lidar' | 'kml' | 'other';
+  /** Direct download URL */
+  url: string;
+  /** File size in bytes (optional, can be fetched dynamically) */
+  sizeBytes?: number;
+  /** ISO date string of last modification */
+  lastModified?: string;
+  /** Additional notes about this download */
+  notes?: string;
+}
+
+export interface GISLayer {
   id: string;
   name: string;
   description: string;
   sourceId: string;
+  /** Live service URL for queries - may be empty for download-only datasets */
   serviceUrl: string;
-  layerType: 'FeatureServer' | 'MapServer' | 'TileServer';
+  layerType: 'FeatureServer' | 'MapServer' | 'TileServer' | 'download-only';
   layerIndex?: number;
   category: string;
   tags: string[];
@@ -31,13 +46,17 @@ interface GISLayer {
   geometryType: 'Point' | 'Polygon' | 'Polyline' | 'MultiPoint';
   spatialReference: number;
   fields: FieldInfo[];
-  lookupMethod: 'spatial' | 'attribute' | 'both';
+  lookupMethod: 'spatial' | 'attribute' | 'both' | 'download';
   priority: 'high' | 'medium' | 'low';
   coverage: 'countywide' | 'unincorporated' | 'cities' | 'partial';
   updateFrequency?: string;
   dataSource?: string;
   notes?: string;
   relatedLayers?: string[];
+  /** URL to metadata page (e.g., ArcGIS Online item page) */
+  metadataUrl?: string;
+  /** Available file downloads for this dataset */
+  downloads?: DownloadOption[];
 }
 
 interface GISSource {
@@ -542,6 +561,145 @@ export async function findLayersForQuestion(args: {
       success: false,
       error_type: 'SEARCH_ERROR',
       message: `Search failed: ${errorMessage}`,
+    };
+  }
+}
+
+/**
+ * List layers that have downloadable files
+ */
+export async function listGISDownloads(args: {
+  format?: 'shapefile' | 'geodatabase' | 'geojson' | 'csv' | 'lidar' | 'kml' | 'other';
+  category?: string;
+}): Promise<{
+  success: boolean;
+  downloads?: Array<{
+    layerId: string;
+    layerName: string;
+    description: string;
+    category: string;
+    metadataUrl?: string;
+    serviceUrl?: string;
+    hasLiveService: boolean;
+    availableFormats: Array<{
+      format: string;
+      url: string;
+      notes?: string;
+    }>;
+  }>;
+  total?: number;
+  error_type?: string;
+  message?: string;
+}> {
+  const { format, category } = args;
+
+  try {
+    const catalog = await loadCatalog();
+
+    // Filter layers that have downloads
+    let layers = catalog.layers.filter(l => l.downloads && l.downloads.length > 0);
+
+    // Filter by category
+    if (category) {
+      const categoryLower = category.toLowerCase();
+      layers = layers.filter(l => l.category.toLowerCase() === categoryLower);
+    }
+
+    // Filter by format
+    if (format) {
+      layers = layers.filter(l =>
+        l.downloads?.some(d => d.format === format)
+      );
+    }
+
+    const results = layers.map(l => ({
+      layerId: l.id,
+      layerName: l.name,
+      description: l.description,
+      category: l.category,
+      metadataUrl: l.metadataUrl,
+      serviceUrl: l.serviceUrl || undefined,
+      hasLiveService: Boolean(l.serviceUrl && l.layerType !== 'download-only'),
+      availableFormats: (l.downloads || []).map(d => ({
+        format: d.format,
+        url: d.url,
+        notes: d.notes,
+      })),
+    }));
+
+    return {
+      success: true,
+      downloads: results,
+      total: results.length,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      error_type: 'READ_ERROR',
+      message: `Failed to read GIS catalog: ${errorMessage}`,
+    };
+  }
+}
+
+/**
+ * Get download URL for a specific layer and format
+ * Used by geoprocessing tools to look up download URLs from the catalog
+ */
+export async function getLayerDownloadUrl(args: {
+  layerId: string;
+  format?: 'shapefile' | 'geodatabase' | 'geojson' | 'csv' | 'lidar' | 'kml' | 'other';
+}): Promise<{
+  success: boolean;
+  url?: string;
+  allFormats?: Array<{ format: string; url: string }>;
+  error_type?: string;
+  message?: string;
+}> {
+  const { layerId, format = 'shapefile' } = args;
+
+  try {
+    await loadCatalog();
+    const layer = layerIndex.get(layerId.toLowerCase());
+
+    if (!layer) {
+      return {
+        success: false,
+        error_type: 'LAYER_NOT_FOUND',
+        message: `Layer "${layerId}" not found`,
+      };
+    }
+
+    if (!layer.downloads || layer.downloads.length === 0) {
+      return {
+        success: false,
+        error_type: 'NO_DOWNLOADS',
+        message: `Layer "${layerId}" does not have any downloadable files`,
+      };
+    }
+
+    const download = layer.downloads.find(d => d.format === format);
+
+    if (!download) {
+      return {
+        success: false,
+        error_type: 'FORMAT_NOT_FOUND',
+        message: `Format "${format}" not available for layer "${layerId}"`,
+        allFormats: layer.downloads.map(d => ({ format: d.format, url: d.url })),
+      };
+    }
+
+    return {
+      success: true,
+      url: download.url,
+      allFormats: layer.downloads.map(d => ({ format: d.format, url: d.url })),
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return {
+      success: false,
+      error_type: 'READ_ERROR',
+      message: `Failed to read GIS catalog: ${errorMessage}`,
     };
   }
 }

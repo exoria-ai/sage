@@ -7,6 +7,7 @@
 
 import { z } from 'zod';
 import { defineTool, ToolResponse } from '../types';
+import { getLayerDownloadUrl } from '../gis-layers';
 
 // Modal endpoint URLs
 // After deployment, endpoints will be: https://aimachinedream--sage-gis-tools-[function-name].modal.run
@@ -15,18 +16,44 @@ const DISSOLVE_ENDPOINT = `${MODAL_BASE_URL}-dissolve-and-store-api.modal.run`;
 const INSPECT_ENDPOINT = `${MODAL_BASE_URL}-inspect-layer.modal.run`;
 
 /**
- * Known Solano County shapefile downloads
+ * Dataset shorthand mapping to layer IDs in gis-layers.json catalog
+ * This allows backward compatibility with existing dataset names
  */
-const SOLANO_DOWNLOADS = {
-  parcels: 'https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Parcels_Public_Aumentum_GIS/Parcels_Public_Aumentum_Shapefiles.zip',
-  roads: 'https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Road_Centerlines_GIS/Road_Centerlines_Shapefiles.zip',
-  addresses: 'https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/Address_Pts_GIS/Address_Pts_Shapefiles.zip',
-  cityBoundary: 'https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/CityBoundary_GIS/CityBoundary_Shapefiles.zip',
-  countyBoundary: 'https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/County_Boundary_GIS/County_Boundary_Shapefiles.zip',
-  generalPlan: 'https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root//SolanoCountyUnincorporated_GeneralPlan2008_GIS/SolanoCountyUnincorporated_GeneralPlan2008_Shapefiles.zip',
-  zoning: 'https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root//SolanoCountyUnincorporatedZoning_GIS/SolanoCountyUnincorporatedZoning_Shapefiles.zip',
-  supervisorDistricts: 'https://solanocountysftpsa.blob.core.windows.net/solano-county-ca-gis-public-sftp/root/BOS_District_Boundaries_2021_SolanoCounty_GIS/BOS_District_Boundaries_2021_SolanoCounty_Shapefiles.zip',
-} as const;
+const DATASET_TO_LAYER_ID: Record<string, string> = {
+  parcels: 'solano-parcels',
+  roads: 'solano-road-centerlines',
+  addresses: 'solano-address-points',
+  cityBoundary: 'solano-city-boundary',
+  countyBoundary: 'solano-county-boundary',
+  generalPlan: 'solano-county-general-plan',
+  zoning: 'solano-county-zoning',
+  supervisorDistricts: 'solano-bos-districts',
+};
+
+/**
+ * Resolve dataset shorthand or input_url to actual download URL
+ */
+async function resolveDownloadUrl(input_url?: string, dataset?: string): Promise<{ url?: string; error?: string }> {
+  if (input_url) {
+    return { url: input_url };
+  }
+
+  if (!dataset) {
+    return { error: 'Must provide either input_url or dataset' };
+  }
+
+  const layerId = DATASET_TO_LAYER_ID[dataset];
+  if (!layerId) {
+    return { error: `Unknown dataset "${dataset}". Available: ${Object.keys(DATASET_TO_LAYER_ID).join(', ')}` };
+  }
+
+  const result = await getLayerDownloadUrl({ layerId, format: 'shapefile' });
+  if (!result.success || !result.url) {
+    return { error: result.message || `No shapefile download available for ${dataset}` };
+  }
+
+  return { url: result.url };
+}
 
 /**
  * Dissolve Layer Tool
@@ -89,20 +116,23 @@ For example, create school district boundaries by dissolving parcels on the scho
   },
 
   handler: async ({ input_url, dataset, dissolve_field, output_name, simplify_tolerance, output_fields }): Promise<ToolResponse> => {
-    // Resolve input URL
-    const url = input_url || (dataset ? SOLANO_DOWNLOADS[dataset] : null);
+    // Resolve input URL from catalog
+    const resolved = await resolveDownloadUrl(input_url, dataset);
 
-    if (!url) {
+    if (resolved.error || !resolved.url) {
       return {
         content: [{
           type: 'text',
-          text: `Error: Must provide either input_url or dataset.
+          text: `Error: ${resolved.error || 'Could not resolve download URL'}
 
-Available datasets:
-${Object.entries(SOLANO_DOWNLOADS).map(([key, val]) => `- ${key}: ${val.split('/').pop()}`).join('\n')}`,
+Available datasets: ${Object.keys(DATASET_TO_LAYER_ID).join(', ')}
+
+Tip: Use list_gis_downloads to see all available datasets with download URLs.`,
         }],
       };
     }
+
+    const url = resolved.url;
 
     try {
       const response = await fetch(DISSOLVE_ENDPOINT, {
@@ -204,16 +234,23 @@ Returns field names, types, unique value counts, and recommendations for dissolv
   },
 
   handler: async ({ input_url, dataset }): Promise<ToolResponse> => {
-    const url = input_url || (dataset ? SOLANO_DOWNLOADS[dataset] : null);
+    // Resolve input URL from catalog
+    const resolved = await resolveDownloadUrl(input_url, dataset);
 
-    if (!url) {
+    if (resolved.error || !resolved.url) {
       return {
         content: [{
           type: 'text',
-          text: 'Error: Must provide either input_url or dataset.',
+          text: `Error: ${resolved.error || 'Could not resolve download URL'}
+
+Available datasets: ${Object.keys(DATASET_TO_LAYER_ID).join(', ')}
+
+Tip: Use list_gis_downloads to see all available datasets with download URLs.`,
         }],
       };
     }
+
+    const url = resolved.url;
 
     try {
       const response = await fetch(INSPECT_ENDPOINT, {
