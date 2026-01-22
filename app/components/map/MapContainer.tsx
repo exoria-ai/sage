@@ -181,6 +181,7 @@ export function MapContainer({
         view.map?.add(routeLayer);
 
         // Handle initial view positioning and feature highlighting
+        console.log('[MapContainer] Calling initializeMapView with:', { highlightApn, highlightAddress, center, zoom });
         await initializeMapView(view, highlightLayer, {
           apn: highlightApn,
           address: highlightAddress,

@@ -65,14 +65,19 @@ export async function initializeMapView(
 ): Promise<void> {
   const { apn, address, center, zoom } = options;
 
+  console.log('[initializeMapView] Options received:', { apn, address, center, zoom });
+
   if (apn) {
+    console.log('[initializeMapView] Branch: APN');
     await highlightByApn(view, highlightLayer, apn);
   } else if (address) {
+    console.log('[initializeMapView] Branch: Address');
     await highlightByAddress(view, highlightLayer, address);
   } else if (center) {
-    // Use provided center/zoom from URL params
+    console.log('[initializeMapView] Branch: Center/Zoom');
     await zoomToCenter(view, center, zoom);
   } else {
+    console.log('[initializeMapView] Branch: Default county extent');
     await zoomToCountyExtent(view);
   }
 }

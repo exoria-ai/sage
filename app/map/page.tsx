@@ -42,6 +42,9 @@ function MapPageContent() {
   const zoomParam = searchParams.get('zoom');
   const zoom = zoomParam ? Number(zoomParam) : undefined;
 
+  // Debug logging
+  console.log('[MapPage] URL params:', { centerParam, zoomParam, center, zoom });
+
   // Parse route parameters (format: "lng,lat" or "lng,lat,label")
   const originParam = searchParams.get('origin');
   const destinationParam = searchParams.get('destination');
