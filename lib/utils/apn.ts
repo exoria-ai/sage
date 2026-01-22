@@ -14,10 +14,15 @@
  * converted to 10 digits (e.g., "0030251020") for database queries.
  */
 
-// Match 9-10 digit APNs with optional dashes
-// Standard 9-digit: XXX-XXX-XXX (human format, needs trailing 0 added)
-// Database 10-digit: XXX-XXX-XXXX (already has trailing 0)
-const APN_PATTERN = /^(\d{3})-?(\d{3})-?(\d{3,4})$/;
+// Match 9-10 digit APNs with optional dashes in any position
+// This is lenient to handle common AI/user formatting variations like:
+// - Standard 9-digit: XXX-XXX-XXX (human format, needs trailing 0 added)
+// - Database 10-digit: XXX-XXX-XXXX or XXXXXXXXXX (already has trailing 0)
+// - Misformatted: XXXX-XXX-XXX (AI agents often try this)
+//
+// We strip all non-digits and validate the total count (9-10 digits).
+// The canonical format is always BBB-PPP-NNN (3-3-3).
+const APN_DIGIT_ONLY_PATTERN = /^\d{9,10}$/;
 
 export interface ParsedAPN {
   raw: string;
@@ -31,37 +36,48 @@ export interface ParsedAPN {
 /**
  * Parse and validate an APN string.
  *
- * Accepts both 9-digit human format (003-025-102) and 10-digit database
- * format (0030251020). Always returns a 10-digit numeric value for queries.
+ * Accepts APNs in various formats:
+ * - Standard 9-digit: 003-025-102, 003025102
+ * - Database 10-digit: 003-025-1020, 0030251020
+ * - Misformatted (AI-friendly): 0169-240-080, 0169 240 080
+ *
+ * Strips all non-digits, validates total count (9-10), then parses as:
+ * - First 3 digits: map book
+ * - Next 3 digits: page
+ * - Remaining 3-4 digits: parcel (trailing 0 added if 9 total)
+ *
+ * Always returns a 10-digit numeric value for database queries.
  */
 export function parseAPN(apn: string): ParsedAPN | null {
-  const cleaned = apn.trim().replace(/\s+/g, '');
-  const match = cleaned.match(APN_PATTERN);
+  // Strip all non-digit characters (handles dashes, spaces, any separator)
+  const digitsOnly = apn.replace(/\D/g, '');
 
-  if (!match) {
+  // Validate: must be exactly 9 or 10 digits
+  if (!APN_DIGIT_ONLY_PATTERN.test(digitsOnly)) {
     return null;
   }
 
-  const [, mapBook, page, parcelRaw] = match;
+  // Parse into components (always 3-3-3 or 3-3-4 from the digit string)
+  const mapBook = digitsOnly.slice(0, 3);
+  const page = digitsOnly.slice(3, 6);
+  const parcelWithMaybeTrailing = digitsOnly.slice(6);
 
-  // Normalize parcel to 3 digits for display, but keep 4 if provided
-  // For database queries, ensure we have 10 total digits (add trailing 0 if needed)
-  let parcel = parcelRaw!;
-  let numericValue = `${mapBook}${page}${parcel}`;
-
-  // If 9 digits, add trailing 0 to match database format
+  // Build the 10-digit database value
+  let numericValue = digitsOnly;
   if (numericValue.length === 9) {
     numericValue = numericValue + '0';
   }
 
-  // For display, show the 3-digit parcel without the trailing 0
-  const displayParcel = parcel.length === 4 ? parcel.slice(0, 3) : parcel;
+  // For display, show the 3-digit parcel (without trailing 0)
+  const displayParcel = parcelWithMaybeTrailing.length === 4
+    ? parcelWithMaybeTrailing.slice(0, 3)
+    : parcelWithMaybeTrailing;
 
   return {
     raw: apn,
     formatted: `${mapBook}-${page}-${displayParcel}`,
-    mapBook: mapBook!,
-    page: page!,
+    mapBook,
+    page,
     parcel: displayParcel,
     numeric: numericValue,
   };

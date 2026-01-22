@@ -450,16 +450,17 @@ describe('APN Validation', () => {
     expect(data.url).toContain('apn=004-425-005');
   });
 
-  it('rejects APN with wrong grouping (4-3-3 instead of 3-3-3)', async () => {
-    // This is the exact error case from the chat log:
-    // LLM mistyped 004-425-0050 as 0044-250-050
+  it('accepts APN with alternate grouping (4-3-3) and normalizes it (lenient parsing)', async () => {
+    // Lenient parsing accepts any 9-10 digit sequence regardless of dash placement.
+    // This helps AI agents that misformat APNs like 0044-250-050 (4-3-3) instead of 004-425-0050 (3-3-4).
+    // The parser extracts digits and re-formats to canonical 3-3-3 format.
     const result = await getInteractiveMapUrlTool.handler({ apn: '0044-250-050' });
     const text = result.content[0];
     const data = JSON.parse((text as { type: 'text'; text: string }).text);
 
-    expect(data.success).toBe(false);
-    expect(data.message).toContain('Invalid APN format');
-    expect(data.suggestion).toContain('9-10 digits');
+    expect(data.success).not.toBe(false);
+    // 0044250050 -> 004-425-005 (canonical format)
+    expect(data.url).toContain('apn=004-425-005');
   });
 
   it('rejects APN with too few digits', async () => {
@@ -480,7 +481,8 @@ describe('APN Validation', () => {
     expect(data.message).toContain('Invalid APN format');
   });
 
-  it('rejects APN with letters', async () => {
+  it('rejects APN with letters (not enough digits after stripping)', async () => {
+    // 004-42A-005 has only 8 digits after stripping the 'A'
     const result = await getInteractiveMapUrlTool.handler({ apn: '004-42A-005' });
     const text = result.content[0];
     const data = JSON.parse((text as { type: 'text'; text: string }).text);

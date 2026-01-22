@@ -15,7 +15,7 @@ npm run typecheck    # Fast type check (tsc --noEmit)
 
 - **Path aliases**: Use `@/` for all imports (never `../../`)
 - **Config centralization**: URLs in `lib/config/endpoints.ts`, constants in `lib/config/defaults.ts`
-- **APNs**: Format as `XXX-XXX-XXX` for display, use `parseAPN()`/`formatAPN()` from `@/lib/utils/apn`
+- **APNs**: Lenient parsing accepts any 9-10 digit input regardless of separator placement. Use `parseAPN()` from `@/lib/utils/apn`. See `docs/sage/APN_FORMAT.md` for details.
 - **Tool architecture**: Definition (schema + handler) in `lib/tools/definitions/`, business logic in `lib/tools/`
 
 ## Dual MCP Server

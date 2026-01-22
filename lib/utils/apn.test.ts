@@ -138,15 +138,44 @@ describe('parseAPN', () => {
       expect(parseAPN('003-025-10234')).toBeNull(); // 5-digit parcel
     });
 
-    it('returns null for non-numeric characters', () => {
-      expect(parseAPN('003-025-10A')).toBeNull();
-      expect(parseAPN('ABC-DEF-GHI')).toBeNull();
-      expect(parseAPN('003.025.102')).toBeNull(); // Wrong separator
+    it('returns null for non-numeric characters that result in wrong digit count', () => {
+      expect(parseAPN('003-025-10A')).toBeNull(); // Only 8 digits after stripping
+      expect(parseAPN('ABC-DEF-GHI')).toBeNull(); // No digits at all
     });
 
-    it('returns null for 4-digit book numbers', () => {
-      // Old format assumed 4-digit book, but actual data shows 3-digit book
-      expect(parseAPN('0046-202-130')).toBeNull();
+    it('accepts various separators (lenient parsing)', () => {
+      // Dots, spaces, or other separators are stripped - only digit count matters
+      const result = parseAPN('003.025.102');
+      expect(result).not.toBeNull();
+      expect(result!.formatted).toBe('003-025-102');
+      expect(result!.numeric).toBe('0030251020');
+    });
+  });
+
+  describe('AI-friendly lenient parsing', () => {
+    it('accepts misformatted 10-digit APNs (4-3-3 dash placement)', () => {
+      // AI agents often format 10-digit APNs as XXXX-XXX-XXX instead of XXX-XXX-XXXX
+      const result = parseAPN('0169-240-080');
+      expect(result).not.toBeNull();
+      expect(result!.formatted).toBe('016-924-008'); // Corrected format
+      expect(result!.numeric).toBe('0169240080');
+    });
+
+    it('accepts 10-digit APNs with any separator placement', () => {
+      // All of these represent the same parcel
+      const variants = [
+        '0046-202-130',  // 4-3-3 (common AI mistake)
+        '004-620-2130',  // 3-3-4 (standard)
+        '0046202130',    // No separators
+        '004 620 213 0', // Spaces everywhere
+      ];
+
+      for (const variant of variants) {
+        const result = parseAPN(variant);
+        expect(result).not.toBeNull();
+        expect(result!.numeric).toBe('0046202130');
+        expect(result!.formatted).toBe('004-620-213');
+      }
     });
   });
 
