@@ -29,6 +29,9 @@ import { MapLoadingSpinner } from './MapLoadingSpinner';
 // Configure ESRI assets path - use CDN for reliable asset loading
 esriConfig.assetsPath = ESRI_JS_ASSETS;
 
+// Track if MapView has been initialized (persists across preset changes)
+let globalViewInitialized = false;
+
 interface MapContainerProps {
   webMapId?: string;
   preset?: keyof typeof WEB_MAPS;
@@ -75,8 +78,12 @@ export function MapContainer({
   // Determine which Web Map ID to use
   const effectiveWebMapId = webMapId || getWebMapId(preset) || '';
 
+  // Track the previous webMapId to detect changes
+  const prevWebMapIdRef = useRef<string | null>(null);
+
+  // Effect 1: Initialize MapView once (on mount)
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || viewRef.current) return;
 
     // Don't initialize if no Web Map ID is available
     if (!effectiveWebMapId) {
@@ -87,19 +94,19 @@ export function MapContainer({
 
     let isMounted = true;
 
-    const initializeMap = async () => {
+    const initializeView = async () => {
       try {
         setIsLoading(true);
         setLocalError(null);
 
-        // Create the Web Map
+        // Create initial Web Map
         const webMap = new WebMap({
           portalItem: {
             id: effectiveWebMapId,
           },
         });
 
-        // Create the Map View
+        // Create the Map View (only once)
         const view = new MapView({
           container: mapRef.current!,
           map: webMap,
@@ -119,11 +126,10 @@ export function MapContainer({
               breakpoint: false,
               position: 'bottom-right',
             },
-            defaultPopupTemplateEnabled: true, // Show attributes even without configured template
+            defaultPopupTemplateEnabled: true,
           },
         });
 
-        // Wait for the view to be ready
         await view.when();
 
         if (!isMounted) {
@@ -132,116 +138,42 @@ export function MapContainer({
         }
 
         viewRef.current = view;
+        prevWebMapIdRef.current = effectiveWebMapId;
+        globalViewInitialized = true;
 
-        // Progressive layer loading for better perceived performance
-        // Priority 1: Basemap and critical boundary layers load first (blocking)
-        // Priority 2: Remaining operational layers load in background (non-blocking)
-        if (view.map) {
-          const allLayers = view.map.allLayers.toArray();
-
-          // Categorize layers by priority
-          const isBasemapLayer = (layer: __esri.Layer) => {
-            if (layer.type === 'tile') return true;
-            if (layer.type === 'vector-tile') {
-              const title = layer.title?.toLowerCase() || '';
-              return (
-                title.includes('basemap') ||
-                title.includes('topographic') ||
-                title.includes('hillshade') ||
-                title.includes('world')
-              );
-            }
-            return false;
-          };
-
-          const isCriticalLayer = (layer: __esri.Layer) => {
-            const title = layer.title?.toLowerCase() || '';
-            return (
-              title.includes('county boundary') ||
-              title.includes('city boundary') ||
-              // Include both Parcels vector tile and feature layer for initial display + queries
-              title.includes('parcels')
-            );
-          };
-
-          const priorityLayers = allLayers.filter(l => isBasemapLayer(l) || isCriticalLayer(l));
-          const deferredLayers = allLayers.filter(l => !isBasemapLayer(l) && !isCriticalLayer(l));
-
-          console.log(`Loading ${priorityLayers.length} priority layers first, deferring ${deferredLayers.length} layers`);
-
-          // Load priority layers synchronously (blocks until complete)
-          await Promise.all(
-            priorityLayers.map(async (layer) => {
-              if (layer.load) {
-                try {
-                  await layer.load();
-                } catch (e) {
-                  console.warn(`Failed to load priority layer "${layer.title}":`, e);
-                }
-              }
-            })
-          );
-
-          // Load deferred layers in background (non-blocking)
-          // This allows the map to become interactive while remaining layers load
-          const loadDeferredLayers = async () => {
-            for (const layer of deferredLayers) {
-              if (!isMounted) break;
-              if (layer.load) {
-                try {
-                  await layer.load();
-                } catch (e) {
-                  console.warn(`Failed to load deferred layer "${layer.title}":`, e);
-                }
-              }
-            }
-            if (isMounted) {
-              console.log('All deferred layers loaded');
-            }
-          };
-
-          // Start background loading but don't await it
-          if (deferredLayers.length > 0) {
-            loadDeferredLayers();
-          }
-
-          // Log layer info
-          console.log('Priority layers loaded:', priorityLayers.map(l => `${l.title} (${l.type})`));
-
-          // Detect and configure vector tile / feature layer pairs
-          // This can run before all layers finish loading since we're just configuring references
-          configureLayerPairs(view);
-
-          // Configure exclusive groups - GroupLayers tagged with [EXCLUSIVE] get radio-button behavior
-          const groupLayers = allLayers.filter((l) => l.type === 'group') as GroupLayer[];
-          for (const groupLayer of groupLayers) {
-            if (groupLayer.title?.includes(EXCLUSIVE_GROUP_SUFFIX)) {
-              // Set exclusive visibility mode (only one child visible at a time)
-              groupLayer.visibilityMode = 'exclusive';
-              // Strip the suffix from the display name
-              groupLayer.title = groupLayer.title.replace(EXCLUSIVE_GROUP_SUFFIX, '').trim();
-              console.log(`Configured exclusive group: "${groupLayer.title}"`);
-            }
-          }
-        }
-
-        // Create highlight graphics layer
+        // Create highlight graphics layer (persists across map swaps)
         const highlightLayer = new GraphicsLayer({
           id: 'highlight-layer',
           title: 'Highlighted Features',
-          listMode: 'hide', // Don't show in layer list
+          listMode: 'hide',
         });
-        view.map?.add(highlightLayer);
         highlightLayerRef.current = highlightLayer;
 
-        // Create route graphics layer
+        // Create route graphics layer (persists across map swaps)
         const routeLayer = new GraphicsLayer({
           id: 'route-layer',
           title: 'Route',
           listMode: 'hide',
         });
-        view.map?.add(routeLayer);
         routeLayerRef.current = routeLayer;
+
+        // Set up event listeners (only once - they persist across map swaps)
+        setupEventListeners(view);
+
+        // Load and configure layers BEFORE adding widgets
+        // This ensures layer names are cleaned up before LayerList renders them
+        await loadWebMapLayers(view, isMounted);
+
+        // Add widgets AFTER layers are configured (so LayerList shows clean names)
+        addMapWidgets(view, {
+          highlightLayerRef,
+          identifyButtonRef,
+          toggleIdentifyMode,
+        });
+
+        // Add graphics layers after WebMap layers are configured
+        view.map?.add(highlightLayer);
+        view.map?.add(routeLayer);
 
         // Handle initial view positioning and feature highlighting
         await initializeMapView(view, highlightLayer, {
@@ -251,23 +183,13 @@ export function MapContainer({
 
         // Display route if origin and destination are provided
         if (routeOrigin && routeDestination) {
-          const routeInfo = await displayRoute(view, routeLayer, routeOrigin, routeDestination);
-          if (routeInfo) {
-            setRouteInfo(routeInfo);
+          const routeResult = await displayRoute(view, routeLayer, routeOrigin, routeDestination);
+          if (routeResult) {
+            setRouteInfo(routeResult);
           }
         }
 
         setIsLoading(false);
-
-        // Add widgets
-        addMapWidgets(view, {
-          highlightLayerRef,
-          identifyButtonRef,
-          toggleIdentifyMode,
-        });
-
-        // Set up event listeners
-        setupEventListeners(view);
       } catch (error) {
         console.error('Failed to initialize map:', error);
         if (isMounted) {
@@ -278,37 +200,26 @@ export function MapContainer({
     };
 
     const setupEventListeners = (view: MapView) => {
-      // Handle click for feature identification
-      // Note: We need to get the current identifyModeActive value via a ref
-      // since this callback is created once during initialization
       view.on('click', async (event) => {
-        // Only identify when identify mode is active
         if (!identifyModeActiveRef.current) {
           return;
         }
 
         try {
-          // First, try standard hitTest for visible feature layers
           const response = await view.hitTest(event, {
             include: view.map?.allLayers?.filter(
               (l) => l.type === 'feature' || l.type === 'map-image'
             ),
           });
 
-          // Collect all graphics from hitTest
           const allGraphics: __esri.Graphic[] = response.results
             .filter((result) => result.type === 'graphic')
             .map((result) => (result as __esri.GraphicHit).graphic);
 
-          // For paired layers: query the hidden FeatureLayer at click point
-          // This handles clicks on VectorTileLayer areas (which hitTest doesn't detect)
           const pairedGraphics = await queryPairedLayersAtPoint(event.mapPoint);
 
-          // Combine hitTest results with paired layer query results
-          // Add paired graphics that aren't already in hitTest results
           for (const graphic of pairedGraphics) {
             const layerTitle = graphic.getAttribute('_layerTitle');
-            // Check if we already have results from this layer (by title since hidden layer has different id)
             const alreadyHave = allGraphics.some(
               (g) => g.layer?.title === layerTitle || g.getAttribute('_layerTitle') === layerTitle
             );
@@ -318,7 +229,6 @@ export function MapContainer({
           }
 
           if (allGraphics.length > 0) {
-            // Open popup with identified features
             view.openPopup({
               location: event.mapPoint,
               features: allGraphics,
@@ -332,26 +242,263 @@ export function MapContainer({
       });
     };
 
-    initializeMap();
+    const loadWebMapLayers = async (view: MapView, mounted: boolean) => {
+      if (!view.map) return;
 
-    // Cleanup
+      const allLayers = view.map.allLayers.toArray();
+
+      const isBasemapLayer = (layer: __esri.Layer) => {
+        if (layer.type === 'tile') return true;
+        if (layer.type === 'vector-tile') {
+          const title = layer.title?.toLowerCase() || '';
+          return (
+            title.includes('basemap') ||
+            title.includes('topographic') ||
+            title.includes('hillshade') ||
+            title.includes('world')
+          );
+        }
+        return false;
+      };
+
+      const isCriticalLayer = (layer: __esri.Layer) => {
+        const title = layer.title?.toLowerCase() || '';
+        return (
+          title.includes('county boundary') ||
+          title.includes('city boundary') ||
+          title.includes('parcels')
+        );
+      };
+
+      const priorityLayers = allLayers.filter(l => isBasemapLayer(l) || isCriticalLayer(l));
+      const deferredLayers = allLayers.filter(l => !isBasemapLayer(l) && !isCriticalLayer(l));
+
+      console.log(`Loading ${priorityLayers.length} priority layers first, deferring ${deferredLayers.length} layers`);
+
+      await Promise.all(
+        priorityLayers.map(async (layer) => {
+          if (layer.load) {
+            try {
+              await layer.load();
+            } catch (e) {
+              console.warn(`Failed to load priority layer "${layer.title}":`, e);
+            }
+          }
+        })
+      );
+
+      console.log('Priority layers loaded:', priorityLayers.map(l => `${l.title} (${l.type})`));
+
+      // Configure layer pairs and exclusive groups BEFORE deferred loading starts
+      // This ensures layer names are cleaned up for the LayerList widget
+      // Note: Layer titles are available even before layer.load() completes
+
+      // Configure layer pairs (handles [VECTOR_TILE] tag - renames layers and hides paired FeatureLayers)
+      configureLayerPairs(view);
+
+      // Configure exclusive groups (handles [EXCLUSIVE] tag - sets radio-button behavior)
+      // Re-fetch layers in case titles changed during pair configuration
+      const layersAfterConfig = view.map.allLayers.toArray();
+      const groupLayers = layersAfterConfig.filter((l) => l.type === 'group') as GroupLayer[];
+      for (const groupLayer of groupLayers) {
+        if (groupLayer.title?.includes(EXCLUSIVE_GROUP_SUFFIX)) {
+          groupLayer.visibilityMode = 'exclusive';
+          groupLayer.title = groupLayer.title.replace(EXCLUSIVE_GROUP_SUFFIX, '').trim();
+          console.log(`Configured exclusive group: "${groupLayer.title}"`);
+        }
+      }
+
+      // Load deferred layers in background (non-blocking) AFTER configuration
+      const loadDeferredLayers = async () => {
+        for (const layer of deferredLayers) {
+          if (!mounted) break;
+          if (layer.load) {
+            try {
+              await layer.load();
+            } catch (e) {
+              console.warn(`Failed to load deferred layer "${layer.title}":`, e);
+            }
+          }
+        }
+        if (mounted) {
+          console.log('All deferred layers loaded');
+        }
+      };
+
+      if (deferredLayers.length > 0) {
+        loadDeferredLayers();
+      }
+    };
+
+    initializeView();
+
+    // Cleanup only on unmount
     return () => {
       isMounted = false;
       if (viewRef.current) {
         viewRef.current.destroy();
         viewRef.current = null;
+        globalViewInitialized = false;
       }
     };
-  }, [
-    effectiveWebMapId,
-    configureLayerPairs,
-    queryPairedLayersAtPoint,
-    highlightApn,
-    highlightAddress,
-    routeOrigin,
-    routeDestination,
-    toggleIdentifyMode,
-  ]);
+    // Note: This effect only runs once on mount - effectiveWebMapId is intentionally
+    // not in the dependency array. WebMap swapping is handled by the second effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Effect 2: Swap WebMap when preset changes (without destroying MapView)
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view || !effectiveWebMapId) return;
+
+    // Skip if this is the initial load (handled by Effect 1)
+    if (prevWebMapIdRef.current === null) return;
+
+    // Skip if the webMapId hasn't changed
+    if (prevWebMapIdRef.current === effectiveWebMapId) return;
+
+    let isMounted = true;
+
+    const swapWebMap = async () => {
+      try {
+        setIsLoading(true);
+        console.log(`Swapping WebMap: ${prevWebMapIdRef.current} -> ${effectiveWebMapId}`);
+
+        // Save current view state
+        const currentCenter = view.center?.clone();
+        const currentZoom = view.zoom;
+
+        // Clear graphics layers before swap
+        highlightLayerRef.current?.removeAll();
+        routeLayerRef.current?.removeAll();
+        setRouteInfo(null);
+
+        // Close any open popup
+        view.closePopup();
+
+        // Create and swap to new WebMap
+        const newWebMap = new WebMap({
+          portalItem: {
+            id: effectiveWebMapId,
+          },
+        });
+
+        // Swap the map (preserves MapView, widgets, event listeners)
+        view.map = newWebMap;
+
+        // Wait for new map to load
+        await view.when();
+
+        if (!isMounted) return;
+
+        // Restore view state (zoom/center) - keeps user's current view
+        if (currentCenter && currentZoom) {
+          view.center = currentCenter;
+          view.zoom = currentZoom;
+        }
+
+        prevWebMapIdRef.current = effectiveWebMapId;
+
+        // Load the new map's layers
+        const allLayers = view.map.allLayers.toArray();
+
+        const isBasemapLayer = (layer: __esri.Layer) => {
+          if (layer.type === 'tile') return true;
+          if (layer.type === 'vector-tile') {
+            const title = layer.title?.toLowerCase() || '';
+            return (
+              title.includes('basemap') ||
+              title.includes('topographic') ||
+              title.includes('hillshade') ||
+              title.includes('world')
+            );
+          }
+          return false;
+        };
+
+        const isCriticalLayer = (layer: __esri.Layer) => {
+          const title = layer.title?.toLowerCase() || '';
+          return (
+            title.includes('county boundary') ||
+            title.includes('city boundary') ||
+            title.includes('parcels')
+          );
+        };
+
+        const priorityLayers = allLayers.filter(l => isBasemapLayer(l) || isCriticalLayer(l));
+        const deferredLayers = allLayers.filter(l => !isBasemapLayer(l) && !isCriticalLayer(l));
+
+        console.log(`Loading ${priorityLayers.length} priority layers, deferring ${deferredLayers.length}`);
+
+        await Promise.all(
+          priorityLayers.map(async (layer) => {
+            if (layer.load) {
+              try {
+                await layer.load();
+              } catch (e) {
+                console.warn(`Failed to load priority layer "${layer.title}":`, e);
+              }
+            }
+          })
+        );
+
+        // Reconfigure layer pairs for new map (handles [VECTOR_TILE] tag)
+        // Do this BEFORE deferred loading so LayerList shows clean names
+        configureLayerPairs(view);
+
+        // Configure exclusive groups (handles [EXCLUSIVE] tag)
+        // Re-fetch layers in case titles changed during pair configuration
+        const layersAfterConfig = view.map.allLayers.toArray();
+        const groupLayers = layersAfterConfig.filter((l) => l.type === 'group') as GroupLayer[];
+        for (const groupLayer of groupLayers) {
+          if (groupLayer.title?.includes(EXCLUSIVE_GROUP_SUFFIX)) {
+            groupLayer.visibilityMode = 'exclusive';
+            groupLayer.title = groupLayer.title.replace(EXCLUSIVE_GROUP_SUFFIX, '').trim();
+            console.log(`Configured exclusive group: "${groupLayer.title}"`);
+          }
+        }
+
+        // Re-add graphics layers to new map
+        if (highlightLayerRef.current) {
+          view.map.add(highlightLayerRef.current);
+        }
+        if (routeLayerRef.current) {
+          view.map.add(routeLayerRef.current);
+        }
+
+        // Load deferred layers in background AFTER configuration
+        if (deferredLayers.length > 0) {
+          (async () => {
+            for (const layer of deferredLayers) {
+              if (!isMounted) break;
+              if (layer.load) {
+                try {
+                  await layer.load();
+                } catch (e) {
+                  console.warn(`Failed to load deferred layer "${layer.title}":`, e);
+                }
+              }
+            }
+            if (isMounted) console.log('All deferred layers loaded');
+          })();
+        }
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to swap WebMap:', error);
+        if (isMounted) {
+          setLocalError(error instanceof Error ? error.message : 'Failed to switch map');
+          setIsLoading(false);
+        }
+      }
+    };
+
+    swapWebMap();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [effectiveWebMapId, configureLayerPairs]);
 
   // Update identify button state and cursor when identify mode changes
   useEffect(() => {
