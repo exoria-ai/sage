@@ -153,25 +153,57 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Connected Systems Grid */}
+      {/* What You Can Do */}
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">Explore System Capabilities</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">What You Can Do With SAGE</h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Browse the catalog of 40+ tools across 11 functional categories.
+              Not just data access—integrated analysis across county systems.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <SystemCard title="Property & Parcels" count="152k Records" icon="🗺️" slug="property" />
-            <SystemCard title="Zoning (7 Cities)" count="Live Routing" icon="📍" slug="zoning" />
-            <SystemCard title="County Code" count="8 Chapters" icon="📜" slug="code" />
-            <SystemCard title="General Plan" count="1,345 Policies" icon="📋" slug="general-plan" />
-            <SystemCard title="Budget & Staffing" count="3,284 FTEs" icon="💰" slug="budget" />
-            <SystemCard title="Hazards (Fire/Flood)" count="FEMA/CAL FIRE" icon="⚠️" slug="hazards" />
-            <SystemCard title="Special Districts" count="School/Water" icon="🏫" slug="districts" />
-            <SystemCard title="Meeting Minutes" count="BOS & ReGIS" icon="🎙️" slug="meetings" />
+          <div className="grid md:grid-cols-2 gap-6">
+            <CapabilityCard
+              title="Complete Property Profiles"
+              description="One address returns ownership, assessed value, zoning, flood zone, fire hazard, all serving districts, and nearby amenities. No more querying six different layers."
+              slug="property"
+            />
+            <CapabilityCard
+              title="Jurisdiction-Aware Zoning"
+              description="Routes queries to the correct system—city or county—based on actual parcel location, not mailing address. Prevents the 'Fairfield address in unincorporated county' mistake."
+              slug="zoning"
+            />
+            <CapabilityCard
+              title="Regulation Lookup"
+              description="Search the County Code by keyword and get the actual legal text. ADU requirements, subdivision exemptions, agritourism rules—cited by section number."
+              slug="code"
+            />
+            <CapabilityCard
+              title="Policy-to-Code Tracing"
+              description="Connect General Plan goals to their implementing code sections. Useful for staff reports, CEQA findings, and explaining 'why' behind decisions."
+              slug="general-plan"
+            />
+            <CapabilityCard
+              title="Staffing & Budget Analysis"
+              description="Find how many positions exist county-wide by title, compare department budgets, or trace resources to functions. Data-driven justifications for Board presentations."
+              slug="budget"
+            />
+            <CapabilityCard
+              title="Notification List Generation"
+              description="Draw a buffer around a parcel and get all neighboring owners with APNs, addresses, and distances. Ready for permit notification mail merge."
+              slug="districts"
+            />
+            <CapabilityCard
+              title="Board Decision Tracking"
+              description="Search BOS and ReGIS meeting minutes by topic. Find what was already approved, link resolutions to implementation, avoid redundant requests."
+              slug="meetings"
+            />
+            <CapabilityCard
+              title="On-Demand Maps"
+              description="Generate static maps for reports or shareable interactive URLs. Parcel highlights, hazard overlays, buffer zones—no ArcGIS export needed."
+              slug="property"
+            />
           </div>
         </div>
       </section>
@@ -280,21 +312,16 @@ function ScenarioCard({ icon, title, question, result }: { icon: string; title: 
   );
 }
 
-function SystemCard({ title, count, icon, slug }: { title: string; count: string; icon: string; slug: string }) {
+function CapabilityCard({ title, description, slug }: { title: string; description: string; slug: string }) {
   return (
-    <Link 
+    <Link
       href={`/capabilities/${slug}`}
-      className="bg-slate-50 rounded-xl p-4 border border-slate-100 hover:border-teal-200 hover:bg-teal-50/50 transition-all hover:-translate-y-0.5 group block h-full flex flex-col justify-between"
+      className="bg-slate-50 rounded-xl p-5 border border-slate-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all group block"
     >
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <span className="text-xl group-hover:scale-110 transition-transform">{icon}</span>
-          <h4 className="font-semibold text-slate-900 text-sm">{title}</h4>
-        </div>
-        <p className="text-xs text-slate-500 pl-8">{count}</p>
-      </div>
-      <div className="mt-4 pl-8 flex items-center gap-1 text-xs text-teal-600 font-bold group-hover:text-teal-700 transition-colors">
-        <span>View examples</span>
+      <h4 className="font-semibold text-slate-900 mb-2 group-hover:text-teal-700 transition-colors">{title}</h4>
+      <p className="text-sm text-slate-600 leading-relaxed mb-3">{description}</p>
+      <div className="flex items-center gap-1 text-xs text-teal-600 font-medium group-hover:text-teal-700 transition-colors">
+        <span>See examples</span>
         <span className="transition-transform group-hover:translate-x-1">→</span>
       </div>
     </Link>
