@@ -62,8 +62,8 @@ NOTES:
 - Empty/null fields are omitted from response`,
   schema: {
     apn: z.string().optional().describe("Assessor's Parcel Number (format: XXX-XXX-XXX)"),
-    latitude: z.number().optional().describe('Latitude in WGS84 (use if no APN)'),
-    longitude: z.number().optional().describe('Longitude in WGS84 (use if no APN)'),
+    latitude: z.coerce.number().optional().describe('Latitude in WGS84 (use if no APN)'),
+    longitude: z.coerce.number().optional().describe('Longitude in WGS84 (use if no APN)'),
   },
   handler: async ({ apn, latitude, longitude }) => {
     const result = await getParcelDetails({ apn, latitude, longitude });
@@ -95,8 +95,8 @@ OUTPUT:
 IMPORTANT: Zoning ≠ automatic permission. Permits still required for most development.`,
   schema: {
     apn: z.string().optional().describe('APN to query zoning for'),
-    latitude: z.number().optional().describe('Latitude in WGS84'),
-    longitude: z.number().optional().describe('Longitude in WGS84'),
+    latitude: z.coerce.number().optional().describe('Latitude in WGS84'),
+    longitude: z.coerce.number().optional().describe('Longitude in WGS84'),
   },
   handler: async ({ apn, latitude, longitude }) => {
     const result = await getZoning({ apn, latitude, longitude });
@@ -126,8 +126,8 @@ NOTE: Flood insurance may still be advisable even outside SFHA.
 LOMA (Letter of Map Amendment) can change zone for specific properties.`,
   schema: {
     apn: z.string().optional().describe('APN to query flood zone for'),
-    latitude: z.number().optional().describe('Latitude in WGS84'),
-    longitude: z.number().optional().describe('Longitude in WGS84'),
+    latitude: z.coerce.number().optional().describe('Latitude in WGS84'),
+    longitude: z.coerce.number().optional().describe('Longitude in WGS84'),
   },
   handler: async ({ apn, latitude, longitude }) => {
     const result = await getFloodZone({ apn, latitude, longitude });
@@ -157,8 +157,8 @@ IMPORTANT DISTINCTION:
 FHSZ maps hazard, not risk. High-hazard areas may have low risk if remote.`,
   schema: {
     apn: z.string().optional().describe('APN to query fire hazard zone for'),
-    latitude: z.number().optional().describe('Latitude in WGS84'),
-    longitude: z.number().optional().describe('Longitude in WGS84'),
+    latitude: z.coerce.number().optional().describe('Latitude in WGS84'),
+    longitude: z.coerce.number().optional().describe('Longitude in WGS84'),
   },
   handler: async ({ apn, latitude, longitude }) => {
     const result = await getFireHazardZone({ apn, latitude, longitude });
@@ -180,8 +180,8 @@ CONTEXT: Board of Supervisors governs unincorporated areas and county-wide servi
 For issues in incorporated cities, contact city council instead.`,
   schema: {
     apn: z.string().optional().describe('APN to find supervisor district for'),
-    latitude: z.number().optional().describe('Latitude in WGS84'),
-    longitude: z.number().optional().describe('Longitude in WGS84'),
+    latitude: z.coerce.number().optional().describe('Latitude in WGS84'),
+    longitude: z.coerce.number().optional().describe('Longitude in WGS84'),
   },
   handler: async ({ apn, latitude, longitude }) => {
     const result = await getSupervisorDistrict({ apn, latitude, longitude });
@@ -211,8 +211,8 @@ USE CASE: "Who provides services to this property?" or
 "What districts does this parcel fall within?"`,
   schema: {
     apn: z.string().optional().describe("Assessor's Parcel Number"),
-    latitude: z.number().optional().describe('Latitude in WGS84'),
-    longitude: z.number().optional().describe('Longitude in WGS84'),
+    latitude: z.coerce.number().optional().describe('Latitude in WGS84'),
+    longitude: z.coerce.number().optional().describe('Longitude in WGS84'),
   },
   handler: async ({ apn, latitude, longitude }) => {
     const result = await getSpecialDistricts({ apn, latitude, longitude });
@@ -247,10 +247,10 @@ USE CASE: "What schools are within 1 mile?" or
   schema: {
     layer_type: z.string().describe('Type of POI: school, park, fire_station, hospital, library, police, transit, community_center'),
     apn: z.string().optional().describe("Assessor's Parcel Number"),
-    latitude: z.number().optional().describe('Latitude in WGS84'),
-    longitude: z.number().optional().describe('Longitude in WGS84'),
-    radius_feet: z.number().optional().describe('Search radius in feet (default: 5280 = 1 mile)'),
-    limit: z.number().optional().describe('Maximum results to return (default: 10)'),
+    latitude: z.coerce.number().optional().describe('Latitude in WGS84'),
+    longitude: z.coerce.number().optional().describe('Longitude in WGS84'),
+    radius_feet: z.coerce.number().optional().describe('Search radius in feet (default: 5280 = 1 mile)'),
+    limit: z.coerce.number().optional().describe('Maximum results to return (default: 10)'),
   },
   handler: async ({ layer_type, apn, latitude, longitude, radius_feet, limit }) => {
     const result = await getNearby({ layer_type, apn, latitude, longitude, radius_feet, limit });

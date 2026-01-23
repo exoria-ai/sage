@@ -165,19 +165,19 @@ Custom view:
     address: z.string().optional()
       .describe('Address to geocode and highlight (e.g., "675 Texas St, Fairfield, CA")'),
     center: z.object({
-      longitude: z.number().describe('Longitude in WGS84'),
-      latitude: z.number().describe('Latitude in WGS84'),
+      longitude: z.coerce.number().describe('Longitude in WGS84'),
+      latitude: z.coerce.number().describe('Latitude in WGS84'),
     }).optional().describe('Initial map center point'),
-    zoom: z.number().min(1).max(20).optional()
+    zoom: z.coerce.number().min(1).max(20).optional()
       .describe('Initial zoom level (1=world, 17=parcel detail, 20=max)'),
     origin: z.object({
-      longitude: z.number().describe('Start point longitude'),
-      latitude: z.number().describe('Start point latitude'),
+      longitude: z.coerce.number().describe('Start point longitude'),
+      latitude: z.coerce.number().describe('Start point latitude'),
       label: z.string().optional().describe('Label for start marker'),
     }).optional().describe('Route origin point'),
     destination: z.object({
-      longitude: z.number().describe('End point longitude'),
-      latitude: z.number().describe('End point latitude'),
+      longitude: z.coerce.number().describe('End point longitude'),
+      latitude: z.coerce.number().describe('End point latitude'),
       label: z.string().optional().describe('Label for end marker'),
     }).optional().describe('Route destination point'),
   },

@@ -10,15 +10,15 @@ import { getDirections, getTravelTime } from '../directions';
 
 const locationSchema = z.object({
   address: z.string().optional().describe('Street address to geocode'),
-  latitude: z.number().optional().describe('Latitude in WGS84'),
-  longitude: z.number().optional().describe('Longitude in WGS84'),
+  latitude: z.coerce.number().optional().describe('Latitude in WGS84'),
+  longitude: z.coerce.number().optional().describe('Longitude in WGS84'),
   apn: z.string().optional().describe("Assessor's Parcel Number (future support)"),
 });
 
 const locationSchemaSimple = z.object({
   address: z.string().optional().describe('Street address to geocode'),
-  latitude: z.number().optional().describe('Latitude in WGS84'),
-  longitude: z.number().optional().describe('Longitude in WGS84'),
+  latitude: z.coerce.number().optional().describe('Latitude in WGS84'),
+  longitude: z.coerce.number().optional().describe('Longitude in WGS84'),
 });
 
 export const getDirectionsTool = defineTool({

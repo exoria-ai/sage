@@ -102,9 +102,9 @@ any part of their boundary falls within the buffer radius.
 LIMITS: Maximum 250 parcels returned. If truncated, total_parcels shows full count.`,
   schema: {
     apn: z.string().optional().describe("Source parcel APN - buffer measured from this parcel's boundary"),
-    latitude: z.number().optional().describe('Source point latitude (use if no APN)'),
-    longitude: z.number().optional().describe('Source point longitude (use if no APN)'),
-    radius_feet: z.number().optional().describe('Buffer radius in feet (default: 300)'),
+    latitude: z.coerce.number().optional().describe('Source point latitude (use if no APN)'),
+    longitude: z.coerce.number().optional().describe('Source point longitude (use if no APN)'),
+    radius_feet: z.coerce.number().optional().describe('Buffer radius in feet (default: 300)'),
     include_source: z.boolean().optional().describe('Include source parcel in results (default: false)'),
   },
   handler: async ({ apn, latitude, longitude, radius_feet, include_source }) => {
