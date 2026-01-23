@@ -173,6 +173,15 @@ const PRINT_SERVICE_URL =
 const EXTERNAL_LAYER_RETRY_ATTEMPTS = 2;
 const EXTERNAL_LAYER_RETRY_DELAY_MS = 2000;
 
+// Known slow external layer hosts - these get health checks before rendering
+const SLOW_EXTERNAL_HOSTS = [
+  'hazards.fema.gov',
+  'services.gis.ca.gov',
+];
+
+// Health check timeout (shorter than render timeout)
+const HEALTH_CHECK_TIMEOUT_MS = 8000;
+
 const DEFAULT_WIDTH = MAP_DEFAULTS.width;
 const DEFAULT_HEIGHT = MAP_DEFAULTS.height;
 const DEFAULT_ZOOM = MAP_DEFAULTS.zoom;
@@ -612,6 +621,91 @@ function detectLayerType(url: string): 'ArcGISTiledMapServiceLayer' | 'ArcGISMap
 }
 
 /**
+ * Check if a URL is from a known slow external host
+ */
+function isSlowExternalLayer(url: string): boolean {
+  try {
+    const host = new URL(url).host;
+    return SLOW_EXTERNAL_HOSTS.some(slowHost => host.includes(slowHost));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Health check for external layer services
+ * Returns true if the service responds within timeout, false otherwise
+ */
+async function checkLayerHealth(url: string): Promise<boolean> {
+  // Only check known slow external services
+  if (!isSlowExternalLayer(url)) {
+    return true;
+  }
+
+  try {
+    // Extract base service URL (without layer ID) for the health check
+    const serviceUrl = url.replace(/\/\d+$/, '');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(`${serviceUrl}?f=json`, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      // Service is healthy if it responds with JSON
+      if (response.ok) {
+        const data = await response.json();
+        // Check that we got valid service info
+        return Boolean(data.serviceDescription || data.layers || data.name);
+      }
+      return false;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (error) {
+    // Log the health check failure for debugging
+    console.warn(`External layer health check failed for ${url}:`, error instanceof Error ? error.message : 'Unknown error');
+    return false;
+  }
+}
+
+/**
+ * Filter additional layers to only include healthy external services
+ * Returns [healthyLayers, unhealthyLayerTitles]
+ */
+async function filterHealthyLayers(
+  layers: AdditionalMapService[] | undefined
+): Promise<[AdditionalMapService[], string[]]> {
+  if (!layers || layers.length === 0) {
+    return [[], []];
+  }
+
+  const healthyLayers: AdditionalMapService[] = [];
+  const unhealthyTitles: string[] = [];
+
+  // Check all layers in parallel for speed
+  const healthChecks = await Promise.all(
+    layers.map(async (layer) => {
+      const isHealthy = await checkLayerHealth(layer.url);
+      return { layer, isHealthy };
+    })
+  );
+
+  for (const { layer, isHealthy } of healthChecks) {
+    if (isHealthy) {
+      healthyLayers.push(layer);
+    } else {
+      unhealthyTitles.push(layer.title || 'external layer');
+    }
+  }
+
+  return [healthyLayers, unhealthyTitles];
+}
+
+/**
  * Create a circle geometry for buffer ring
  */
 function createCircleGeometry(
@@ -1002,14 +1096,19 @@ function buildWebMapJson(options: {
 // Export Function
 // =============================================================================
 
-async function exportWebMap(
+/**
+ * Single attempt to export web map via Print Service
+ */
+async function exportWebMapAttempt(
   webMapJson: WebMapJson,
-  layout: LayoutTemplate = 'MAP_ONLY',
-  layoutOptions?: LayoutOptions
+  layout: LayoutTemplate,
+  layoutOptions?: LayoutOptions,
+  timeout: number = TIMEOUTS.printService
 ): Promise<{
   success: boolean;
   imageUrl?: string;
   error?: string;
+  isTimeout?: boolean;
 }> {
   try {
     const params = new URLSearchParams({
@@ -1041,9 +1140,8 @@ async function exportWebMap(
       }
     }
 
-    // Use generous timeout for print service - external layers like FEMA can be slow
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.printService);
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
       const response = await fetch(PRINT_SERVICE_URL, {
@@ -1059,9 +1157,15 @@ async function exportWebMap(
       const data = await response.json();
 
       if (data.error) {
+        // Check for common external layer timeout errors
+        const errorMsg = data.error.message || '';
+        const isLayerTimeout = errorMsg.includes('timeout') ||
+                               errorMsg.includes('Unable to complete') ||
+                               errorMsg.includes('service');
         return {
           success: false,
           error: data.error.message || 'Print service error',
+          isTimeout: isLayerTimeout,
         };
       }
 
@@ -1084,6 +1188,7 @@ async function exportWebMap(
       return {
         success: false,
         error: 'Print service timeout - external layers may be slow',
+        isTimeout: true,
       };
     }
     return {
@@ -1091,6 +1196,56 @@ async function exportWebMap(
       error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
+}
+
+/**
+ * Export web map with retry and increased timeout for maps with external layers
+ */
+async function exportWebMap(
+  webMapJson: WebMapJson,
+  layout: LayoutTemplate = 'MAP_ONLY',
+  layoutOptions?: LayoutOptions
+): Promise<{
+  success: boolean;
+  imageUrl?: string;
+  error?: string;
+}> {
+  // Check if map includes external layers that might be slow
+  const hasExternalLayers = webMapJson.operationalLayers.some(layer =>
+    layer.url && isSlowExternalLayer(layer.url)
+  );
+
+  // Use longer timeout for maps with external layers
+  const timeout = hasExternalLayers ? TIMEOUTS.printService * 1.5 : TIMEOUTS.printService;
+
+  // First attempt
+  const result = await exportWebMapAttempt(webMapJson, layout, layoutOptions, timeout);
+
+  if (result.success) {
+    return result;
+  }
+
+  // If timeout occurred and we have external layers, retry once with even longer timeout
+  if (result.isTimeout && hasExternalLayers) {
+    console.warn('Print service timeout with external layers, retrying with extended timeout...');
+    await new Promise(resolve => setTimeout(resolve, EXTERNAL_LAYER_RETRY_DELAY_MS));
+
+    const retryResult = await exportWebMapAttempt(webMapJson, layout, layoutOptions, timeout * 1.5);
+    if (retryResult.success) {
+      return retryResult;
+    }
+
+    // Return the retry error
+    return {
+      success: false,
+      error: retryResult.error || 'External layer timeout after retry',
+    };
+  }
+
+  return {
+    success: false,
+    error: result.error,
+  };
 }
 
 /**
@@ -1373,6 +1528,21 @@ export async function captureMapView(args: MapOptions): Promise<CaptureMapResult
   // Priority: extentLayerBbox > inputBbox > calculated from center
   const bbox = extentLayerBbox || inputBbox || calculateBboxFromCenter(lat, lon, zoom, width, height);
 
+  // Health check external layers before rendering to avoid timeout failures
+  // This filters out slow/unavailable external services (FEMA, CAL FIRE, etc.)
+  let healthyAdditionalLayers = additionalLayers;
+  let unavailableLayers: string[] = [];
+
+  if (additionalLayers && additionalLayers.length > 0) {
+    const [healthy, unavailable] = await filterHealthyLayers(additionalLayers);
+    healthyAdditionalLayers = healthy.length > 0 ? healthy : undefined;
+    unavailableLayers = unavailable;
+
+    if (unavailable.length > 0) {
+      console.warn(`Skipping unavailable external layers: ${unavailable.join(', ')}`);
+    }
+  }
+
   // Build WebMap JSON
   const webMapJson = buildWebMapJson({
     bbox,
@@ -1390,7 +1560,7 @@ export async function captureMapView(args: MapOptions): Promise<CaptureMapResult
       !buffer && !extentLayer && parcelApns.length === 0 ? { lon, lat } : undefined,
     boundaries,
     zoom,
-    additionalLayers,
+    additionalLayers: healthyAdditionalLayers,
   });
 
   // Export the map
@@ -1423,8 +1593,12 @@ export async function captureMapView(args: MapOptions): Promise<CaptureMapResult
   if (boundaries?.showCities || layers.cityBoundary) layersShown.push('cityBoundary');
   if (boundaries?.showCounty || layers.countyBoundary) layersShown.push('countyBoundary');
   if (layers.addressPoints) layersShown.push('addressPoints');
-  if (additionalLayers) {
-    additionalLayers.forEach(l => layersShown.push(l.title || 'additional layer'));
+  if (healthyAdditionalLayers) {
+    healthyAdditionalLayers.forEach(l => layersShown.push(l.title || 'additional layer'));
+  }
+  // Note any layers that were skipped due to service unavailability
+  if (unavailableLayers.length > 0) {
+    layersShown.push(`(unavailable: ${unavailableLayers.join(', ')})`);
   }
   layersShown.push(`basemap: ${basemap}`);
 
