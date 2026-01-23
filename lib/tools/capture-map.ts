@@ -634,6 +634,7 @@ function isSlowExternalLayer(url: string): boolean {
 
 /**
  * Health check for external layer services
+ * Actually queries features to test real performance, not just metadata
  * Returns true if the service responds within timeout, false otherwise
  */
 async function checkLayerHealth(url: string): Promise<boolean> {
@@ -643,23 +644,34 @@ async function checkLayerHealth(url: string): Promise<boolean> {
   }
 
   try {
-    // Extract base service URL (without layer ID) for the health check
-    const serviceUrl = url.replace(/\/\d+$/, '');
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), HEALTH_CHECK_TIMEOUT_MS);
 
     try {
-      const response = await fetch(`${serviceUrl}?f=json`, {
+      // Query actual features with a small bbox in Solano County to test real performance
+      // This is more representative than just querying metadata
+      const testBbox = '-122.1,38.2,-122.0,38.3'; // Small area in Solano County
+      const params = new URLSearchParams({
+        where: '1=1',
+        geometry: testBbox,
+        geometryType: 'esriGeometryEnvelope',
+        inSR: '4326',
+        outFields: 'OBJECTID',
+        returnGeometry: 'false',
+        resultRecordCount: '1',
+        f: 'json',
+      });
+
+      const response = await fetch(`${url}/query?${params}`, {
         method: 'GET',
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
 
-      // Service is healthy if it responds with JSON
       if (response.ok) {
         const data = await response.json();
-        // Check that we got valid service info
-        return Boolean(data.serviceDescription || data.layers || data.name);
+        // Service is healthy if it returns valid query response (even with no features)
+        return !data.error && (Array.isArray(data.features) || data.objectIds !== undefined);
       }
       return false;
     } finally {
