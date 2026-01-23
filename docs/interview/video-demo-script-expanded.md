@@ -178,32 +178,54 @@
 >
 > This is institutional knowledge. The kind of thing you learn after getting burned once, or from a mentor who's been doing this for 20 years. Now it's encoded in tool descriptions and can be applied consistently every time."
 
-### Demo 3: Permit Workflow Automation
+### Demo 3: Short-Term Rental Eligibility
 
 **Setup:**
-> "Let me show you a practical workflow automation—the kind of task that takes significant staff time every single permit."
+> "Let me show you a different kind of complexity—questions where the answer depends on multiple factors that aren't obvious to the person asking."
 
 **Prompt:**
-> "I'm preparing a discretionary permit application for 4300 Suisun Valley Road. Check what hazards affect this property and generate a notification list of all property owners within 300 feet."
+> "Can I rent my cabin near Green Valley as an Airbnb?"
 
 **[RUN DEMO]**
 
 **Narration:**
-> "California requires notification to nearby property owners for discretionary permits—use permits, variances, subdivisions. Typically 300 to 1,000 feet depending on jurisdiction.
+> "This seems like a simple yes/no question. But it's not.
 >
-> That means someone has to: identify the subject parcel, run a buffer analysis, query all intersecting parcels, pull owner information, format it for mailing labels, and generate a map for the public hearing.
->
-> That's 15-20 minutes of staff time per application. For a busy planning department, that's hours per week."
+> Vacation house rentals in Solano County depend on multiple factors: fire hazard zone, structure type, road access, water and septic capacity. The AI needs to check each one."
 
 **After results:**
-> "Hazard check complete. 29 parcels within the notification radius. Owner names and addresses ready for export. Map generated showing the buffer.
+> "Notice the fire hazard zone check. Properties in Very High Fire Hazard Severity Zones are prohibited from vacation rentals. Properties in High zones can qualify—but only if they meet specific California Building Code requirements, defensible space standards, and road access standards.
 >
-> Same accuracy. Fraction of the time. And more importantly—this frees up staff to do the work that actually requires human judgment, like reviewing the project itself."
+> The AI also checked structure type. ADUs, secondary dwellings, and employee housing can't be used as vacation rentals—even if they're otherwise eligible.
+>
+> This is multi-factor eligibility analysis. The kind of question where a resident calls planning and gets transferred three times because no single person has all the pieces. The AI synthesizes it in one query."
 
-### Demo 4: Layer Discovery for Environmental Review
+### Demo 4: Visual Map Interpretation
 
 **Setup:**
-> "One more demo. This one shows how the AI handles open-ended research questions."
+> "This demo shows something different—the AI actually looking at maps, not just querying data."
+
+**Prompt:**
+> "Where exactly does the flood zone cross the 80-acre parcel at 4300 Suisun Valley Road?"
+
+**[RUN DEMO]**
+
+**Narration:**
+> "This isn't just asking 'what's the flood zone?' That would return 'Zone A.' But the question is spatial—where on the parcel does the hazard apply?
+>
+> The AI captures a map view with the FEMA flood overlay, then interprets what it sees."
+
+**After results:**
+> "Look at this. The AI identified that Suisun Creek bisects the property north-south through the eastern third. It estimated 15-20 acres are in Zone A—the high-risk area—while the vineyard portions to the west are in Zone X.
+>
+> It then connected this to development implications: new structures in Zone A need base flood elevation determination, the existing estate buildings are partially in the flood zone, agricultural uses are less constrained than structures.
+>
+> This is visual interpretation, not just data lookup. The AI is analyzing where on the parcel the hazard applies—the kind of spatial reasoning that usually requires pulling up a map and looking at it yourself."
+
+### Demo 5: Layer Discovery for Environmental Review (Optional)
+
+**Setup:**
+> "One more demo if we have time. This shows how the AI handles open-ended research questions."
 
 **Prompt:**
 > "I'm doing CEQA review for a proposed subdivision near Suisun Marsh. What environmental data layers should I be checking?"
@@ -230,7 +252,7 @@
 >
 > The tools I just showed you—they're not about replacing staff. They're about redirecting staff effort toward higher-value work.
 >
-> Every hour someone spends manually assembling notification lists is an hour they're not spending on analysis. Every time someone re-researches the same zoning question is time not spent on complex projects that actually need human judgment.
+> Every time someone re-researches the same zoning question is time not spent on complex projects that actually need human judgment. Every phone call that gets transferred three times because no single person has all the regulatory pieces—that's friction we can eliminate.
 >
 > Automation handles the repeatable. Humans handle the novel."
 
@@ -508,8 +530,9 @@
 |------|--------|
 | Property Analysis | "Tell me everything about 2500 Cordelia Road in Fairfield—zoning, hazards, services, assessed value." |
 | Winery Permit | "I have 30 acres of vineyard zoned A-40 and want to build a winery. I'll grow at least 50% of my grapes on-site and produce about 50,000 gallons per year. What permits do I need? And what if I also want to host wedding receptions?" |
-| Permit Workflow | "I'm preparing a discretionary permit application for 4300 Suisun Valley Road. Check what hazards affect this property and generate a notification list of all property owners within 300 feet." |
-| CEQA Review | "I'm doing CEQA review for a proposed subdivision near Suisun Marsh. What environmental data layers should I be checking?" |
+| Short-Term Rental | "Can I rent my cabin near Green Valley as an Airbnb?" |
+| Visual Flood Analysis | "Where exactly does the flood zone cross the 80-acre parcel at 4300 Suisun Valley Road?" |
+| CEQA Review (optional) | "I'm doing CEQA review for a proposed subdivision near Suisun Marsh. What environmental data layers should I be checking?" |
 | Map Handoff | "Show me an interactive map of this property so I can explore the area." |
 
 ## Tag Reference
@@ -544,15 +567,16 @@
 | 2.1 | SAGE introduction | 1:00 | 6:30 |
 | 3.1 | Demo: Property analysis | 1:30 | 8:00 |
 | 3.2 | Demo: Winery permit | 1:30 | 9:30 |
-| 3.3 | Demo: Notification list | 1:00 | 10:30 |
-| 3.4 | Demo: CEQA layers | 0:45 | 11:15 |
-| 4.1 | What this means for staff | 1:00 | 12:15 |
-| 4.2 | Skill transfer opportunity | 1:00 | 13:15 |
-| 4.3 | Transition + map handoff | 0:45 | 14:00 |
+| 3.3 | Demo: Short-term rental | 1:00 | 10:30 |
+| 3.4 | Demo: Visual flood analysis | 1:00 | 11:30 |
+| 3.5 | Demo: CEQA layers (optional) | 0:45 | 12:15 |
+| 4.1 | What this means for staff | 1:00 | 13:15 |
+| 4.2 | Skill transfer opportunity | 1:00 | 14:15 |
+| 4.3 | Transition + map handoff | 0:45 | 15:00 |
 
-**Note:** This runs ~14 minutes if fully delivered. Trim by:
+**Note:** This runs ~15 minutes if fully delivered. Trim by:
 - Shortening section 1.2 (GIS history)
-- Cutting one demo (recommend CEQA layers)
+- Cutting Demo 3.4 (visual flood) or 3.5 (CEQA)
 - Tightening narration during demos
 
 ## Video 2: Web GIS (Target: 10-12 minutes)
@@ -593,7 +617,7 @@ Before recording, verify you've communicated:
 - [ ] MCP explained briefly as technical enabler (not the star)
 - [ ] Jurisdiction routing demonstrated and explained
 - [ ] Institutional knowledge encoding shown (winery/wedding)
-- [ ] Staff time savings quantified (15-20 min → 10 sec)
+- [ ] Multi-factor analysis shown (short-term rental eligibility)
 - [ ] Team development opportunity mentioned
 - [ ] Clean handoff to Video 2
 
