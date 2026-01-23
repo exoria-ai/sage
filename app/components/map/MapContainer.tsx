@@ -32,6 +32,25 @@ esriConfig.assetsPath = ESRI_JS_ASSETS;
 // Track if MapView has been initialized (persists across preset changes)
 let globalViewInitialized = false;
 
+/**
+ * Enable the Parcels layer if it exists in the map.
+ * Used when highlighting parcels on non-parcels presets (e.g., Planning, Hazards)
+ * so users can see the parcel boundaries and labels.
+ */
+function enableParcelsLayer(view: MapView): void {
+  if (!view.map) return;
+
+  const allLayers = view.map.allLayers.toArray();
+  const parcelsLayer = allLayers.find(
+    (l) => l.title?.toLowerCase() === 'parcels'
+  );
+
+  if (parcelsLayer && !parcelsLayer.visible) {
+    parcelsLayer.visible = true;
+    console.log('[MapContainer] Auto-enabled Parcels layer for parcel highlighting');
+  }
+}
+
 interface MapContainerProps {
   webMapId?: string;
   preset?: keyof typeof WEB_MAPS;
@@ -188,6 +207,11 @@ export function MapContainer({
           center,
           zoom,
         });
+
+        // Auto-enable Parcels layer when highlighting parcels (for non-parcels presets)
+        if (highlightApns || highlightAddress) {
+          enableParcelsLayer(view);
+        }
 
         // Display route if origin and destination are provided
         if (routeOrigin && routeDestination) {
