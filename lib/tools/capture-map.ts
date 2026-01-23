@@ -20,6 +20,7 @@ import {
   SOLANO_AGOL_BASE,
   MAP_DEFAULTS,
   SOLANO_COUNTY_EXTENT,
+  TIMEOUTS,
 } from '@/lib/config';
 
 // =============================================================================
@@ -167,6 +168,10 @@ interface CaptureMapResult {
 
 const PRINT_SERVICE_URL =
   'https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task/execute';
+
+// Retry configuration for external layers (FEMA, CAL FIRE, etc.)
+const EXTERNAL_LAYER_RETRY_ATTEMPTS = 2;
+const EXTERNAL_LAYER_RETRY_DELAY_MS = 2000;
 
 const DEFAULT_WIDTH = MAP_DEFAULTS.width;
 const DEFAULT_HEIGHT = MAP_DEFAULTS.height;
@@ -1036,35 +1041,51 @@ async function exportWebMap(
       }
     }
 
-    const response = await fetch(PRINT_SERVICE_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params.toString(),
-    });
+    // Use generous timeout for print service - external layers like FEMA can be slow
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.printService);
 
-    const data = await response.json();
+    try {
+      const response = await fetch(PRINT_SERVICE_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+        signal: controller.signal,
+      });
 
-    if (data.error) {
+      clearTimeout(timeoutId);
+      const data = await response.json();
+
+      if (data.error) {
+        return {
+          success: false,
+          error: data.error.message || 'Print service error',
+        };
+      }
+
+      if (data.results?.[0]?.value?.url) {
+        return {
+          success: true,
+          imageUrl: data.results[0].value.url,
+        };
+      }
+
       return {
         success: false,
-        error: data.error.message || 'Print service error',
+        error: 'No image URL in response',
       };
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    if (data.results?.[0]?.value?.url) {
-      return {
-        success: true,
-        imageUrl: data.results[0].value.url,
-      };
-    }
-
-    return {
-      success: false,
-      error: 'No image URL in response',
-    };
   } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return {
+        success: false,
+        error: 'Print service timeout - external layers may be slow',
+      };
+    }
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -1073,26 +1094,47 @@ async function exportWebMap(
 }
 
 /**
- * Fetch image and convert to base64
+ * Fetch image and convert to base64 with timeout and retry
  */
-async function fetchImageAsBase64(url: string): Promise<{
+async function fetchImageAsBase64(url: string, retryCount = 0): Promise<{
   success: boolean;
   base64?: string;
   error?: string;
 }> {
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      return { success: false, error: `HTTP ${response.status}` };
-    }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.imageFetch);
 
-    const arrayBuffer = await response.arrayBuffer();
-    const base64 = Buffer.from(arrayBuffer).toString('base64');
-    return { success: true, base64 };
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        // Retry on 504 Gateway Timeout (common when external layers are slow)
+        if (response.status === 504 && retryCount < EXTERNAL_LAYER_RETRY_ATTEMPTS) {
+          await new Promise(resolve => setTimeout(resolve, EXTERNAL_LAYER_RETRY_DELAY_MS));
+          return fetchImageAsBase64(url, retryCount + 1);
+        }
+        return { success: false, error: `HTTP ${response.status}` };
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      return { success: true, base64 };
+    } finally {
+      clearTimeout(timeoutId);
+    }
   } catch (error) {
+    // Retry on timeout if we haven't exhausted retries
+    if (error instanceof Error && error.name === 'AbortError' && retryCount < EXTERNAL_LAYER_RETRY_ATTEMPTS) {
+      await new Promise(resolve => setTimeout(resolve, EXTERNAL_LAYER_RETRY_DELAY_MS));
+      return fetchImageAsBase64(url, retryCount + 1);
+    }
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ?
+        (error.name === 'AbortError' ? 'Image fetch timeout' : error.message) :
+        'Unknown error',
     };
   }
 }

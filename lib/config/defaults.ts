@@ -123,6 +123,10 @@ export const MAP_VIEW_PADDING = {
 export const TIMEOUTS = {
   /** Default API request timeout */
   default: 30000,
+  /** Print service timeout - longer for complex maps with external layers */
+  printService: 60000, // 60 seconds
+  /** Image fetch timeout - fetching rendered map images */
+  imageFetch: 45000, // 45 seconds
   /** Token refresh buffer before expiry */
   tokenRefreshBuffer: 300000, // 5 minutes
 } as const;
