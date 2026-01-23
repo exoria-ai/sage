@@ -271,19 +271,26 @@ export default function Home() {
 
             {/* Map Screenshot */}
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-tr from-teal-100 to-emerald-100 rounded-2xl transform -rotate-2 scale-105 opacity-50"></div>
-              <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200">
+              <a
+                href="https://sage-three-theta.vercel.app/map?preset=planning&apn=0027030010,0027040010"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-xl overflow-hidden shadow-2xl border border-slate-200 hover:shadow-3xl transition-shadow group"
+              >
                 <img
                   src="/images/site-selection-map.png"
                   alt="Interactive map showing multiple parcels highlighted in orange, zoomed to fit all candidates in Suisun Valley"
                   className="w-full h-auto"
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
                   <p className="text-white text-sm font-medium">
                     Two candidate parcels highlighted in Suisun Valley — 80 and 36 acres, both ASV-20 zoning
                   </p>
+                  <p className="text-white/70 text-xs mt-1 group-hover:text-white transition-colors">
+                    Click to open interactive map →
+                  </p>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         </div>
