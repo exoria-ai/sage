@@ -24,7 +24,9 @@ function MapPageContent() {
   const preset = (searchParams.get('preset') as keyof typeof WEB_MAPS) || 'parcels';
 
   // Parse feature highlight parameters
-  const highlightApn = searchParams.get('apn') || undefined;
+  // APNs can be comma-separated for multi-parcel highlighting: ?apn=001-001-001,002-002-002
+  const apnParam = searchParams.get('apn');
+  const highlightApns = apnParam ? apnParam.split(',').map(a => a.trim()).filter(Boolean) : undefined;
   const highlightAddress = searchParams.get('address') || undefined;
 
   // Parse center parameter (format: "lng,lat")
@@ -101,7 +103,7 @@ function MapPageContent() {
           className="absolute inset-0"
           center={center}
           zoom={zoom}
-          highlightApn={highlightApn}
+          highlightApns={highlightApns}
           highlightAddress={highlightAddress}
           routeOrigin={routeOrigin}
           routeDestination={routeDestination}

@@ -39,8 +39,8 @@ interface MapContainerProps {
   // Initial view positioning (from URL params)
   center?: { longitude: number; latitude: number };
   zoom?: number;
-  // Feature to highlight on load
-  highlightApn?: string;
+  // Feature(s) to highlight on load
+  highlightApns?: string[];  // Array of APNs to highlight (supports multi-parcel)
   highlightAddress?: string;
   // Route display options
   routeOrigin?: RouteStop;
@@ -53,7 +53,7 @@ export function MapContainer({
   className = '',
   center,
   zoom,
-  highlightApn,
+  highlightApns,
   highlightAddress,
   routeOrigin,
   routeDestination,
@@ -181,9 +181,9 @@ export function MapContainer({
         view.map?.add(routeLayer);
 
         // Handle initial view positioning and feature highlighting
-        console.log('[MapContainer] Calling initializeMapView with:', { highlightApn, highlightAddress, center, zoom });
+        console.log('[MapContainer] Calling initializeMapView with:', { highlightApns, highlightAddress, center, zoom });
         await initializeMapView(view, highlightLayer, {
-          apn: highlightApn,
+          apns: highlightApns,
           address: highlightAddress,
           center,
           zoom,

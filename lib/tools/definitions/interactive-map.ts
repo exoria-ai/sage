@@ -34,7 +34,7 @@ function getMapBaseUrl(): string {
 function buildMapUrl(params: {
   preset?: string;
   webMapId?: string;
-  apn?: string;
+  apns?: string[];  // Now supports array of APNs
   address?: string;
   center?: { longitude?: number; latitude?: number };
   zoom?: number;
@@ -50,9 +50,10 @@ function buildMapUrl(params: {
     url.searchParams.set('preset', params.preset);
   }
 
-  // Feature highlighting: APN takes precedence over address
-  if (params.apn) {
-    url.searchParams.set('apn', params.apn);
+  // Feature highlighting: APNs take precedence over address
+  // Multiple APNs are joined with commas
+  if (params.apns && params.apns.length > 0) {
+    url.searchParams.set('apn', params.apns.join(','));
   } else if (params.address) {
     url.searchParams.set('address', params.address);
   }
@@ -93,6 +94,7 @@ this opens a live map where users can pan, zoom, toggle layers, and explore.
 - User wants to use map widgets (legend, layer list, basemap gallery)
 - User is looking at multiple properties or wants to navigate around
 - After showing a static map image, offer the interactive link for exploration
+- After identifying candidate parcels from a search, present them on a map
 
 **USE capture_map_view INSTEAD** when:
 - User just needs a quick visual (static image is faster)
@@ -107,7 +109,7 @@ this opens a live map where users can pan, zoom, toggle layers, and explore.
    - hazards: Hazards - FEMA flood zones, CAL FIRE severity zones
 
 2. **Feature Highlight** (one of):
-   - apn: Highlight and zoom to a parcel by APN (e.g., "0001-011-180")
+   - apns: Array of APNs to highlight (supports multiple parcels!)
    - address: Geocode and highlight an address (e.g., "675 Texas St, Fairfield")
 
 3. **View Settings**:
@@ -121,12 +123,19 @@ this opens a live map where users can pan, zoom, toggle layers, and explore.
 
 **EXAMPLES**:
 
-Simple parcel view:
-  get_interactive_map_url({ apn: "0001-011-180" })
+Single parcel view:
+  get_interactive_map_url({ apns: ["0001-011-180"] })
   → Opens map centered on parcel, highlighted
 
+Multiple parcels (site selection results):
+  get_interactive_map_url({
+    apns: ["002-703-001", "002-704-010", "003-101-050"],
+    preset: "planning"
+  })
+  → Opens map with all candidate parcels highlighted, zoomed to fit all
+
 Hazard assessment:
-  get_interactive_map_url({ apn: "0001-011-180", preset: "hazards" })
+  get_interactive_map_url({ apns: ["0001-011-180"], preset: "hazards" })
   → Opens hazard layers, centered on parcel
 
 Address lookup:
@@ -151,8 +160,8 @@ Custom view:
       .describe('Map preset/theme: parcels (default), planning, hazards'),
     webMapId: z.string().optional()
       .describe('Custom ArcGIS Web Map ID (overrides preset)'),
-    apn: z.string().optional()
-      .describe('APN to highlight and zoom to (e.g., "0001-011-180")'),
+    apns: z.array(z.string()).optional()
+      .describe('Array of APNs to highlight and zoom to (e.g., ["002-703-001", "002-704-010"])'),
     address: z.string().optional()
       .describe('Address to geocode and highlight (e.g., "675 Texas St, Fairfield, CA")'),
     center: z.object({
@@ -176,33 +185,36 @@ Custom view:
   handler: async ({
     preset,
     webMapId,
-    apn,
+    apns,
     address,
     center,
     zoom,
     origin,
     destination,
   }): Promise<ToolResponse> => {
-    // Validate APN format if provided (fail fast with helpful error)
-    let normalizedApn = apn;
-    if (apn) {
-      const parsed = parseAPN(apn);
-      if (!parsed) {
-        return jsonResponse({
-          success: false,
-          message: `Invalid APN format: "${apn}"`,
-          suggestion: 'APN should be 9-10 digits, optionally with dashes (e.g., "003-025-102" or "0030251020")',
-        });
+    // Validate and normalize APNs if provided
+    let normalizedApns: string[] | undefined;
+    if (apns && apns.length > 0) {
+      normalizedApns = [];
+      for (const apn of apns) {
+        const parsed = parseAPN(apn);
+        if (!parsed) {
+          return jsonResponse({
+            success: false,
+            message: `Invalid APN format: "${apn}"`,
+            suggestion: 'APN should be 9-10 digits, optionally with dashes (e.g., "003-025-102" or "0030251020")',
+          });
+        }
+        // Use numeric format for URL (more compact, works with query)
+        normalizedApns.push(parsed.numeric);
       }
-      // Use the canonical formatted version for consistency
-      normalizedApn = parsed.formatted;
     }
 
     // Build the URL
     const url = buildMapUrl({
       preset,
       webMapId,
-      apn: normalizedApn,
+      apns: normalizedApns,
       address,
       center,
       zoom,
@@ -216,8 +228,13 @@ Custom view:
     const presetName = preset || 'parcels';
     features.push(`**Preset**: ${presetName} - ${PRESET_DESCRIPTIONS[presetName as keyof typeof PRESET_DESCRIPTIONS]}`);
 
-    if (normalizedApn) {
-      features.push(`**Highlighted Parcel**: ${normalizedApn}`);
+    if (normalizedApns && normalizedApns.length > 0) {
+      if (normalizedApns.length === 1) {
+        features.push(`**Highlighted Parcel**: ${normalizedApns[0]}`);
+      } else {
+        features.push(`**Highlighted Parcels**: ${normalizedApns.length} parcels`);
+        features.push(`  APNs: ${normalizedApns.join(', ')}`);
+      }
     } else if (address) {
       features.push(`**Highlighted Address**: ${address}`);
     }

@@ -1,16 +1,19 @@
 import type MapView from '@arcgis/core/views/MapView';
 import type GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import type Geometry from '@arcgis/core/geometry/Geometry';
+import type Polygon from '@arcgis/core/geometry/Polygon';
 import Graphic from '@arcgis/core/Graphic';
 import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
 import * as query from '@arcgis/core/rest/query';
 import Query from '@arcgis/core/rest/support/Query';
 import Extent from '@arcgis/core/geometry/Extent';
+import * as geometryEngine from '@arcgis/core/geometry/geometryEngine';
 
 import { SOLANO_SERVICES } from '@/lib/esri/webmaps';
 import { normalizeApnForQuery } from '@/lib/utils/apn';
 
 /**
- * Default zoom level when highlighting a parcel or address
+ * Default zoom level when highlighting a single parcel or address
  */
 const HIGHLIGHT_ZOOM = 18;
 
@@ -36,8 +39,8 @@ const HIGHLIGHT_SYMBOL = new SimpleFillSymbol({
 });
 
 export interface InitialMapViewOptions {
-  /** APN to highlight and zoom to */
-  apn?: string;
+  /** APNs to highlight and zoom to (supports multiple) */
+  apns?: string[];
   /** Address to geocode and highlight */
   address?: string;
   /** Initial center point (from URL params) */
@@ -50,26 +53,26 @@ export interface InitialMapViewOptions {
  * Handle initial view positioning and feature highlighting.
  *
  * Priority order:
- * 1. APN - Query parcel by APN and zoom to it
+ * 1. APNs - Query parcels by APN(s) and zoom to combined extent
  * 2. Address - Geocode address, find associated parcel, and highlight
  * 3. Default - Fit Solano County extent in view
  *
  * @param view - The ESRI MapView instance
  * @param highlightLayer - GraphicsLayer to add highlight graphics to
- * @param options - APN or address to highlight
+ * @param options - APNs or address to highlight
  */
 export async function initializeMapView(
   view: MapView,
   highlightLayer: GraphicsLayer,
   options: InitialMapViewOptions
 ): Promise<void> {
-  const { apn, address, center, zoom } = options;
+  const { apns, address, center, zoom } = options;
 
-  console.log('[initializeMapView] Options received:', { apn, address, center, zoom });
+  console.log('[initializeMapView] Options received:', { apns, address, center, zoom });
 
-  if (apn) {
-    console.log('[initializeMapView] Branch: APN');
-    await highlightByApn(view, highlightLayer, apn);
+  if (apns && apns.length > 0) {
+    console.log('[initializeMapView] Branch: APNs');
+    await highlightByApns(view, highlightLayer, apns);
   } else if (address) {
     console.log('[initializeMapView] Branch: Address');
     await highlightByAddress(view, highlightLayer, address);
@@ -83,18 +86,26 @@ export async function initializeMapView(
 }
 
 /**
- * Query parcel by APN and highlight it
+ * Query multiple parcels by APNs and highlight them all
  */
-async function highlightByApn(
+async function highlightByApns(
   view: MapView,
   highlightLayer: GraphicsLayer,
-  apn: string
+  apns: string[]
 ): Promise<void> {
   try {
-    console.log('Querying parcel by APN:', apn);
-    const normalizedApn = normalizeApnForQuery(apn);
+    console.log('Querying parcels by APNs:', apns);
+
+    // Normalize all APNs for query
+    const normalizedApns = apns.map(apn => normalizeApnForQuery(apn));
+
+    // Build WHERE clause for multiple APNs
+    const whereClause = normalizedApns.length === 1
+      ? `parcelid = '${normalizedApns[0]}'`
+      : `parcelid IN (${normalizedApns.map(a => `'${a}'`).join(', ')})`;
+
     const queryTask = new Query({
-      where: `parcelid = '${normalizedApn}'`,
+      where: whereClause,
       outFields: ['*'],
       returnGeometry: true,
     });
@@ -102,29 +113,52 @@ async function highlightByApn(
     const result = await query.executeQueryJSON(SOLANO_SERVICES.parcels, queryTask);
 
     if (result.features && result.features.length > 0) {
-      const feature = result.features[0]!;
+      const geometries: Geometry[] = [];
 
-      // Add highlight graphic
-      const graphic = new Graphic({
-        geometry: feature.geometry ?? undefined,
-        symbol: HIGHLIGHT_SYMBOL,
-        attributes: feature.attributes ?? {},
-      });
-      highlightLayer.add(graphic);
-
-      // Zoom to the parcel
-      if (feature.geometry) {
-        await view.goTo({
-          target: feature.geometry,
-          zoom: HIGHLIGHT_ZOOM,
+      // Add highlight graphic for each parcel
+      for (const feature of result.features) {
+        const graphic = new Graphic({
+          geometry: feature.geometry ?? undefined,
+          symbol: HIGHLIGHT_SYMBOL,
+          attributes: feature.attributes ?? {},
         });
+        highlightLayer.add(graphic);
+
+        if (feature.geometry) {
+          geometries.push(feature.geometry);
+        }
       }
-      console.log('Highlighted parcel:', feature.attributes ?? {});
+
+      console.log(`Highlighted ${result.features.length} parcel(s)`);
+
+      // Zoom to combined extent of all parcels
+      if (geometries.length > 0) {
+        if (geometries.length === 1) {
+          // Single parcel - zoom to it with standard zoom
+          await view.goTo({
+            target: geometries[0],
+            zoom: HIGHLIGHT_ZOOM,
+          });
+        } else {
+          // Multiple parcels - calculate union extent and fit all
+          // Cast to Polygon[] since parcels are always polygons
+          const unionGeometry = geometryEngine.union(geometries as Polygon[]);
+          if (unionGeometry) {
+            await view.goTo({
+              target: unionGeometry,
+            });
+            // Add some padding by zooming out slightly
+            if (view.zoom > 15) {
+              await view.goTo({ zoom: view.zoom - 1 });
+            }
+          }
+        }
+      }
     } else {
-      console.warn('No parcel found for APN:', apn);
+      console.warn('No parcels found for APNs:', apns);
     }
   } catch (err) {
-    console.error('Error querying parcel by APN:', err);
+    console.error('Error querying parcels by APNs:', err);
   }
 }
 
