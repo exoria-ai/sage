@@ -36,8 +36,10 @@ let globalViewInitialized = false;
  * Enable the Parcels layer if it exists in the map.
  * Used when highlighting parcels on non-parcels presets (e.g., Planning, Hazards)
  * so users can see the parcel boundaries and labels.
+ *
+ * Waits for the layer to be loaded before setting visibility to ensure it persists.
  */
-function enableParcelsLayer(view: MapView): void {
+async function enableParcelsLayer(view: MapView): Promise<void> {
   if (!view.map) return;
 
   const allLayers = view.map.allLayers.toArray();
@@ -45,9 +47,19 @@ function enableParcelsLayer(view: MapView): void {
     (l) => l.title?.toLowerCase() === 'parcels'
   );
 
-  if (parcelsLayer && !parcelsLayer.visible) {
-    parcelsLayer.visible = true;
-    console.log('[MapContainer] Auto-enabled Parcels layer for parcel highlighting');
+  if (parcelsLayer) {
+    try {
+      // Wait for the layer to be loaded before setting visibility
+      if (parcelsLayer.load) {
+        await parcelsLayer.load();
+      }
+      if (!parcelsLayer.visible) {
+        parcelsLayer.visible = true;
+        console.log('[MapContainer] Auto-enabled Parcels layer for parcel highlighting');
+      }
+    } catch (err) {
+      console.warn('[MapContainer] Failed to enable Parcels layer:', err);
+    }
   }
 }
 
@@ -210,7 +222,7 @@ export function MapContainer({
 
         // Auto-enable Parcels layer when highlighting parcels (for non-parcels presets)
         if (highlightApns || highlightAddress) {
-          enableParcelsLayer(view);
+          await enableParcelsLayer(view);
         }
 
         // Display route if origin and destination are provided
