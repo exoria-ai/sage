@@ -145,21 +145,22 @@ async function highlightByApns(
             zoom: HIGHLIGHT_ZOOM,
           });
         } else {
-          // Multiple parcels - calculate union extent and fit all
+          // Multiple parcels - calculate combined extent and fit all
           console.log(`Calculating union of ${geometries.length} geometries`);
           // Cast to Polygon[] since parcels are always polygons
           const unionGeometry = geometryEngine.union(geometries as Polygon[]);
           console.log(`Union result: ${unionGeometry ? 'success' : 'null'}`);
-          if (unionGeometry) {
-            await view.goTo({
-              target: unionGeometry,
-            });
-            console.log(`After goTo union, zoom level: ${view.zoom}`);
-            // Add some padding by zooming out slightly
-            if (view.zoom > 15) {
-              await view.goTo({ zoom: view.zoom - 1 });
-              console.log(`After zoom adjustment: ${view.zoom}`);
-            }
+          if (unionGeometry && unionGeometry.extent) {
+            // Expand the extent by 20% for padding
+            const expandedExtent = unionGeometry.extent.expand(1.2);
+            console.log(`Union extent: ${JSON.stringify({
+              xmin: expandedExtent.xmin,
+              ymin: expandedExtent.ymin,
+              xmax: expandedExtent.xmax,
+              ymax: expandedExtent.ymax
+            })}`);
+            await view.goTo(expandedExtent);
+            console.log(`After goTo extent, zoom level: ${view.zoom}`);
           } else {
             // Fallback: zoom to extent of all geometries
             console.log('Union failed, falling back to first geometry');
