@@ -36,9 +36,6 @@ export default async function CapabilityPage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <header className="mb-16 text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white shadow-sm border border-slate-200 text-4xl mb-6">
-              {capability.icon}
-            </div>
             <h1 className="text-4xl font-bold text-slate-900 mb-4">{capability.title}</h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
               {capability.description}

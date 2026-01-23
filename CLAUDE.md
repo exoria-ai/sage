@@ -6,10 +6,16 @@ AI-powered GIS assistant for Solano County. MCP server with 40+ tools hosted on 
 
 ```bash
 npm run build        # ALWAYS run before committing (catches TS errors)
-npm run dev          # Start local Next.js server (localhost:3000)
+npm run dev          # Start local Next.js server with Turbopack (localhost:3000)
+npm run clean        # Clear .next cache if builds fail with missing module errors
+npm run rebuild      # Clean + build in one command
 npx vitest run       # Run unit tests
 npm run typecheck    # Fast type check (tsc --noEmit)
 ```
+
+## Dev Server Cache Issues
+
+If `npm run build` fails with "Cannot find module './XXX.js'" errors, run `npm run clean` or `npm run rebuild`. This happens when Next.js cache gets corrupted from rapid file edits. Turbopack (`npm run dev`) is more resilient than webpack but production builds still use webpack.
 
 ## Critical Patterns
 

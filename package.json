@@ -4,11 +4,14 @@
   "description": "SAGE - Solano Agent for Geographic Enquiry: AI-powered GIS assistant for Solano County",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
+    "dev:webpack": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "clean": "rm -rf .next",
+    "rebuild": "rm -rf .next && next build",
     "test": "vitest",
     "test:run": "vitest run"
   },

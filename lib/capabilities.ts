@@ -23,21 +23,23 @@ export interface CapabilityCategory {
 
 export const capabilities: CapabilityCategory[] = [
 	{
-		title: 'Property & Parcels',
-		slug: 'property',
-		icon: '🗺️',
-		description: 'The foundation of county GIS. Direct access to Assessor data, boundaries, and ownership information for 152,000+ parcels across seven cities and unincorporated areas.',
-		source: 'Solano County Assessor / Aumentum System',
+		title: 'Site Selection & Feasibility',
+		slug: 'economic-development',
+		icon: '📈',
+		description: 'Complex site selection queries that combine spatial criteria with regulatory analysis. What takes hours of manual research becomes a single question—with full context from zoning, hazards, districts, and policy.',
+		source: 'Multiple Sources (Assessor, Zoning, General Plan, County Code)',
 		tools: [
 			{ name: 'get_parcel_details', description: 'Retrieve comprehensive property info including APN, address, acreage, use codes, and assessed values.' },
-			{ name: 'geocode_address', description: 'Convert street addresses to coordinates and APNs with fuzzy matching.' },
-			{ name: 'search_parcels', description: 'Find parcels matching specific criteria (e.g., "Agricultural land over 20 acres").' },
-			{ name: 'find_nearby_parcels', description: 'Buffer analysis for notification lists. Returns all parcels within specified radius with owner info and distances.' }
+			{ name: 'get_zoning', description: 'Returns zoning code, description, and jurisdiction with automatic city vs. county detection.' },
+			{ name: 'search_county_code', description: 'Full-text search of regulations with relevance ranking.' },
+			{ name: 'search_general_plan', description: 'Search General Plan policies and goals.' },
+			{ name: 'get_flood_zone', description: 'FEMA flood zone designation and insurance implications.' },
+			{ name: 'capture_map_view', description: 'Generate static map images with parcel highlights and layer overlays.' }
 		],
 		scenarios: [
 			{
-				title: 'Agritourism Feasibility',
-				description: 'Comprehensive property profile for development evaluation.',
+				title: 'Agritourism Site Analysis',
+				description: 'Comprehensive property evaluation for agricultural tourism development.',
 				query: 'Give me a property profile for 4300 Suisun Valley Road for agritourism.',
 				toolCalls: ['Geocode Address', 'Get Parcel Details', 'Get Zoning', 'Get Flood Zone', 'Get Fire Hazard Zone', 'Get Special Districts', 'Search County Code', 'Search General Plan', 'Capture Map View'],
 				result: `**Property Overview**
@@ -65,7 +67,22 @@ export const capabilities: CapabilityCategory[] = [
 **Flood Zone Impact:** Zone A requires flood insurance and Base Flood Elevation determination for any new construction.
 
 The General Plan explicitly supports agritourism in Suisun Valley. The existing large structure and active agricultural production position this property well for agricultural homestay, winery, or event facility uses.`
-			},
+			}
+		]
+	},
+	{
+		title: 'Property & Parcels',
+		slug: 'property',
+		icon: '🗺️',
+		description: 'The foundation of county GIS. Direct access to Assessor data, boundaries, and ownership information for 152,000+ parcels across seven cities and unincorporated areas.',
+		source: 'Solano County Assessor / Aumentum System',
+		tools: [
+			{ name: 'get_parcel_details', description: 'Retrieve comprehensive property info including APN, address, acreage, use codes, and assessed values.' },
+			{ name: 'geocode_address', description: 'Convert street addresses to coordinates and APNs with fuzzy matching.' },
+			{ name: 'search_parcels', description: 'Find parcels matching specific criteria (e.g., "Agricultural land over 20 acres").' },
+			{ name: 'find_nearby_parcels', description: 'Buffer analysis for notification lists. Returns all parcels within specified radius with owner info and distances.' }
+		],
+		scenarios: [
 			{
 				title: 'Policy Lookup by APN',
 				description: 'Comprehensive zoning and land use policy research from a parcel number.',
@@ -99,102 +116,24 @@ Crop production, grazing, primary dwelling (min 1,000 sf), secondary dwelling (m
 **Service Districts:** Dixon Fire District, Vacaville Unified School District, Recology garbage service, Supervisor District 5
 
 **Key Policy Note:** At 79 acres, this parcel is just under the 80-acre minimum—limiting subdivision potential in A-80 zoning. General Plan Policy AG.P-31 requires conformance with minimum parcel sizes.`
-			},
-			{
-				title: 'Notification List Generation',
-				description: 'Automated buffer analysis for discretionary permit applications.',
-				query: 'Generate a 300-foot notification list for APN 004-425-0050.',
-				toolCalls: ['Find Nearby Parcels'],
-				result: `300-Foot Notification List for APN 004-425-0050
-Source Parcel: 004-425-0050
-Buffer Radius: 300 feet
-Total Parcels Found: 3
-
-| APN | Situs Address | Owner | City | Acreage | Distance (ft) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| 004-631-0120 | — | Not Available | Unincorporated | 0.49 | 137 |
-| 004-424-0010 | — | Not Available | Unincorporated | 62.06 | 237 |
-| 004-425-0080 | 2543 Cordelia Road | Not Available | Unincorporated | 21.71 | 272 |
-
-**Notes:**
-• This is a rural area near Cordelia Road with only 3 parcels within 300 feet
-• Owner names are not available in the public dataset - you'll need to obtain current owner/mailing address information from the Solano County Assessor's Office for official notification purposes
-• All neighboring parcels are in unincorporated Solano County
-
-For official permit notification purposes, contact the Solano County Assessor's Office to obtain the current property owner names and mailing addresses for these APNs.`
 			}
 		]
 	},
 	{
-		title: 'Zoning & Jurisdiction',
+		title: 'Zoning & Permit Analysis',
 		slug: 'zoning',
 		icon: '📍',
-		description: 'Intelligent jurisdiction routing across 8 zoning authorities. Automatically determines whether a parcel falls under County or City regulations—critical because mailing addresses often mislead.',
-		source: 'Solano County Planning + Benicia, Dixon, Fairfield, Rio Vista, Suisun City, Vacaville, Vallejo GIS Services',
+		description: 'AI-powered analysis of 365 pages of zoning regulations. Ask complex permit questions and get structured answers—permit matrices by use type, development standards, grape sourcing requirements—not just keyword matches.',
+		source: 'Solano County Code Chapter 28 (Zoning)',
 		tools: [
 			{ name: 'get_zoning', description: 'Returns zoning code, description, and jurisdiction with automatic city vs. county detection based on actual parcel location.' },
-			{ name: 'geocode_address', description: 'Address lookup that identifies the legal jurisdiction—not just the mailing city.' }
-		],
-		scenarios: [
-			{
-				title: 'Jurisdiction Routing',
-				description: 'Catching the common mailing-address-vs-legal-jurisdiction confusion.',
-				query: 'What is the zoning for 2500 Cordelia Road, Fairfield?',
-				toolCalls: ['Geocode Address', 'Get Zoning'],
-				result: `Jurisdiction: Unincorporated Solano County (NOT City of Fairfield).
-Zoning: ASV-20 (Suisun Valley Agriculture, 20-acre minimum).
-
-The mailing address says "Fairfield" but this parcel is outside city limits and subject to County zoning regulations.`
-			}
-		]
-	},
-	{
-		title: 'County Code',
-		slug: 'code',
-		icon: '📜',
-		description: 'Semantic search across 8 chapters of the Solano County Code: Zoning (Ch. 28), Subdivisions (Ch. 26), Grading (Ch. 31), and more. Surfaces specific sections buried in hundreds of pages of regulations.',
-		source: 'Solano County Code (Municode)',
-		tools: [
 			{ name: 'search_county_code', description: 'Full-text search with relevance ranking. Returns section IDs, titles, and contextual snippets.' },
-			{ name: 'get_county_code_sections', description: 'Retrieve complete legal text of specific code sections with ordinance history.' },
-			{ name: 'list_county_code_chapters', description: 'Browse available chapters and section counts.' }
+			{ name: 'get_county_code_sections', description: 'Retrieve complete legal text of specific code sections with ordinance history.' }
 		],
 		scenarios: [
-			{
-				title: 'ADU Regulations',
-				description: 'Summarizing complex development standards.',
-				query: 'What are the setback and size requirements for an ADU in Solano County?',
-				toolCalls: ['Search County Code', 'Get County Code Sections'],
-				result: `ADU Requirements in Solano County
-Based on Solano County Code Section 28.72.10, here are the setback and size requirements for Accessory Dwelling Units (ADUs) and Junior ADUs (JADUs):
-
-**Setbacks**
-| Setback | Requirement |
-| :--- | :--- |
-| Front | Per the applicable zoning district (Table 28.31B for R-R or 28.32C for R-TC) |
-| Side | 4 feet minimum |
-| Rear | 4 feet minimum |
-
-*Exception: No additional setback is required when converting existing living area or a residential accessory structure.*
-
-**Size Requirements**
-| ADU Type | Size Limits |
-| :--- | :--- |
-| Attached ADU | Max 50% of primary dwelling floor area, not to exceed 1,200 sq ft |
-| Detached ADU (R-TC) | Max 850 sq ft (1 bedroom) or 1,000 sq ft (2+ bedrooms) |
-| Detached ADU (R-R) | Max 1,500 sq ft |
-| Junior ADU | Max 500 sq ft |
-| Minimum size | 380 sq ft (or efficiency unit) |
-
-**Other Key Requirements**
-• 1 parking space required per ADU (unless within ½ mile of transit)
-• ADUs are allowed by right in R-R and R-TC zoning districts
-• Owner occupancy is not required for ADUs
-• ADUs cannot be sold separately from the primary dwelling`
-			},
 			{
 				title: 'Winery Permit Research',
-				description: 'Multi-step regulatory navigation.',
+				description: 'Multi-step regulatory navigation synthesized into actionable guidance.',
 				query: 'What permits does a winery need in agricultural zoning?',
 				toolCalls: ['Search County Code', 'Get County Code Sections'],
 				result: `Winery Permits in Solano County Agricultural Zones
@@ -215,6 +154,52 @@ The permit required for a winery depends on its size (annual production) and gra
 • **Special Events:** Medium/Large wineries may host events per permit; Small wineries need Sheriff notification.
 
 *Summary: Small local wineries (under 20k gallons) operate by right. Larger operations need discretionary permits.*`
+			}
+		]
+	},
+	{
+		title: 'County Code',
+		slug: 'code',
+		icon: '📜',
+		description: 'Semantic search across 8 chapters of the Solano County Code: Zoning (Ch. 28), Subdivisions (Ch. 26), Grading (Ch. 31), and more. Surfaces specific sections buried in hundreds of pages of regulations.',
+		source: 'Solano County Code (Municode)',
+		tools: [
+			{ name: 'search_county_code', description: 'Full-text search with relevance ranking. Returns section IDs, titles, and contextual snippets.' },
+			{ name: 'get_county_code_sections', description: 'Retrieve complete legal text of specific code sections with ordinance history.' },
+			{ name: 'list_county_code_chapters', description: 'Browse available chapters and section counts.' }
+		],
+		scenarios: [
+			{
+				title: 'Grading Permit Exemptions',
+				description: 'Navigating Chapter 31 permit requirements for land disturbance.',
+				query: 'Does my client need a grading permit to level a field for agriculture?',
+				toolCalls: ['Search County Code', 'Get County Code Sections'],
+				result: `Grading Permit Requirements (Chapter 31)
+**Short answer:** Likely exempt, but conditions apply.
+
+**General Rule (Section 31-20)**
+A grading permit is required for any work that changes topography, alters drainage, or clears vegetation—unless specifically exempted.
+
+**Agricultural Exemptions (Section 31-22)**
+| Activity | Exempt? | Conditions |
+| :--- | :--- | :--- |
+| Routine plowing, disking, planting | **Yes** | Slopes under 14% (7:1) |
+| Same on steeper slopes | **Yes** | Must follow RCD conservation plan |
+| Field leveling for crops | **Yes** | Under 50 cu yd, <8,000 sq ft, <3 ft depth |
+| Irrigation trenching | **Yes** | For water management or piping |
+| Corral/stable maintenance | **Yes** | Cleaning and related activities |
+
+**Conditions for All Exemptions (Section 31-21)**
+Even exempt work must:
+• Not adversely impact adjacent property
+• Not increase erosion, sedimentation, or runoff
+• Not divert or impair offsite watercourses
+• Not create a public nuisance
+
+**Special Restriction: Suisun Marsh**
+Work within 25 feet of protected channels in the Suisun Marsh watershed requires a permit regardless of exemptions—plus a separate marsh development permit.
+
+*Cite: Solano County Code Sections 31-20, 31-21, 31-22*`
 			}
 		]
 	},
@@ -272,30 +257,32 @@ Short answer: No. The General Plan strongly discourages parcel divisions in agri
 		],
 		scenarios: [
 			{
-				title: 'Department Analysis',
-				description: 'Understanding organizational capacity and structure.',
-				query: "What is the staffing breakdown for the Sheriff's Office?",
-				toolCalls: ['Get Department'],
-				result: `Sheriff's Office Staffing Breakdown
-The Sheriff's Office has **588 total FTE** (full-time equivalent positions) across 7 divisions:
+				title: 'GIS Division Analysis',
+				description: 'Understanding staffing, budget, and accomplishments for a specific division.',
+				query: 'What is the staffing and budget for the GIS division?',
+				toolCalls: ['Get Division', 'Search Budget'],
+				result: `GIS Division (Division 1896)
+Part of the Department of Information Technology under CIO Timothy Flanagan.
 
-**By Division**
-| Division | FTE |
+**Staffing: 5 FTE**
+| Position | FTE |
 | :--- | :--- |
-| Custody Division | 287 |
-| Field Operations Division | 171 |
-| Support Services Division | 56 |
-| Animal Care Services | 29 |
-| Emergency Services Division | 29 |
-| Compliance Services Division | 14 |
+| IT Infrastructure & Ops Manager | 1 |
+| IT Analyst (Principal) | 1 |
+| IT Analyst IV | 2 |
+| Cadastral Mapping Technician II | 1 |
 
-**Top Positions**
-• **Correctional Officer:** 247 FTE
-• **Deputy Sheriff:** 115 FTE
-• **Custody Sergeant:** 30 FTE
-• **Sheriff's Security Officer:** 24 FTE
+**Parent Department:** DoIT has 74 total FTE and a $48.5M budget (FY2025-26). GIS falls under "Regional Services" alongside Emergency Radio and Digital Equity programs.
 
-The **Custody Division** is the largest, accounting for nearly half of the department's staff. **Field Operations** is the second largest, focusing on patrol and investigative duties.`
+**FY2024-25 Accomplishments (from budget document)**
+• Achieved inclusion in 3DEP program for advanced LiDAR/elevation data
+• Secured federal hydrography funding through the 3DHP grant
+• Delivered GIS training through Teach Me GIS and Esri workshops
+• Established interagency data-sharing via ReGIS consortium
+• Developed Spatial Data Governance Framework
+• Enhanced emergency response through updated data layers and drone-based mapping
+
+The GIS team supports 19 departments county-wide and coordinates with 7 cities through the ReGIS consortium, chaired by Stewart Bruce.`
 			}
 		]
 	},
@@ -311,6 +298,35 @@ The **Custody Division** is the largest, accounting for nearly half of the depar
 		],
 		scenarios: [
 			{
+				title: 'Visual Flood Zone Analysis',
+				description: 'AI interprets a map overlay to answer spatial questions.',
+				query: 'Where exactly does the flood zone cross the 80-acre parcel at 4300 Suisun Valley Road?',
+				toolCalls: ['Geocode Address', 'Capture Map View', 'Get Flood Zone'],
+				result: `**Visual Analysis of APN 002-703-0010**
+
+I've captured a map with FEMA flood zones overlaid on the parcel:
+
+**What I See:**
+The parcel is bisected by Suisun Creek running roughly north-south through the eastern third of the property.
+
+**Zone A (High Risk)** — shown in cyan/teal:
+• Follows the creek corridor through the property
+• Covers approximately 15-20 acres along the creek
+• Includes the area immediately surrounding the main estate buildings
+
+**Zone X (Minimal Risk)** — shown in orange:
+• Covers the western portion of the parcel
+• The vineyard areas appear to be mostly in Zone X
+
+**Development Implications:**
+• New structures in Zone A require Base Flood Elevation determination
+• Flood insurance mandatory for any mortgaged structures in Zone A
+• The existing 22,000 sq ft estate is partially within Zone A—verify elevation certificate
+• Agricultural uses (vines, orchards) are less constrained than structures
+
+*This is visual interpretation, not just a zone code lookup. I'm analyzing where on the parcel the hazard applies.*`
+			},
+			{
 				title: 'Fire Hazard Assessment',
 				description: 'Determining disclosure requirements and building standards.',
 				query: 'Is the property at 4303 Rockville Heights in a fire hazard zone?',
@@ -325,25 +341,6 @@ The **Custody Division** is the largest, accounting for nearly half of the depar
 • Real estate disclosure required
 
 *Note: FHSZ maps fire behavior potential (hazard), not probability (risk).*`
-			},
-			{
-				title: 'Flood Zone Check',
-				description: 'Insurance and development constraint analysis.',
-				query: 'What flood zone is 2500 Cordelia Road in?',
-				toolCalls: ['Geocode Address', 'Get Flood Zone'],
-				result: `Flood Zone for 2500 Cordelia Road
-
-| Detail | Information |
-| :--- | :--- |
-| **Address** | 2500 Cordelia Road (matched to 2503 Cordelia Road) |
-| **APN** | 004-425-0050 |
-| **FEMA Flood Zone** | Zone X (0.2% Annual Chance Flood Hazard) |
-| **Risk Level** | Low |
-| **Special Flood Hazard Area** | No |
-| **Insurance Required** | No |
-
-**What This Means**
-Zone X (shaded) indicates moderate-to-low flood risk—outside the 100-year floodplain. Flood insurance is not required for federally-backed mortgages but is available at preferred rates.`
 			}
 		]
 	},

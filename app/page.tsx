@@ -46,8 +46,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-            Integrating 7 cities, 13 departments, and 152,000 parcels into one conversation.
-            Ask complex questions about zoning, hazards, and code using natural language.
+            An AI that understands Solano County the way a veteran employee does—parcels, zoning, hazards, regulations, budget—and can explain any location in that full context.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -80,39 +79,56 @@ export default function Home() {
                 Today, SAGE solves the operational silo problem using <strong>natural language</strong>.
               </p>
               <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                It doesn't ask you to learn 40 different tools. It translates your intent into the precise queries needed to answer your question—whether that requires checking FEMA flood zones, City of Fairfield zoning, or the County Budget.
+                Property data lives in the Assessor's system. Zoning in Planning. Flood zones at FEMA. Fire hazard at CAL FIRE. The County Code in one database, the General Plan in another, the budget in a third. SAGE connects them all—so one question can pull from six sources without six separate lookups.
               </p>
               <ul className="space-y-4">
-                <FeatureItem>Automatic Jurisdiction Routing (City vs. County)</FeatureItem>
-                <FeatureItem>Cross-Departmental Synthesis</FeatureItem>
-                <FeatureItem>Encoded Institutional Knowledge</FeatureItem>
+                <FeatureItem>Parcel queries that include hazards, districts, and code citations</FeatureItem>
+                <FeatureItem>Permit research that traces policy to regulation to budget</FeatureItem>
+                <FeatureItem>Institutional knowledge encoded in tool behavior, not just documentation</FeatureItem>
               </ul>
             </div>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-tr from-teal-50 to-emerald-50 rounded-2xl transform rotate-3 scale-105 opacity-70"></div>
-              <div className="relative bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-800 bg-slate-950/50">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="ml-2 text-xs text-slate-500 font-mono">sage-agent — v1.0.0</span>
+              <div className="relative rounded-2xl shadow-2xl overflow-hidden border border-slate-700 bg-slate-800">
+                {/* User Query */}
+                <div className="px-5 py-4 border-b border-slate-700">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold mt-0.5" style={{ backgroundColor: 'rgb(0, 151, 129)' }}>
+                      U
+                    </div>
+                    <p className="text-[15px] leading-relaxed text-slate-100">
+                      Can I build a secondary dwelling at 2847 Rockville Road, Fairfield?
+                    </p>
+                  </div>
                 </div>
-                <div className="p-6 font-mono text-sm leading-relaxed text-slate-300">
-                  <div className="mb-4">
-                    <span className="text-teal-400">user:</span> What are the ADU rules in unincorporated Solano County?
-                  </div>
-                  <div className="mb-4 animate-pulse opacity-70">
-                    <span className="text-purple-400">sage:</span> <span className="text-slate-500">[thinking...]</span>
-                  </div>
-                  <div className="pl-4 border-l-2 border-slate-800 text-xs text-slate-500 mb-4 space-y-1">
-                    <div>→ Checking tool definitions...</div>
-                    <div className="text-teal-500/80">→ Calling get_zoning(jurisdiction="county")</div>
-                    <div className="text-emerald-500/80">→ Calling search_county_code(q="ADU")</div>
-                    <div>→ Synthesizing policy limits...</div>
-                  </div>
-                  <div>
-                    <span className="text-purple-400">sage:</span> ADUs are allowed by-right in Rural Residential districts. County Code Section 28.72.10 limits attached ADUs to 50% of the primary dwelling...
-                  </div>
+
+                {/* Tool Calls */}
+                <div className="px-5 py-3 border-b border-slate-700 flex flex-wrap gap-2">
+                  {['Geocode Address', 'Get Zoning', 'Search County Code'].map((tool) => (
+                    <div
+                      key={tool}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-slate-700 text-slate-200"
+                    >
+                      <span className="w-2 h-2 rounded-full flex-shrink-0 bg-emerald-500" />
+                      {tool}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Result */}
+                <div className="px-5 py-4 text-[15px] leading-relaxed text-slate-300">
+                  <p className="mb-3">
+                    <strong className="text-slate-100">Matched Address:</strong> 2849 Rockville Road (APN 015-028-0080)
+                  </p>
+                  <p className="mb-3">
+                    <strong className="text-slate-100">Jurisdiction:</strong> Unincorporated Solano County <span className="text-amber-400">(not City of Fairfield)</span>
+                  </p>
+                  <p className="mb-3">
+                    <strong className="text-slate-100">Zoning:</strong> ASV-20 (Suisun Valley Agriculture, 20-acre minimum)
+                  </p>
+                  <p>
+                    Secondary dwellings are <strong className="text-emerald-400">permitted</strong> in agricultural districts for family members. County Code Section 28.21.11 supports the family farm by allowing secondary dwellings as affordable housing for relatives.
+                  </p>
                 </div>
               </div>
             </div>
@@ -138,10 +154,10 @@ export default function Home() {
               result="Identifies the parcel is actually in Unincorporated Solano County (ISD), not City of Fairfield. Routes query to County zoning tools instead of City tools. Prevents misinformation."
             />
             <ScenarioCard
-              icon="🍇"
-              title="Complex Permitting"
-              question="I want to build a medium winery on 30 acres of A-40 land. Can I host weddings?"
-              result="Checks 'Medium Winery' definition (production volume), verifies 25% on-site growing rule, and identifies 'Weddings' as a separate 'Special Events Facility' use requiring its own permit."
+              icon="🏠"
+              title="Short-Term Rental Eligibility"
+              question="Can I rent my cabin near Green Valley as an Airbnb?"
+              result="Checks fire hazard zone (Very High = prohibited, High = conditional), confirms structure isn't an ADU or secondary dwelling, verifies road access. Multi-factor eligibility—not a simple yes/no."
             />
             <ScenarioCard
               icon="⚡"
@@ -165,13 +181,13 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <CapabilityCard
-              title="Complete Property Profiles"
-              description="One address returns ownership, assessed value, zoning, flood zone, fire hazard, all serving districts, and nearby amenities. No more querying six different layers."
-              slug="property"
+              title="Site Selection & Feasibility"
+              description="Complex site queries that would take hours become seconds. 'Find 20+ acre parcels in Suisun Valley zoned for wineries, outside flood zones, with road frontage'—answered with full regulatory context."
+              slug="economic-development"
             />
             <CapabilityCard
-              title="Jurisdiction-Aware Zoning"
-              description="Routes queries to the correct system—city or county—based on actual parcel location, not mailing address. Prevents the 'Fairfield address in unincorporated county' mistake."
+              title="Zoning & Permit Analysis"
+              description="Ask 'what permits does a winery need?' and get a matrix by size, grape sourcing, and zone—synthesized from 365 pages of zoning regulations. Not keyword search. Actual regulatory analysis."
               slug="zoning"
             />
             <CapabilityCard
@@ -190,9 +206,9 @@ export default function Home() {
               slug="budget"
             />
             <CapabilityCard
-              title="Notification List Generation"
-              description="Draw a buffer around a parcel and get all neighboring owners with APNs, addresses, and distances. Ready for permit notification mail merge."
-              slug="districts"
+              title="Visual Map Interpretation"
+              description="AI that looks at maps, not just queries data. 'Where exactly does the flood zone cross this parcel?' answered by analyzing the actual overlay—not just returning a zone code."
+              slug="hazards"
             />
             <CapabilityCard
               title="Board Decision Tracking"
@@ -200,8 +216,8 @@ export default function Home() {
               slug="meetings"
             />
             <CapabilityCard
-              title="On-Demand Maps"
-              description="Generate static maps for reports or shareable interactive URLs. Parcel highlights, hazard overlays, buffer zones—no ArcGIS export needed."
+              title="Complete Property Profiles"
+              description="One address returns ownership, assessed value, zoning, flood zone, fire hazard, all serving districts, and relevant policies. No more querying six different layers."
               slug="property"
             />
           </div>
@@ -269,12 +285,12 @@ export default function Home() {
               <span className="text-sm text-slate-400">Solano County Interview Project</span>
             </div>
             <p className="text-sm text-slate-600">
-              Built by Ryan Pream for Solano County DoIT.
+              Built by Ryan Pream as an independent demonstration project.
             </p>
           </div>
           <div className="text-sm text-slate-600">
-            <p>Data sources: Solano County, CAL FIRE, FEMA, CsGS.</p>
-            <p className="mt-1 opacity-60">For demonstration purposes only.</p>
+            <p>Data sources: Solano County, CAL FIRE, FEMA, CGS.</p>
+            <p className="mt-1 opacity-60">Not affiliated with Solano County. For demonstration purposes only.</p>
           </div>
         </div>
       </footer>
