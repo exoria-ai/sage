@@ -224,6 +224,71 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Site Selection Demo */}
+      <section className="py-20 bg-slate-50 border-t border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Text Content */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-100 text-teal-700 text-xs font-semibold uppercase tracking-wider mb-4">
+                AI to Map Handoff
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-6">
+                From Analysis to Exploration
+              </h2>
+              <p className="text-lg text-slate-600 mb-6 leading-relaxed">
+                SAGE doesn't just answer questions—it sets you up for discovery. After analyzing your query, it generates a map URL with your results already highlighted.
+              </p>
+
+              {/* Example Query */}
+              <div className="bg-white rounded-xl border border-slate-200 p-5 mb-6 shadow-sm">
+                <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Example Query</p>
+                <p className="text-slate-800 font-medium">
+                  "Find 20+ acre parcels in Suisun Valley zoned for wineries, outside flood zones."
+                </p>
+              </div>
+
+              {/* What Happens */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-sm font-bold text-teal-700">1</div>
+                  <p className="text-slate-600"><strong className="text-slate-800">Search</strong> — Queries 163 matching parcels from Assessor data</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-sm font-bold text-teal-700">2</div>
+                  <p className="text-slate-600"><strong className="text-slate-800">Filter</strong> — Checks flood zones, eliminates high-risk parcels</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-sm font-bold text-teal-700">3</div>
+                  <p className="text-slate-600"><strong className="text-slate-800">Handoff</strong> — Generates map URL with candidates highlighted</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-500 italic">
+                Click the link and you're exploring—all candidates visible, zoning layers loaded, ready to dig deeper.
+              </p>
+            </div>
+
+            {/* Map Screenshot */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-tr from-teal-100 to-emerald-100 rounded-2xl transform -rotate-2 scale-105 opacity-50"></div>
+              <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-200">
+                <img
+                  src="/images/site-selection-map.png"
+                  alt="Interactive map showing multiple parcels highlighted in orange, zoomed to fit all candidates in Suisun Valley"
+                  className="w-full h-auto"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                  <p className="text-white text-sm font-medium">
+                    Two candidate parcels highlighted in Suisun Valley — 80 and 36 acres, both ASV-20 zoning
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Setup Guide */}
       <section id="setup" className="py-20 bg-slate-900 text-slate-300">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
