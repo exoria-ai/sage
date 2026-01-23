@@ -278,16 +278,25 @@
 
 > "The AI handles questions. But sometimes people want to explore—toggle layers, zoom around, click on parcels and discover what's there.
 >
-> So SAGE can hand off to an interactive map with context already loaded."
+> So SAGE can hand off to an interactive map with context already loaded. Let me show you how this works using the property we just looked at."
 
 **Prompt:**
-> "Show me an interactive map of this property so I can explore the area."
+> "Can you show me this property on an interactive hazard map? I want to explore the flood boundaries myself and see if neighboring parcels have the same issues."
 
 **[RUN DEMO - Show URL generation]**
 
-> "The AI generates a URL to an interactive map viewer—with the right parcel highlighted and relevant layers loaded.
+**Narration:**
+> "Watch what happens. The AI doesn't just generate a generic map link. It builds a URL with context:
 >
-> Let me show you that map viewer and some of the design decisions behind it."
+> The parcel we were discussing is highlighted. The hazard preset is selected—so FEMA flood zones and fire severity layers are already loaded. The zoom level is set to show the parcel and its surroundings.
+>
+> When I click this link..."
+
+**[OPEN MAP URL - Show interactive map with flood layers]**
+
+> "The map opens with exactly what I asked for. The flood zone boundary is visible. I can click neighboring parcels to see if they have the same Zone A issue. I can toggle layers, zoom out to see the broader floodplain, switch to historical aerials.
+>
+> This is the handoff from AI analysis to self-service exploration. The AI got me started with the right context—now I can discover on my own."
 
 **[END VIDEO 1 - TRANSITION]**
 
@@ -533,7 +542,7 @@
 | Short-Term Rental | "Can I rent my cabin near Green Valley as an Airbnb?" |
 | Visual Flood Analysis | "Where exactly does the flood zone cross the 80-acre parcel at 4300 Suisun Valley Road?" |
 | CEQA Review (optional) | "I'm doing CEQA review for a proposed subdivision near Suisun Marsh. What environmental data layers should I be checking?" |
-| Map Handoff | "Show me an interactive map of this property so I can explore the area." |
+| Map Handoff | "Can you show me this property on an interactive hazard map? I want to explore the flood boundaries myself and see if neighboring parcels have the same issues." |
 
 ## Tag Reference
 
@@ -572,9 +581,9 @@
 | 3.5 | Demo: CEQA layers (optional) | 0:45 | 12:15 |
 | 4.1 | What this means for staff | 1:00 | 13:15 |
 | 4.2 | Skill transfer opportunity | 1:00 | 14:15 |
-| 4.3 | Transition + map handoff | 0:45 | 15:00 |
+| 4.3 | Transition + map handoff (with live demo) | 1:30 | 15:45 |
 
-**Note:** This runs ~15 minutes if fully delivered. Trim by:
+**Note:** This runs ~16 minutes if fully delivered. Trim by:
 - Shortening section 1.2 (GIS history)
 - Cutting Demo 3.4 (visual flood) or 3.5 (CEQA)
 - Tightening narration during demos
@@ -618,6 +627,8 @@ Before recording, verify you've communicated:
 - [ ] Jurisdiction routing demonstrated and explained
 - [ ] Institutional knowledge encoding shown (winery/wedding)
 - [ ] Multi-factor analysis shown (short-term rental eligibility)
+- [ ] Visual spatial reasoning shown (flood zone interpretation)
+- [ ] AI → Interactive Map handoff demonstrated (context preserved)
 - [ ] Team development opportunity mentioned
 - [ ] Clean handoff to Video 2
 
