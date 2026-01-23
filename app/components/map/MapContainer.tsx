@@ -37,28 +37,54 @@ let globalViewInitialized = false;
  * Used when highlighting parcels on non-parcels presets (e.g., Planning, Hazards)
  * so users can see the parcel boundaries and labels.
  *
- * Waits for the layer to be loaded before setting visibility to ensure it persists.
+ * IMPORTANT: Parcels uses a layer pair pattern:
+ * - VectorTileLayer (display) - originally "Parcels [VECTOR_TILE]", renamed to "Parcels"
+ * - FeatureLayer (queries only) - titled "Parcels", hidden with opacity 0
+ *
+ * We must enable the VectorTileLayer specifically, not the hidden FeatureLayer.
  */
 async function enableParcelsLayer(view: MapView): Promise<void> {
   if (!view.map) return;
 
   const allLayers = view.map.allLayers.toArray();
-  const parcelsLayer = allLayers.find(
-    (l) => l.title?.toLowerCase() === 'parcels'
+
+  // Debug: log all layers with "parcels" in the title
+  const parcelsLayers = allLayers.filter(l => l.title?.toLowerCase().includes('parcels'));
+  console.log('[enableParcelsLayer] Layers with "parcels" in title:',
+    parcelsLayers.map(l => ({ title: l.title, type: l.type, visible: l.visible }))
   );
 
-  if (parcelsLayer) {
+  // Find the VectorTileLayer specifically - this is what actually displays parcels
+  // The FeatureLayer with same name is hidden (opacity 0) and used for queries only
+  const parcelsVectorTileLayer = allLayers.find(
+    (l) => l.title?.toLowerCase() === 'parcels' && l.type === 'vector-tile'
+  );
+
+  if (parcelsVectorTileLayer) {
     try {
+      console.log(`[enableParcelsLayer] Found VectorTileLayer, current visible: ${parcelsVectorTileLayer.visible}`);
       // Wait for the layer to be loaded before setting visibility
-      if (parcelsLayer.load) {
-        await parcelsLayer.load();
+      if (parcelsVectorTileLayer.load) {
+        await parcelsVectorTileLayer.load();
       }
-      if (!parcelsLayer.visible) {
-        parcelsLayer.visible = true;
-        console.log('[MapContainer] Auto-enabled Parcels layer for parcel highlighting');
+      if (!parcelsVectorTileLayer.visible) {
+        parcelsVectorTileLayer.visible = true;
+        console.log('[enableParcelsLayer] Set VectorTileLayer visible = true');
       }
+      // Verify the change took effect
+      console.log(`[enableParcelsLayer] After setting, visible: ${parcelsVectorTileLayer.visible}`);
     } catch (err) {
-      console.warn('[MapContainer] Failed to enable Parcels layer:', err);
+      console.warn('[enableParcelsLayer] Failed to enable Parcels layer:', err);
+    }
+  } else {
+    // Fallback: try to find any layer with "parcels" in the title
+    const anyParcelsLayer = allLayers.find(
+      (l) => l.title?.toLowerCase() === 'parcels'
+    );
+    if (anyParcelsLayer) {
+      console.log(`[enableParcelsLayer] Found Parcels layer but type is "${anyParcelsLayer.type}", not vector-tile`);
+    } else {
+      console.log('[enableParcelsLayer] No Parcels layer found in map');
     }
   }
 }
