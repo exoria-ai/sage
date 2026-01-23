@@ -115,8 +115,13 @@ async function highlightByApns(
     if (result.features && result.features.length > 0) {
       const geometries: Geometry[] = [];
 
+      console.log(`Query returned ${result.features.length} features`);
+
       // Add highlight graphic for each parcel
       for (const feature of result.features) {
+        const apn = feature.attributes?.parcelid || 'unknown';
+        console.log(`Adding highlight for parcel: ${apn}, has geometry: ${!!feature.geometry}`);
+
         const graphic = new Graphic({
           geometry: feature.geometry ?? undefined,
           symbol: HIGHLIGHT_SYMBOL,
@@ -129,7 +134,7 @@ async function highlightByApns(
         }
       }
 
-      console.log(`Highlighted ${result.features.length} parcel(s)`);
+      console.log(`Highlighted ${result.features.length} parcel(s), geometries collected: ${geometries.length}`);
 
       // Zoom to combined extent of all parcels
       if (geometries.length > 0) {
@@ -141,16 +146,27 @@ async function highlightByApns(
           });
         } else {
           // Multiple parcels - calculate union extent and fit all
+          console.log(`Calculating union of ${geometries.length} geometries`);
           // Cast to Polygon[] since parcels are always polygons
           const unionGeometry = geometryEngine.union(geometries as Polygon[]);
+          console.log(`Union result: ${unionGeometry ? 'success' : 'null'}`);
           if (unionGeometry) {
             await view.goTo({
               target: unionGeometry,
             });
+            console.log(`After goTo union, zoom level: ${view.zoom}`);
             // Add some padding by zooming out slightly
             if (view.zoom > 15) {
               await view.goTo({ zoom: view.zoom - 1 });
+              console.log(`After zoom adjustment: ${view.zoom}`);
             }
+          } else {
+            // Fallback: zoom to extent of all geometries
+            console.log('Union failed, falling back to first geometry');
+            await view.goTo({
+              target: geometries[0],
+              zoom: HIGHLIGHT_ZOOM,
+            });
           }
         }
       }

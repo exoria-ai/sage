@@ -1,0 +1,435 @@
+What is the staffing breakdown for the Sheriff's Office?
+
+MCPSearch
+select:mcp__sage__get_department
+
+Get Department
+
+
+Sheriff's Office Staffing Breakdown
+The Sheriff's Office has 588 total FTE (full-time equivalent positions) across 7 divisions:
+By Division
+Division
+FTE
+Custody Division
+287
+Field Operations Division
+171
+Support Services Division
+56
+Animal Care Services
+29
+Emergency Services Division
+29
+Compliance Services Division
+14
+Special Revenue Fund
+2
+Top Positions (by FTE)
+Position
+FTE
+Correctional Officer
+247
+Deputy Sheriff
+115
+Custody Sergeant
+30
+Sheriff's Security Officer
+24
+Sergeant-Sheriff
+21
+Legal Procedures Clerk
+17
+Public Safety Dispatcher (Sr)
+16
+Office Assistant II
+10
+Animal Care Specialist
+9
+Lieutenant-Sheriff
+8
+The Custody Division is the largest, accounting for nearly half of the department's staff, primarily staffed by Correctional Officers. Field Operations is the second largest, with most positions being Deputy Sheriffs who handle patrol and investigative duties.
+What property is at 675 Texas Street in Fairfield?
+
+Get Parcel Details
+
+
+MCPSearch
+select:mcp__sage__geocode_address
+
+Geocode Address
+
+
+Get Parcel Details
+
+
+Property at 675 Texas Street, Fairfield
+Detail
+Information
+APN
+003-025-1020
+Situs Address
+601 Texas Street, Fairfield
+Acreage
+5.28 acres (240,015 sq ft)
+Use
+Governmental & Miscellaneous
+Zoning
+Public Facilities
+Assessed Value
+$0 (government-owned, tax-exempt)
+Tax Rate Area
+3104 (Fairfield City)
+This is a government-owned property spanning over 5 acres, zoned for public facilities. The $0 assessed value indicates it's a tax-exempt public property. This address is part of the Solano County Government Center complex in downtown Fairfield, which houses various county administrative offices.
+Useful Links:
+	•	Property Details
+	•	Tax Map
+	•	Tax Information
+enerate a 300-foot notification list for APN 004-425-0050.
+
+MCPSearch
+select:mcp__sage__find_nearby_parcels
+
+Find Nearby Parcels
+
+
+300-Foot Notification List for APN 004-425-0050
+Source Parcel: 004-425-0050 Buffer Radius: 300 feet Total Parcels Found: 3
+APN
+Situs Address
+Owner
+City
+Acreage
+Distance (ft)
+004-631-0120
+—
+Not Available
+Unincorporated
+0.49
+137
+004-424-0010
+—
+Not Available
+Unincorporated
+62.06
+237
+004-425-0080
+2543 Cordelia Road
+Not Available
+Unincorporated
+21.71
+272
+Notes:
+	•	This is a rural area near Cordelia Road with only 3 parcels within 300 feet
+	•	Owner names are not available in the public dataset - you'll need to obtain current owner/mailing address information from the Solano County Assessor's Office for official notification purposes
+	•	All neighboring parcels are in unincorporated Solano County
+For official permit notification purposes, contact the Solano County Assessor's Office to obtain the current property owner names and mailing addresses for these APNs.
+What are the setback and size requirements for an ADU in Solano County?
+
+MCPSearch
+select:mcp__sage__search_county_code
+
+Search County Code
+accessory dwelling unit ADU setback size
+
+Search County Code
+accessory dwelling unit
+
+MCPSearch
+select:mcp__sage__get_county_code_sections
+
+Get County Code Sections
+
+
+ADU Requirements in Solano County
+Based on Solano County Code Section 28.72.10, here are the setback and size requirements for Accessory Dwelling Units (ADUs) and Junior ADUs (JADUs):
+Setbacks
+Setback
+Requirement
+Front
+Per the applicable zoning district (Table 28.31B for R-R or 28.32C for R-TC)
+Side
+4 feet minimum
+Rear
+4 feet minimum
+Exception: No additional setback is required when converting existing living area or a residential accessory structure (like a garage) to an ADU, or when building an ADU in the same location and dimensions as an existing structure.
+Size Requirements
+ADU Type
+Size Limits
+Attached ADU
+Max 50% of primary dwelling floor area, not to exceed 1,200 sq ft
+Detached ADU (R-TC zone)
+Max 850 sq ft (1 bedroom) or 1,000 sq ft (2+ bedrooms)
+Detached ADU (R-R zone)
+Max 1,500 sq ft
+Junior ADU
+Max 500 sq ft
+Minimum size
+380 sq ft (or efficiency unit with specific requirements)
+When Both ADU and JADU on Same Lot
+If you want both an ADU and JADU on the same property:
+	•	The ADU must be detached and cannot exceed 800 sq ft
+	•	The JADU must be entirely within the existing/proposed single-family dwelling
+	•	Neither unit may be rented for terms of 30 days or less
+Parking
+	•	1 parking space required per ADU (can be in front/side setback or tandem)
+	•	No parking required if:
+	•	ADU is within ½ mile of public transit
+	•	ADU is part of the primary residence or an accessory structure
+	•	No parking required for JADUs
+Other Key Requirements
+	•	ADUs are allowed by right in R-R and R-TC zoning districts
+	•	Owner occupancy is not required for ADUs
+	•	Owner occupancy is required for JADUs (either primary dwelling or JADU must be owner-occupied)
+	•	ADUs cannot be sold separately from the primary dwelling
+	•	Fire sprinklers not required unless required for the primary residence
+What permits does a winery need in agricultural zoning?
+
+Search County Code
+winery
+
+Get County Code Sections
+
+
+Winery Permits in Solano County Agricultural Zones
+The permit required for a winery depends on its size (annual production) and grape sourcing:
+Winery Size Classifications
+Size
+Annual Production
+Definition
+Small
+≤ 20,000 gallons
+Bulk and bottles combined
+Medium
+20,001 – 100,000 gallons
+Bulk and bottles combined
+Large
+> 100,000 gallons
+Bulk and bottles combined
+Permit Requirements by Winery Size
+Winery Type
+A-20, A-40, A-80, A-160 Zones
+Key Conditions
+Small Winery
+Allowed by Right (no permit)
+Must source ≥25% of grapes from Solano County
+Medium Winery
+Administrative Permit (AP) or Minor Use Permit (MUP)
+MUP required if no direct access from public road
+Large Winery
+Use Permit (UP)
+Discretionary approval required
+Winery with <25% on-site grapes
+Use Permit (UP)
+Regardless of size
+Key Requirements for All Wineries
+Grape Sourcing:
+	•	Small wineries must source at least 25% of grapes from land owned or leased by the operator within Solano County (averaged over 5 years)
+	•	Failure to meet this threshold subjects the winery to higher permit requirements
+Reporting:
+	•	Annual reporting to the Department of Resource Management of total gallons produced, OR proof of ABC license renewal fee payment
+Tasting Facility Limits:
+Winery Size
+Max Tasting Room Size
+Small
+1,000 sq ft
+Medium
+2,000 sq ft
+Large
+2,000 sq ft
+General Standards (all wineries):
+	•	Trucking access must not interfere with normal traffic
+	•	Stormwater must be managed to prevent processing wastes from entering waterways
+	•	Must comply with district development standards (setbacks, height, etc.)
+Special Events:
+	•	Medium and large wineries may host special events as permitted under their use permit
+	•	Small wineries must obtain Environmental Health and Fire Department approval and notify the Sheriff's Office before hosting special events
+Summary
+If you're planning a small winery (under 20,000 gallons/year) that sources at least 25% of its grapes locally, you can operate by right with no discretionary permit—just meet the development standards and reporting requirements. Larger operations or those sourcing most grapes from outside the county will need a Use Permit with Planning Commission approval.
+Does the General Plan support subdivisions in agricultural areas?
+
+MCPSearch
+select:mcp__sage__search_general_plan
+
+Search General Plan
+subdivision agricultural land parcel division minimum lot size
+
+MCPSearch
+select:mcp__sage__search_general_plan_policies
+
+Search General Plan Policies
+subdivision parcel division agricultural land minimum parcel size
+
+MCPSearch
+select:mcp__sage__get_general_plan_chunk
+
+Get General Plan Chunk
+
+
+Get General Plan Chunk
+
+
+Search General Plan
+minimum parcel size agricultural regions table AG-3
+
+Get General Plan Chunk
+
+
+Search General Plan
+Table AG-3 parcel size 20 40 80 160 acres agricultural regions
+
+Get General Plan Chunk
+
+
+General Plan Policy on Subdivisions in Agricultural Areas
+Short answer: No, the General Plan does not support subdivisions in agricultural areas. The General Plan strongly discourages parcel divisions in agricultural zones and establishes large minimum parcel sizes to preserve farmland.
+Minimum Parcel Sizes by Agricultural Region
+The General Plan (Table AG-3) establishes minimum parcel sizes that effectively prohibit subdivisions:
+Agricultural Region
+Minimum Parcel Size
+Suisun Valley
+20 acres
+Green Valley
+20 acres
+Winters
+40 acres
+Dixon Ridge
+40 acres
+Elmira (northwest)
+40 acres
+Maine Prairie (southeast)
+80 acres
+Ryer Island
+80 acres
+Montezuma Hills
+160 acres
+Jepson Prairie
+160 acres
+Western Hills (west of Pleasants Valley Rd)
+160 acres
+Pleasants, Vaca, Lagoon Valleys
+20-40 acres (varies by current zoning)
+Key General Plan Policies
+Policy AG.P-31 establishes that parcel sizes must conform to these minimums. It does allow one residence plus a secondary unit on lots of record existing as of January 1, 1984, but only if the lot is first merged with contiguous parcels to the maximum extent possible under state law.
+Policy AG.P-28 explicitly states that agriculture is to be the predominant land use in Dixon Ridge, Elmira and Maine Prairie, Montezuma Hills, Ryer Island, and Winters regions, and that preservation efforts should be focused there with conflicting land uses avoided.
+Policy AG.P-32 allows redesignation to rural residential (1 unit per 2.5-10 acres) only if the Board of Supervisors makes all of the following findings:
+	•	Won't encourage piecemeal conversion of agricultural areas
+	•	Land is not prime agricultural land (per the Williamson Act)
+	•	Land is unsuitable for agriculture due to terrain, soil, drainage, flooding, or parcel size
+	•	Proposed use is compatible with agricultural uses
+	•	Land is adjacent to existing comparably developed areas
+	•	Adequate public services are available
+	•	Annexation to a city is not appropriate
+Even then, redesignations are limited to 160 acres per landowner per calendar year.
+Policy AG.P-4 requires farmland conversion mitigation at a minimum 1:1 ratio for any conversion of agricultural land to non-agricultural uses.
+Summary
+The General Plan's approach to agricultural lands is preservation, not subdivision. Creating smaller parcels in agricultural zones would require a General Plan Amendment with extensive findings that the land is unsuitable for agriculture—a high bar to meet.
+What flood zone is 2500 Cordelia Road in?
+
+Geocode Address
+
+
+MCPSearch
+select:mcp__sage__get_flood_zone
+
+Get Flood Zone
+
+
+Flood Zone for 2500 Cordelia Road
+Detail
+Information
+Address
+2500 Cordelia Road (matched to 2503 Cordelia Road)
+APN
+004-425-0050
+FEMA Flood Zone
+Zone X (0.2% Annual Chance Flood Hazard)
+Risk Level
+Low
+Special Flood Hazard Area (SFHA)
+No
+Flood Insurance Required for Mortgage
+No
+What This Means
+Zone X (shaded/0.2% annual chance) indicates the property is in an area with moderate-to-low flood risk—outside the 100-year floodplain but within the 500-year floodplain. This means:
+	•	There is a 0.2% chance of flooding in any given year (1 in 500 years statistically)
+	•	Flood insurance is not required by mortgage lenders
+	•	If you choose to purchase flood insurance, you qualify for lower preferred rates
+	•	While low risk, flooding can still occur—about 20% of flood claims come from outside high-risk zones
+What districts serve the property at 2500 Cordelia Road?
+
+MCPSearch
+select:mcp__sage__get_special_districts
+
+Get Special Districts
+
+
+Districts Serving 2500 Cordelia Road
+Service
+District/Provider
+Fire Protection
+Suisun Fire Protection District
+Water
+Solano Irrigation District
+School District
+Fairfield-Suisun Unified School District
+Board of Supervisors
+District 2
+Garbage/Waste
+Republic Services
+Cemetery
+Solano Cemetery District
+This property (APN 004-425-0050) is in unincorporated Solano County and receives services from these special districts rather than a city.
+When did Solano County approve participation in the GovAI Coalition?
+
+MCPSearch
+select:mcp__sage__search_meeting_minutes
+
+Search Meeting Minutes
+GovAI Coalition artificial intelligence
+
+GovAI Coalition Approval
+The Solano County Board of Supervisors approved participation in the GovAI Coalition on April 9, 2024.
+Item 24-251 authorized the Chief Information Officer to execute the GovAI Coalition registration agreement. The item was approved on the consent calendar.
+The GovAI Coalition is a partnership of government agencies focused on the responsible adoption and use of artificial intelligence technologies in public sector operations.
+Create a 300-foot buffer map for APN 004-425-0050.
+
+MCPSearch
+select:mcp__sage__capture_map_view
+
+Capture Map View
+
+
+300-Foot Buffer Map for APN 004-425-0050
+Here is the 300-foot notification buffer map for APN 004-425-0050 (2500 Cordelia Road area):
+The map shows:
+	•	Subject Parcel: 004-425-0050 (highlighted in orange)
+	•	300-foot Buffer: Dashed orange circle showing the notification radius
+	•	Adjacent Parcels: Labeled with APNs
+The buffer area includes portions of the following neighboring parcels:
+	•	004-425-0080 (to the north, labeled "008")
+	•	004-425-0040 (to the south, labeled "004")
+	•	004-631-0120 (to the southeast)
+Map URL for download/sharing: 300-Foot Buffer Map
+This map can be used for property owner notification purposes for discretionary permits such as use permits, variances, or rezonings.
+Show me an interactive map of this property with hazard layers.
+
+MCPSearch
+select:mcp__sage__get_interactive_map_url
+
+Get Interactive Map Url
+
+
+Interactive Hazard Map for APN 004-425-0050
+Here's an interactive map with hazard layers for the property:
+Open Interactive Hazard Map
+This map includes:
+	•	FEMA Flood Zones - showing flood risk areas
+	•	CAL FIRE Severity Zones - showing fire hazard ratings
+	•	Parcel boundaries with the subject property highlighted
+Features you can use:
+	•	Pan and zoom freely to explore the area
+	•	Click on parcels to view property details
+	•	Toggle layers on/off in the Layers panel
+	•	Change basemaps (aerial, topographic, etc.)
+	•	View the legend to understand hazard classifications
