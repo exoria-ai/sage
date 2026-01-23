@@ -54,9 +54,14 @@ Check flood zones for a property:
   capture_map_view({
     apn: "003-025-1020",
     additionalLayers: [
-      { url: "https://hazards.fema.gov/.../NFHL/MapServer/28", title: "Flood Zones" }
+      { url: "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28", title: "FEMA Flood Zones" }
     ]
   })
+
+**IMPORTANT - FEMA FLOOD LAYER URL**:
+The CORRECT FEMA flood zone URL is:
+  https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28
+Do NOT use /gis/nfhl/ - that path does not work.
 
 View with aerial imagery for detail:
   capture_map_view({ apn: "003-025-1020", layers: { aerial2025: true } })
@@ -128,6 +133,16 @@ View with aerial imagery for detail:
     }).optional().describe('Options for layout templates (only used with non-MAP_ONLY layouts)'),
   },
   handler: async ({ apn, apns, center, bbox, buffer, layers, extent, basemap, zoom, width, height, format, additionalLayers, extentLayer, layout, layoutOptions }): Promise<ToolResponse> => {
+    // Normalize common wrong FEMA URLs to the correct path
+    const normalizedAdditionalLayers = additionalLayers?.map(layer => {
+      let url = layer.url;
+      // Fix wrong FEMA URL paths
+      if (url.includes('hazards.fema.gov/gis/nfhl/')) {
+        url = url.replace('/gis/nfhl/', '/arcgis/');
+      }
+      return { ...layer, url };
+    });
+
     const result = await captureMapView({
       apn,
       apns,
@@ -141,7 +156,7 @@ View with aerial imagery for detail:
       zoom,
       format,
       basemap,
-      additionalLayers,
+      additionalLayers: normalizedAdditionalLayers,
       extentLayer,
       layout,
       layoutOptions,
