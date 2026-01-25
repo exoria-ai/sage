@@ -186,7 +186,7 @@ export function MapContainer({
             dockOptions: {
               buttonEnabled: true,
               breakpoint: false,
-              position: 'bottom-right',
+              position: 'bottom-left',
             },
             defaultPopupTemplateEnabled: true,
           },
