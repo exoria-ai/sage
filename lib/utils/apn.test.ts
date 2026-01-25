@@ -128,9 +128,17 @@ describe('parseAPN', () => {
       expect(parseAPN('   ')).toBeNull();
     });
 
-    it('returns null for too few digits', () => {
-      expect(parseAPN('12345678')).toBeNull();   // 8 digits
-      expect(parseAPN('003-025-10')).toBeNull(); // 2-digit parcel
+    it('returns null for too few digits (no separators)', () => {
+      expect(parseAPN('12345678')).toBeNull();   // 8 digits, no separators
+      expect(parseAPN('1234567')).toBeNull();    // 7 digits, no separators
+    });
+
+    it('accepts 2-digit parcel with separators (pads to 3 digits)', () => {
+      // With separators, short segments are padded with leading zeros
+      const result = parseAPN('003-025-10');
+      expect(result).not.toBeNull();
+      expect(result!.formatted).toBe('003-025-010');
+      expect(result!.numeric).toBe('0030250100');
     });
 
     it('returns null for too many digits', () => {
@@ -198,6 +206,62 @@ describe('parseAPN', () => {
       expect(result!.numeric).toBe('9999999990');
     });
   });
+
+  describe('missing leading zeros', () => {
+    it('pads single-digit segments with leading zeros', () => {
+      const result = parseAPN('3-25-102');
+
+      expect(result).not.toBeNull();
+      expect(result!.mapBook).toBe('003');
+      expect(result!.page).toBe('025');
+      expect(result!.parcel).toBe('102');
+      expect(result!.formatted).toBe('003-025-102');
+      expect(result!.numeric).toBe('0030251020');
+    });
+
+    it('pads two-digit segments with leading zeros', () => {
+      const result = parseAPN('16-24-8');
+
+      expect(result).not.toBeNull();
+      expect(result!.mapBook).toBe('016');
+      expect(result!.page).toBe('024');
+      expect(result!.parcel).toBe('008');
+      expect(result!.formatted).toBe('016-024-008');
+      expect(result!.numeric).toBe('0160240080');
+    });
+
+    it('handles mixed padding needs', () => {
+      const result = parseAPN('3-025-102');
+
+      expect(result).not.toBeNull();
+      expect(result!.formatted).toBe('003-025-102');
+      expect(result!.numeric).toBe('0030251020');
+    });
+
+    it('handles spaces as separators with missing zeros', () => {
+      const result = parseAPN('3 25 102');
+
+      expect(result).not.toBeNull();
+      expect(result!.formatted).toBe('003-025-102');
+      expect(result!.numeric).toBe('0030251020');
+    });
+
+    it('handles dots as separators with missing zeros', () => {
+      const result = parseAPN('3.25.102');
+
+      expect(result).not.toBeNull();
+      expect(result!.formatted).toBe('003-025-102');
+      expect(result!.numeric).toBe('0030251020');
+    });
+
+    it('handles 4-digit parcel segment (trailing zero included)', () => {
+      const result = parseAPN('3-25-1020');
+
+      expect(result).not.toBeNull();
+      expect(result!.formatted).toBe('003-025-102');
+      expect(result!.numeric).toBe('0030251020');
+    });
+  });
 });
 
 describe('normalizeApnForQuery', () => {
@@ -231,6 +295,24 @@ describe('normalizeApnForQuery', () => {
       expect(normalizeApnForQuery('12345678')).toBe('12345678');
       // 11 digits - not modified
       expect(normalizeApnForQuery('12345678901')).toBe('12345678901');
+    });
+  });
+
+  describe('missing leading zeros', () => {
+    it('pads segments with leading zeros when separators present', () => {
+      expect(normalizeApnForQuery('3-25-102')).toBe('0030251020');
+    });
+
+    it('handles two-digit segments', () => {
+      expect(normalizeApnForQuery('16-24-8')).toBe('0160240080');
+    });
+
+    it('handles mixed padding with spaces', () => {
+      expect(normalizeApnForQuery('3 25 102')).toBe('0030251020');
+    });
+
+    it('handles 4-digit parcel with missing book/page zeros', () => {
+      expect(normalizeApnForQuery('3-25-1020')).toBe('0030251020');
     });
   });
 

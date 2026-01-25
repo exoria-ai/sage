@@ -42,8 +42,20 @@ Users and AI agents provide APNs in many formats:
 | `0169-240-080` | 10 | ✓ | `016-924-008` |
 | `003.025.102` | 9 | ✓ | `003-025-102` |
 | `003 025 102` | 9 | ✓ | `003-025-102` |
+| `3-25-102` | 7 | ✓ | `003-025-102` |
+| `16-24-8` | 5 | ✓ | `016-024-008` |
 | `12345678` | 8 | ✗ | — |
 | `12345678901` | 11 | ✗ | — |
+
+### Missing Leading Zeros
+
+When separators (dashes, spaces, dots) are present, each segment is padded with leading zeros:
+
+- `3-25-102` → `003-025-102` (book and page padded)
+- `16-24-8` → `016-024-008` (all segments padded)
+- `3 25 102` → `003-025-102` (spaces work too)
+
+This only applies to segmented input. Plain digit strings like `12345678` are rejected if they don't have exactly 9-10 digits.
 
 ## AI Agent Formatting Issue
 
