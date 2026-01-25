@@ -278,7 +278,9 @@ export function MapContainer({
         try {
           const response = await view.hitTest(event, {
             include: view.map?.allLayers?.filter(
-              (l) => l.type === 'feature' || l.type === 'map-image'
+              (l) =>
+                (l.type === 'feature' || l.type === 'map-image') &&
+                (l as __esri.FeatureLayer).popupEnabled !== false
             ),
           });
 

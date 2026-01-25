@@ -163,7 +163,11 @@ export function useLayerPairs(): UseLayerPairsReturn {
       const { includeHidden = false } = options;
 
       const queries = layerPairsRef.current
-        .filter((pair) => includeHidden || pair.vectorTileLayer.visible)
+        .filter(
+          (pair) =>
+            (includeHidden || pair.vectorTileLayer.visible) &&
+            pair.featureLayer.popupEnabled !== false
+        )
         .map(async (pair): Promise<__esri.Graphic[]> => {
           try {
             const spatialQuery = new Query({
